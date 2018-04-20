@@ -1360,7 +1360,7 @@ Float Function getHeavyPercent(Actor akTarget, Int aiTargetData = 0)
     TargetData = getTargetData(akTarget)
   EndIf
   Float HeavyPercent
-  Float Fullness = JMap.getFlt(TargetData, "STFullness")
+  Float Fullness = JMap.getFlt(TargetData, "STFullness")  ;Replace this with total?
   Int PerkLevel = JMap.getInt(TargetData, "SCLHeavyBurden")
   Int MaxWeight = 150 * (PerkLevel + 1)
   Int BaseWeight = 100 * (PerkLevel + 1)
@@ -1578,6 +1578,7 @@ Int Function createActorProfile(Form akTarget = None, Int JM_Container = 0, Bool
     JMap.setFlt(TargetData, "STDigestionRate", 0.2)
     JMap.setInt(TargetData, "SCLGluttony", 5)
     JMap.setInt(TargetData, "SCLInsobriety", 5)
+    JMap.setInt(TargetData, "SCLBasicProfile", 1)
   EndIf
   JMap.setObj(TargetData, "Contents1", JFormMap.object())
   JMap.setObj(TargetData, "Contents2", JFormMap.object())

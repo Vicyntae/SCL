@@ -24,6 +24,10 @@ EndFunction
 Int Function addActorPerksMenuOptions(Actor akTarget, Int JA_Description, Int JA_OptionList1, Int JA_OptionList2, Int JA_OptionList3, Int aiTargetData = 0)
 EndFunction
 
+Event OnInit()
+  SCLibrary.addLibraryScript(Self)
+EndEvent
+
 ;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ;Debug Functions
 ;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
