@@ -1,11 +1,5 @@
 ScriptName SCLPlayerMonitor Extends SCLMonitor
 
-Event OnInit()
-  Notice("Beginning Player monitor setup")
-  Utility.Wait(0.5)
-  Setup()
-EndEvent
-
 Function Setup()
   Parent.Setup()
   RegisterForModEvent("SCLActionKeyChange", "OnActionKeyChange")

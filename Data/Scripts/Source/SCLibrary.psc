@@ -65,8 +65,8 @@ Function startupAllQuests()
 EndFunction
 
 Function stopAllQuests()
-  SCLSet.SCL_MonitorManagerQuest.Stop()
-  SCLSet.SCL_MonitorCycleQuest.Stop()
+  getSCLMonitorCycle().Stop()
+  getSCLMonitorManager().Stop()
 EndFunction
 
 Int Function getActorData(Actor akTarget) Global
@@ -1011,7 +1011,7 @@ Int Function getTargetData(Actor akTarget, Bool abGenProfile = False)
     Int Data = JFormDB.findEntry("SCLActorData", Target)
     If !Data && abGenProfile
       Bool Basic = False
-      If Target == PlayerRef || akTarget.IsInFaction(SCLSet.PotentialFollowerFaction)
+      If akTarget == PlayerRef || akTarget.IsInFaction(SCLSet.PotentialFollowerFaction)
         Basic = True
       EndIf
       Data = generateActorProfile(Target, Basic)
@@ -3305,7 +3305,7 @@ Function showActorStatsMenu(Actor akTarget = None, Int aiMode = 0)
 
   UIExtensions.OpenMenu("UIListMenu", akTarget)
   Int Option = UIExtensions.GetMenuResultInt("UIListMenu")
-  While Option != 0 && Option < JArray.count(JA_Description)
+  While Option > 0 && Option < JArray.count(JA_Description)
     Debug.Notification(JArray.getStr(JA_Description, Option))
     UIExtensions.OpenMenu("UIListMenu", akTarget)
     Option = UIExtensions.GetMenuResultInt("UIListMenu")
@@ -3384,7 +3384,7 @@ Function showContentsList(Actor akTarget, Int aiMode = 0)
   EndIf
   UIExtensions.OpenMenu("UIListMenu", akTarget)
   Int Option = UIExtensions.GetMenuResultInt("UIListMenu")
-  While Option != 0 && Option < JArray.count(JA_Description)
+  While Option > 0 && Option < JArray.count(JA_Description)
     Notice("Option " + Option + " chosen")
     If aiMode == 1
       Int Choice = SCLSet.SCL_ContentsMenuMessage.Show()
@@ -3524,7 +3524,7 @@ Function showPerksList(Actor akTarget = None, Int aiMode = 0)
 
   UIExtensions.OpenMenu("UIListMenu", akTarget)
   Int Option = UIExtensions.GetMenuResultInt("UIListMenu")
-  While Option != 0 && Option < JArray.count(JA_Description)
+  While Option > 0 && Option < JArray.count(JA_Description)
     Notice("Option " + Option + " selected!")
     Bool RebuildMenu = False
     String PerkID = JArray.getStr(JA_OptionList1, Option)

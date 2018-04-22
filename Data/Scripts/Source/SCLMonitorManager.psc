@@ -65,6 +65,7 @@ Bool Function Start()
   RegisterForMenu("Sleep/Wait Menu")
   RegisterForModEvent("SCLReset", "OnSCLReset")
   RegisterForSingleUpdate(SCLSet.UpdateRate)
+  (GetNthAlias(0) as SCLMonitor).Setup()
   SCLibrary.addToReloadList(Self)
   Return bReturn
 EndFunction
