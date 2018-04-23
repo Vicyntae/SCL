@@ -91,7 +91,6 @@ Event OnDigestCall(Int aiID)
                   ;Debug.notification("Item Number = " + ItemNum + ", resetting Active value")
                   ItemNum -= 1 ;Remove 1
                   Active = Indv ;Reset the active amount
-                  sendDigestItemFinishEvent(MyActor, (ItemKey as SCLBundle).ItemForm, Indv)
                   ;Debug.notification("Active = " + Active)
                   ;Notice("More items found! Resetting active amount")
                 Else
@@ -101,6 +100,7 @@ Event OnDigestCall(Int aiID)
                   ;Don't have to reset dvalues, we're going to delete this
                   ;Notice("No more items left!")
                 EndIf
+                sendDigestItemFinishEvent(MyActor, (ItemKey as SCLBundle).ItemForm, Indv)
               EndIf
             EndWhile
             DigestedAmount -= RemoveAmount  ;If there's anything left of the remove amount, subtract it from the digested amount
@@ -155,14 +155,18 @@ Event OnDigestCall(Int aiID)
   EndIf
 EndEvent
 
-Bool Function sendDigestFinishEvent(Actor akEater, Float afDigestedAmount)
+Function sendDigestFinishEvent(Actor akEater, Float afDigestedAmount)
   Int FinishEvent = ModEvent.Create("SCLDigestFinishEvent")
   ModEvent.PushForm(FinishEvent, akEater)
   ModEvent.PushFloat(FinishEvent, afDigestedAmount)
-  Return ModEvent.Send(FinishEvent)
+  ModEvent.Send(FinishEvent)
 EndFunction
 
-Bool Function sendDigestItemFinishEvent(Actor akEater, Form akFood, Float afDigestValue)
+Function sendDigestItemFinishEvent(Actor akEater, Form akFood, Float afDigestValue)
+  If akFood as Actor
+    (akFood as Actor).Kill(akEater)
+    SCLibrary.addToActorTrashList(akFood as Actor, 3)
+  EndIf
   Int FinishEvent = ModEvent.Create("SCLDigestItemFinishEvent")
   ModEvent.PushForm(FinishEvent, akEater)
   ModEvent.PushForm(FinishEvent, akFood)
@@ -175,10 +179,10 @@ Function JF_eraseKeys(Int JF_Source, Int JA_Remove, Actor akEater)
   While i
     i -= 1
     Form Erase = JArray.getForm(JA_Remove, i)
-    If Erase as Actor
+    ;/If Erase as Actor
       (Erase as Actor).Kill(akEater)
       SCLibrary.addToActorTrashList(Erase as Actor, 3)
-    EndIf
+    EndIf/;
     JFormMap.removeKey(JF_Source, Erase)
     SCLibrary.addToObjectTrashList(Erase as ObjectReference, 3)
   EndWhile
@@ -227,12 +231,12 @@ Bool Function PlayerThought(Actor akTarget, String sMessage1 = "", String sMessa
   EndIf
 EndFunction
 
-Bool Function PlayerThoughtDB(Actor akTarget, String sKey, Int iOverride = 0, Actor[] akActors = None, Int aiActorIndex = -1)
+Bool Function PlayerThoughtDB(Actor akTarget, String sKey, Int iOverride = 0, Int JA_Actors = 0, Int aiActorIndex = -1)
   {Use this to display player information. Returns whether the passed actor is
   the player.
   Pulls message from database; make sure sKey is valid.
   Will add POV int to end of key, so omit it in the parameter}
-  Return SCLib.ShowPlayerThoughtDB(akTarget, sKey, iOverride, akActors, aiActorIndex)
+  Return SCLib.ShowPlayerThoughtDB(akTarget, sKey, iOverride, JA_Actors, aiActorIndex)
 EndFunction
 
 Function Popup(String sMessage)

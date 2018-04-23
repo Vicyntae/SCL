@@ -62,35 +62,37 @@ Event OnActorEatCall(Int aiID)
       Int JA_Take = JArray.object()
       While i < NumItems
         Form Item = MyActor.GetNthForm(i)
-        If Item as Potion
-          If !(Item as Potion).isFood() || !(Item as Potion).IsPoison()
-            MagicEffect[] Effects = (Item as Potion).getMagicEffects()
-            Bool Taken
-            If !Taken && MyActor.GetActorValuePercentage("Health") < 0.5
-              Int HealthFind = Effects.Find(SCLSet.AlchRestoreHealth)
-              If HealthFind >= 0
-                JArray.addForm(JA_Take, Item)
-                EatenAmount += 1
-                Taken  = True
-                Notice("Taking health potion " + Item.GetName())
+        If Item
+          If Item as Potion
+            If !(Item as Potion).isFood() || !(Item as Potion).IsPoison()
+              MagicEffect[] Effects = (Item as Potion).getMagicEffects()
+              Bool Taken
+              If !Taken && MyActor.GetActorValuePercentage("Health") < 0.5
+                Int HealthFind = Effects.Find(SCLSet.AlchRestoreHealth)
+                If HealthFind >= 0
+                  JArray.addForm(JA_Take, Item)
+                  EatenAmount += 1
+                  Taken  = True
+                  Notice("Taking health potion " + Item.GetName())
+                EndIf
               EndIf
-            EndIf
-            If !Taken && MyActor.GetActorValuePercentage("Stamina") < 0.25
-              Int StaminaFind = Effects.Find(SCLSet.AlchRestoreStamina)
-              If StaminaFind >= 0
-                JArray.addForm(JA_Take, Item)
-                EatenAmount += 1
-                Taken = True
-                Notice("Taking stamina potion " + Item.GetName())
+              If !Taken && MyActor.GetActorValuePercentage("Stamina") < 0.25
+                Int StaminaFind = Effects.Find(SCLSet.AlchRestoreStamina)
+                If StaminaFind >= 0
+                  JArray.addForm(JA_Take, Item)
+                  EatenAmount += 1
+                  Taken = True
+                  Notice("Taking stamina potion " + Item.GetName())
+                EndIf
               EndIf
-            EndIf
-            If !Taken && MyActor.GetActorValuePercentage("Magicka") < 0.25
-              Int MagickaFind = Effects.Find(SCLSet.AlchRestoreMagicka)
-              If MagickaFind >= 0
-                JArray.addForm(JA_Take, Item)
-                EatenAmount += 1
-                Taken = True
-                Notice("Taking magicka potion " + Item.GetName())
+              If !Taken && MyActor.GetActorValuePercentage("Magicka") < 0.25
+                Int MagickaFind = Effects.Find(SCLSet.AlchRestoreMagicka)
+                If MagickaFind >= 0
+                  JArray.addForm(JA_Take, Item)
+                  EatenAmount += 1
+                  Taken = True
+                  Notice("Taking magicka potion " + Item.GetName())
+                EndIf
               EndIf
             EndIf
           EndIf
@@ -169,7 +171,7 @@ Event OnActorEatCall(Int aiID)
       Int JA_Eaten = JArray.object()
       While i < NumItems && MealSize > 0
         Form Item = MyActor.GetNthForm(i)
-        If (Item as Potion).IsFood()
+        If Item && Item as Potion && (Item as Potion).IsFood()
           Int JM_ItemEntry = SCLib.getItemDataEntry(Item)
           If JMap.getInt(JM_ItemEntry, "IsNotFood") == 0 && JMap.getInt(JM_ItemEntry, "IsDrink") == 0
             Float DigestValue = SCLib.genDigestValue(Item)
@@ -183,93 +185,95 @@ Event OnActorEatCall(Int aiID)
         i += 1
       EndWhile
       Location CurrentLoc = MyActor.GetCurrentLocation()
-      If CurrentLoc.HasKeyword(SCLSet.LocTypeInn) || CurrentLoc.HasKeyword(SCLSet.LocTypeHabitationHasInn)
-        Int Gold = MyActor.GetGoldAmount()
-        Float BuyPriceFactor = SCLib.getPriceFactor(MyActor)
-        Potion Bread = Game.GetFormFromFile(0x00065c97, "Skyrim.esm") as Potion
-        Float BreadSize = SCLib.genDigestValue(Bread)
-        Int BreadValue = Math.Ceiling(Bread.GetGoldValue() * BuyPriceFactor)
+      If CurrentLoc
+        If CurrentLoc.HasKeyword(SCLSet.LocTypeInn) || CurrentLoc.HasKeyword(SCLSet.LocTypeHabitationHasInn)
+          Int Gold = MyActor.GetGoldAmount()
+          Float BuyPriceFactor = SCLib.getPriceFactor(MyActor)
+          Potion Bread = Game.GetFormFromFile(0x00065c97, "Skyrim.esm") as Potion
+          Float BreadSize = SCLib.genDigestValue(Bread)
+          Int BreadValue = Math.Ceiling(Bread.GetGoldValue() * BuyPriceFactor)
 
-        Potion GreenApple = Game.GetFormFromFile(0x00064b2f, "Skyrim.esm") as Potion
-        Float AppleSize = SCLib.genDigestValue(GreenApple)
-        Int AppleValue = Math.Ceiling(GreenApple.GetGoldValue() * BuyPriceFactor)
+          Potion GreenApple = Game.GetFormFromFile(0x00064b2f, "Skyrim.esm") as Potion
+          Float AppleSize = SCLib.genDigestValue(GreenApple)
+          Int AppleValue = Math.Ceiling(GreenApple.GetGoldValue() * BuyPriceFactor)
 
-        Potion GoatCheese = Game.GetFormFromFile(0x00064b31, "Skyrim.esm") as Potion
-        Float CheeseSize = SCLib.genDigestValue(GoatCheese)
-        Int CheeseValue = Math.Ceiling(GoatCheese.GetGoldValue() * BuyPriceFactor)
-        Bool Eaten
-        Int j
-        Int k
-        Int TakenGold
-        While MealSize > 0 && Eaten
-          Eaten = False
-          If Gold > BreadValue
-            JArray.addForm(JA_Take, Bread)
-            MealSize -= BreadSize
-            EatenAmount += BreadSize
-            Gold -= BreadValue
-            TakenGold += BreadValue
-            JArray.addStr(JA_Eaten, Bread.GetName())
+          Potion GoatCheese = Game.GetFormFromFile(0x00064b31, "Skyrim.esm") as Potion
+          Float CheeseSize = SCLib.genDigestValue(GoatCheese)
+          Int CheeseValue = Math.Ceiling(GoatCheese.GetGoldValue() * BuyPriceFactor)
+          Bool Eaten
+          Int j
+          Int k
+          Int TakenGold
+          While MealSize > 0 && Eaten
+            Eaten = False
+            If Gold > BreadValue
+              JArray.addForm(JA_Take, Bread)
+              MealSize -= BreadSize
+              EatenAmount += BreadSize
+              Gold -= BreadValue
+              TakenGold += BreadValue
+              JArray.addStr(JA_Eaten, Bread.GetName())
 
-            Eaten = True
-          EndIf
+              Eaten = True
+            EndIf
 
-          If Gold > AppleValue
-            JArray.addForm(JA_Take, GreenApple)
-            MealSize -= AppleSize
-            EatenAmount += AppleSize
-            Gold -= AppleValue
-            TakenGold += AppleValue
-            JArray.addStr(JA_Eaten, GreenApple.GetName())
-            Eaten = True
-          EndIf
+            If Gold > AppleValue
+              JArray.addForm(JA_Take, GreenApple)
+              MealSize -= AppleSize
+              EatenAmount += AppleSize
+              Gold -= AppleValue
+              TakenGold += AppleValue
+              JArray.addStr(JA_Eaten, GreenApple.GetName())
+              Eaten = True
+            EndIf
 
-          If Gold > CheeseValue
-            JArray.addForm(JA_Take, GoatCheese)
-            MealSize -= CheeseSize
-            EatenAmount += CheeseSize
-            Gold -= CheeseValue
-            TakenGold += CheeseValue
-            JArray.addStr(JA_Eaten, GoatCheese.GetName())
-            Eaten = True
-          EndIf
+            If Gold > CheeseValue
+              JArray.addForm(JA_Take, GoatCheese)
+              MealSize -= CheeseSize
+              EatenAmount += CheeseSize
+              Gold -= CheeseValue
+              TakenGold += CheeseValue
+              JArray.addStr(JA_Eaten, GoatCheese.GetName())
+              Eaten = True
+            EndIf
 
-          j += 1
-          If Eaten
-            k += 1
-          EndIf
-        EndWhile
-        Int l = j
-        Bool Bought
-        While j && Bought
-          Bought = False
-          If Gold > BreadValue
-            MyActor.AddItem(Bread, i)
-            Gold -= BreadValue
-            TakenGold += BreadValue
-            Bought = True
-          EndIf
+            j += 1
+            If Eaten
+              k += 1
+            EndIf
+          EndWhile
+          Int l = j
+          Bool Bought
+          While j && Bought
+            Bought = False
+            If Gold > BreadValue
+              MyActor.AddItem(Bread, i)
+              Gold -= BreadValue
+              TakenGold += BreadValue
+              Bought = True
+            EndIf
 
-          If Gold > AppleValue
-            MyActor.AddItem(GreenApple, i)
-            Gold -= AppleValue
-            TakenGold += AppleValue
-            Bought = True
-          EndIf
+            If Gold > AppleValue
+              MyActor.AddItem(GreenApple, i)
+              Gold -= AppleValue
+              TakenGold += AppleValue
+              Bought = True
+            EndIf
 
-          If Gold > CheeseValue
-            MyActor.AddItem(GoatCheese, i)
-            Gold -= CheeseValue
-            TakenGold += CheeseValue
-            Bought = True
-          EndIf
-          j -= 1
-          If Bought
-            k += 1
-          EndIf
-        EndWhile
-        Notice("Purchasing addtional food from inn. Starting gold = " + Gold + ", Total gold spent = " + TakenGold + ", Total food bought for now = " + l + ", Total meals bought = " + k)
-        MyActor.RemoveItem(Game.GetFormFromFile(0x0000000f, "Skyrim.esm"), TakenGold)
+            If Gold > CheeseValue
+              MyActor.AddItem(GoatCheese, i)
+              Gold -= CheeseValue
+              TakenGold += CheeseValue
+              Bought = True
+            EndIf
+            j -= 1
+            If Bought
+              k += 1
+            EndIf
+          EndWhile
+          Notice("Purchasing addtional food from inn. Starting gold = " + Gold + ", Total gold spent = " + TakenGold + ", Total food bought for now = " + l + ", Total meals bought = " + k)
+          MyActor.RemoveItem(Game.GetFormFromFile(0x0000000f, "Skyrim.esm"), TakenGold)
+        EndIf
       EndIf
       If !JValue.empty(JA_Take)
         If Anim

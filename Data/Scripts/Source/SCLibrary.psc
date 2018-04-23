@@ -254,7 +254,7 @@ Function addMessage(String asKey, String asMessage) Global
   EndIf
 EndFunction
 
-String Function getMessage(String asKey, Int aiIndex = -1, Bool abTagReplace = True, Actor[] akActors = None, Int aiActorIndex = -1)
+String Function getMessage(String asKey, Int aiIndex = -1, Bool abTagReplace = True, Int JA_Actors = 0, Int aiActorIndex = -1)
   ;Retrieves the specified message type from the database. Will also perform tag replacement.
   Int JA_MessageList = JDB.solveObj(".SCLExtraData.Messages." + asKey)
   Int i
@@ -266,7 +266,7 @@ String Function getMessage(String asKey, Int aiIndex = -1, Bool abTagReplace = T
 
   String ReturnMessage = JArray.getStr(JA_MessageList, i)
   If abTagReplace
-    ReturnMessage = replaceTags(ReturnMessage, akActors)
+    ReturnMessage = replaceTags(ReturnMessage, JA_Actors)
   EndIf
   Return ReturnMessage
 EndFunction
@@ -295,7 +295,7 @@ Actor Function getTeammate(Int aiIndex = -1)
   Return None
 EndFunction
 
-String Function replaceTags(String asMessage, Actor[] akActors = None, Int aiActorIndex = -1) ;Consider making a global?
+String Function replaceTags(String asMessage, Int JA_Actors = 0, Int aiActorIndex = -1) ;Consider making a global?
   {Replaces tokens in strings and replaces them
   Adapted from post by jbezorg
   https://www.creationkit.com/index.php?title=Talk:StringUtil_Script}
@@ -336,14 +336,14 @@ String Function replaceTags(String asMessage, Actor[] akActors = None, Int aiAct
         EndIf
         sReturn += StringUtil.Substring(asMessage, iStart, iEnd) + TagReplace
       ElseIf sOperator == "a"
-        If akActors
+        If JA_Actors
           Int i
           If aiActorIndex >= 0
             i = aiActorIndex
           Else
-            i = Utility.RandomInt(0, akActors.length - 1)
+            i = Utility.RandomInt(0, JArray.count(JA_Actors) - 1)
           EndIf
-          sReturn += StringUtil.Substring(asMessage, iStart, iEnd) + nameGet(akActors[i])
+          sReturn += StringUtil.Substring(asMessage, iStart, iEnd) + nameGet(JArray.getForm(JA_Actors, i))
         EndIf
       ;ElseIf sOperator == "whatever"
       Else
@@ -1456,6 +1456,16 @@ EndFunction
 Bool Function isNotFood(Form akItem)
   Int JM_DataEntry = getItemDataEntry(akItem)
   Return JMap.getInt(JM_DataEntry, "IsNotFood") as Bool
+EndFunction
+
+Bool Function isDigestible(Form akItem)
+  {Basically a convenience function to test both the above}
+  Int JM_DataEntry = getItemDataEntry(akItem)
+  If JMap.getInt(JM_DataEntry, "IsInContainer") == 0 && JMap.getInt(JM_DataEntry, "IsNotFood") == 0
+    Return True
+  Else
+    Return False
+  EndIf
 EndFunction
 
 Float Function getLiquidRatio(Form akItem)
@@ -3777,12 +3787,12 @@ Bool Function PlayerThought(Actor akTarget, String sMessage1 = "", String sMessa
   EndIf
 EndFunction
 
-Bool Function PlayerThoughtDB(Actor akTarget, String sKey, Int iOverride = 0, Actor[] akActors = None, Int aiActorIndex = -1)
+Bool Function PlayerThoughtDB(Actor akTarget, String sKey, Int iOverride = 0, Int JA_Actors = 0, Int aiActorIndex = -1)
   {Use this to display player information. Returns whether the passed actor is
   the player.
   Pulls message from database; make sure sKey is valid.
   Will add POV int to end of key, so omit it in the parameter}
-  Return ShowPlayerThoughtDB(akTarget, sKey, iOverride, akActors, aiActorIndex)
+  Return ShowPlayerThoughtDB(akTarget, sKey, iOverride, JA_Actors, aiActorIndex)
 EndFunction
 
 Function Popup(String sMessage)
@@ -3813,7 +3823,7 @@ Function Issue(String sMessage, Int iSeverity = 0, Int aiID = 0, Bool bOverride 
   ShowIssue(sMessage, iSeverity, ID, bOverride, DebugName)
 EndFunction
 
-Bool Function ShowPlayerThoughtDB(Actor akTarget, String sKey, Int iOverride = 0, Actor[] akActors = None, Int aiActorIndex = -1)
+Bool Function ShowPlayerThoughtDB(Actor akTarget, String sKey, Int iOverride = 0, Int JA_Actors = 0, Int aiActorIndex = -1)
   {Use this to display player information. Returns whether the passed actor is
   the player.
   Pulls message from database; make sure sKey is valid.
@@ -3828,11 +3838,11 @@ Bool Function ShowPlayerThoughtDB(Actor akTarget, String sKey, Int iOverride = 0
     If Setting == -1
       Return True
     EndIf
-    String sMessage = getMessage(sKey + Setting, -1, True, akActors, aiActorIndex)
+    String sMessage = getMessage(sKey + Setting, -1, True, JA_Actors, aiActorIndex)
     If sMessage
       Debug.Notification(sMessage)
     Else
-      PlayerThought(akTarget, getMessage(sKey + 1, -1, True, akActors, aiActorIndex), getMessage(sKey + 2, -1, True, akActors, aiActorIndex),getMessage(sKey + 3, -1, True, akActors, aiActorIndex))
+      PlayerThought(akTarget, getMessage(sKey + 1, -1, True, JA_Actors, aiActorIndex), getMessage(sKey + 2, -1, True, JA_Actors, aiActorIndex), getMessage(sKey + 3, -1, True, JA_Actors, aiActorIndex))
     EndIf
     Return True
   Else

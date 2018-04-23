@@ -64,31 +64,12 @@ Bool Function PlayerThought(Actor akTarget, String sMessage1 = "", String sMessa
   EndIf
 EndFunction
 
-Bool Function PlayerThoughtDB(Actor akTarget, String sKey, Int iOverride = 0)
+Bool Function PlayerThoughtDB(Actor akTarget, String sKey, Int iOverride = 0, Int JA_Actors = 0, Int aiActorIndex = -1)
   {Use this to display player information. Returns whether the passed actor is
   the player.
   Pulls message from database; make sure sKey is valid.
   Will add POV int to end of key, so omit it in the parameter}
-  If akTarget == PlayerRef
-    Int Setting
-    If iOverride != 0
-      Setting = iOverride
-    Else
-      Setting = SCLSet.PlayerMessagePOV
-    EndIf
-    If Setting == -1
-      Return True
-    EndIf
-    String sMessage = SCLib.getMessage(sKey + Setting)
-    If sMessage
-      Debug.Notification(sMessage)
-    Else
-      PlayerThought(akTarget, SCLib.getMessage(sKey + 1), SCLib.getMessage(sKey + 2),SCLib.getMessage(sKey + 3))
-    EndIf
-    Return True
-  Else
-    Return False
-  EndIf
+  Return SCLib.ShowPlayerThoughtDB(akTarget, sKey, iOverride, JA_Actors, aiActorIndex)
 EndFunction
 
 Function Popup(String sMessage)
