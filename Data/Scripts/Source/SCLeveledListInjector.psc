@@ -51,10 +51,49 @@ LeveledItem Property LItemBarrelFoodSame75 Auto
 LeveledItem Property LItemMiscVendorMiscItems75 Auto
 LeveledItem Property LItemFoodInnCommon Auto
 
+LeveledItem Property SCL_LItemPotionFortifyStomachSkills Auto ;DONE
+LeveledItem Property LItemPotionAllSkills Auto
+
+LeveledItem Property SCL_LItemEnchRingSkillStomach Auto ;Add to below DONE
+LeveledItem Property LItemEnchRingAll Auto
+LeveledItem Property LItemEnchRingAll25 Auto
+LeveledItem Property LItemEnchRingAll75 Auto
+
+
+LeveledItem Property SCL_LItemEnchNecklaceGlutton Auto
+LeveledItem Property SCL_LItemEnchNecklaceBaseCap Auto
+LeveledItem Property SCL_LItemEnchNecklaceDigestRate Auto
+LeveledItem Property LItemEnchNecklaceAll Auto  ;Add above to this DONE
+LeveledItem Property LItemEnchNecklaceAll25 Auto ; And this
+
 Ingredient Property SCL_MountainFlower01White Auto
 Ingredient Property SCL_Lemon Auto
 Ingredient Property SCL_Orange Auto
 Potion Property SCL_WhiteMountainFlowerTea Auto
+
+LeveledItem Property SublistEnchArmorBandedIronCuirass01 Auto ;Put these two together DONE
+Armor Property SCL_EnchArmorIronBandedCuirassHeavyBurden01 Auto
+
+LeveledItem Property SublistEnchArmorOrcishBoots04 Auto
+Armor Property SCL_EnchArmorOrcishBootsHeavyBurden04 Auto
+
+LeveledItem Property SublistEnchArmorGlassCuirass03 Auto
+Armor Property SCL_EnchArmorGlassCuirassHeavyBurden03 Auto
+
+LeveledItem Property SublistEnchArmorDwarvenBoots02 Auto
+Armor Property SCL_EnchArmorDwarvenBootsHeavyBurden02 Auto
+
+LeveledItem Property SublistEnchArmorDragonplateBoots06 Auto
+Armor Property SCL_EnchArmorDragonplateCuirassHeavyBurden06 Auto
+
+LeveledItem Property SublistEnchArmorDragonplateBoots05 Auto
+Armor Property SCL_EnchArmorDragonplateBootsHeavyBurden05 Auto
+
+LeveledItem Property SublistEnchArmorDaedricCuirass05 Auto
+Armor Property SCL_EnchArmorDaedricCuirassHeavyBurden05 Auto
+
+LeveledItem Property SublistEnchArmorDaedricBoots04 Auto
+Armor Property SCL_EnchArmorDaedricBootsHeavyBurden04 Auto
 
 Event OnInit()
   SCLibrary.addToReloadList(Self)
@@ -82,7 +121,35 @@ Function _CheckVersion()
 
     LItemFoodInnCommon.addForm(SCL_WhiteMountainFlowerTea, 7, 2)
 
+    SublistEnchArmorBandedIronCuirass01.AddForm(SCL_EnchArmorIronBandedCuirassHeavyBurden01, 1, 1)
 
+    SublistEnchArmorOrcishBoots04.AddForm(SCL_EnchArmorOrcishBootsHeavyBurden04, 1, 1)
+
+    SublistEnchArmorGlassCuirass03.AddForm(SCL_EnchArmorGlassCuirassHeavyBurden03, 1, 1)
+
+    SublistEnchArmorDwarvenBoots02.AddForm(SCL_EnchArmorDwarvenBootsHeavyBurden02, 1, 1)
+
+    SublistEnchArmorDragonplateBoots06.AddForm(SCL_EnchArmorDragonplateCuirassHeavyBurden06, 1, 1)
+
+    SublistEnchArmorDragonplateBoots05.AddForm(SCL_EnchArmorDragonplateBootsHeavyBurden05, 1, 1)
+
+    SublistEnchArmorDaedricCuirass05.AddForm(SCL_EnchArmorDaedricCuirassHeavyBurden05, 1, 1)
+
+    SublistEnchArmorDaedricBoots04.AddForm(SCL_EnchArmorDaedricBootsHeavyBurden04, 1, 1)
+
+    LItemPotionAllSkills.AddForm(SCL_LItemPotionFortifyStomachSkills, 1, 1)
+
+    LItemEnchRingAll.addForm(SCL_LItemEnchRingSkillStomach, 1, 1)
+    LItemEnchRingAll25.addForm(SCL_LItemEnchRingSkillStomach, 1, 1)
+    LItemEnchRingAll75.addForm(SCL_LItemEnchRingSkillStomach, 1, 1)
+
+    LItemEnchNecklaceAll.addForm(SCL_LItemEnchNecklaceGlutton, 1, 1)
+    LItemEnchNecklaceAll.addForm(SCL_LItemEnchNecklaceBaseCap, 1, 1)
+    LItemEnchNecklaceAll.addForm(SCL_LItemEnchNecklaceDigestRate, 1, 1)
+
+    LItemEnchNecklaceAll25.addForm(SCL_LItemEnchNecklaceGlutton, 1, 1)
+    LItemEnchNecklaceAll25.addForm(SCL_LItemEnchNecklaceBaseCap, 1, 1)
+    LItemEnchNecklaceAll25.addForm(SCL_LItemEnchNecklaceDigestRate, 1, 1)
   EndIf
 
   If ScriptVersion >= 2 && StoredVersion < 2

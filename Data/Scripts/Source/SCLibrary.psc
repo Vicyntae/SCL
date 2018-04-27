@@ -1556,7 +1556,7 @@ Int Function createActorProfile(Form akTarget = None, Int JM_Container = 0, Bool
       Int RandomBase = Utility.RandomInt(25, 50)
       JMap.setFlt(TargetData, "STBase", RandomBase)
       JMap.setFlt(TargetData, "STStretch", 1.75)
-      JMap.setInt(TargetData, "STStoredLimit", 2)
+      JMap.setInt(TargetData, "SCLStoredLimitUp", 2)
       JMap.setFlt(TargetData, "STDigestionRate", 1)
       JMap.setInt(TargetData, "STTier", 3)
       JMap.setInt(TargetData, "SCLGluttony", 15)
@@ -1564,7 +1564,7 @@ Int Function createActorProfile(Form akTarget = None, Int JM_Container = 0, Bool
     ElseIf StomachChance > 50
       Int RandomBase = Utility.RandomInt(10, 15)
       JMap.setFlt(TargetData, "STBase", RandomBase)
-      JMap.setInt(TargetData, "STStoredLimit", 1)
+      JMap.setInt(TargetData, "SCLStoredLimitUp", 1)
       JMap.setInt(TargetData, "STTier", 2)
       JMap.setFlt(TargetData, "STStretch", 1.6)
       JMap.setFlt(TargetData, "STDigestionRate", 0.5)
@@ -1573,7 +1573,7 @@ Int Function createActorProfile(Form akTarget = None, Int JM_Container = 0, Bool
     Else
       Int RandomBase = Utility.RandomInt(2, 5)
       JMap.setFlt(TargetData, "STBase", RandomBase)
-      JMap.setInt(TargetData, "STStoredLimit", 0)
+      JMap.setInt(TargetData, "SCLStoredLimitUp", 0)
       JMap.setInt(TargetData, "STTier", 1)
       JMap.setFlt(TargetData, "STStretch", 1.5)
       JMap.setFlt(TargetData, "STDigestionRate", 0.2)
@@ -1582,7 +1582,7 @@ Int Function createActorProfile(Form akTarget = None, Int JM_Container = 0, Bool
     EndIf
   Else
     JMap.setFlt(TargetData, "STBase", 3)
-    JMap.setInt(TargetData, "STStoredLimit", 0)
+    JMap.setInt(TargetData, "SCLStoredLimitUp", 0)
     JMap.setInt(TargetData, "STTier", 1)
     JMap.setFlt(TargetData, "STStretch", 1.5)
     JMap.setFlt(TargetData, "STDigestionRate", 0.2)
@@ -2744,10 +2744,15 @@ Function vomitAmount(Actor akTarget, Float afRemoveAmount, Bool abRemoveStored =
   Int NumOfItems = JFormMap.count(JF_DigestContents)
   Float IndvRemoveAmount = afRemoveAmount / NumOfItems
   Float AmountRemoved
+  Bool Break
   Form ItemKey = JFormMap.nextKey(JF_DigestContents)
-  While AmountRemoved < afRemoveAmount
+  While AmountRemoved < afRemoveAmount && !Break
     If !ItemKey ;If we reach the end, start back at the beginning
+      JF_eraseKeys(JF_DigestContents, JA_Remove)
       ItemKey = JFormMap.nextKey(JF_DigestContents)
+      If !ItemKey
+        Break = True
+      EndIf
     EndIf
     If ItemKey as ObjectReference
       Int JM_ItemEntry = JFormMap.getObj(JF_DigestContents, ItemKey)
