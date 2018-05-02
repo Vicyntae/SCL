@@ -151,11 +151,21 @@ EndEvent
 
 Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
   If akBaseObject as Potion || akBaseObject as Ingredient
-    If JMap.getInt(SCLib.getItemDataEntry(akBaseObject), "STIsNotFood") == 0
+    Int JM_Entry = SCLib.getItemDataEntry(akBaseObject)
+    If JMap.getInt(JM_Entry, "STIsNotFood") == 0
       ;Lock()
       Notice(akBaseObject.GetName() + " was eaten!")
       SCLib.addItem(MyActor, akReference, akBaseObject, 1)
       SCLib.updateSingleContents(MyActor, 1)
+      If SCLSet.WF_Active
+        If SCLSet.WF_SolidActive
+          Float Illness = JMap.getFlt(JM_Entry, "WF_SolidBaseLower")
+          If Illness
+            JMap.setFlt(ActorData, "WF_SolidIllnessBuildUp", JMap.getFlt(ActorData, "WF_SolidIllnessBuildUp") + Illness)
+          EndIf
+        EndIf
+      EndIf
+
       SCLib.quickUpdate(MyActor)
       ;Unlock()
     EndIf
@@ -238,7 +248,8 @@ Function fullActorUpdate(Float afTimePassed, Float afCurrentUpdateTime, Bool abD
     EndWhile
   EndIf
   DigestFinished = False
-  Float Fullness = updateFullness()
+  updateFullness()
+  Float Fullness = JMap.getFlt(ActorData, "STFullness")
   ;Note("Fullness after update = " + Fullness)
   Float Max = SCLib.getMax(MyActor)
 
@@ -354,6 +365,8 @@ Function fullActorUpdate(Float afTimePassed, Float afCurrentUpdateTime, Bool abD
   ;SCLib.updateItemProcess(MyActor, afTimePassed)
   ;Float CurrentFullness = SCLib.updateFullness(MyActor, ActorData)
   ;SCLib.updateDamage(MyActor)
+  checkWF(afTimePassed, afCurrentUpdateTime)
+
 
   SCLib.visualBellyUpdate(MyActor, SCLib.getTotalBelly(MyActor))
   If abDailyUpdate
@@ -379,77 +392,137 @@ Function fullActorUpdate(Float afTimePassed, Float afCurrentUpdateTime, Bool abD
   ;Notice("Finished updating " + akTarget.GetLeveledActorBase().GetName())
 EndFunction
 
-
 Function checkAutoEat(Float afFullness, Float afCurrentUpdateTime)
-  If MyActor != PlayerRef
-    Float EatTimePassed = ((afCurrentUpdateTime - (JMap.getFlt(ActorData, "LastEatTime")))*24) ;In hours
-    Float Glut = SCLib.getGlutMin(akTarget = MyActor, aiTargetData = ActorData)
-    Float GlutTime = SCLib.getGlutTime(akTarget = MyActor, aiTargetData = ActorData)
-    Int Gluttony = SCLib.getGlutValue(MyActor, ActorData)
-    Float Eaten
-    If EatTimePassed >= 8
-      Notice("Meal not eaten in over 8 hours. Eating...")
-      Eaten = SCLib.actorEat(MyActor, 3, 2, True)
-      If Eaten
-        JMap.setFlt(ActorData, "LastEatTime", afCurrentUpdateTime)
-      EndIf
-    ElseIf EatTimePassed >= 4
-      Location CurrentLoc = MyActor.GetCurrentLocation()
-      If CurrentLoc.HasKeyword(SCLSet.LocTypeInn) || CurrentLoc.HasKeyword(SCLSet.LocTypeHabitationHasInn)
-        Notice("Meal not eaten in over 4 hours and actor is in tavern. Eating...")
-        SCLib.actorEat(MyActor, -2, 60, True)
-        Eaten = SClib.actorEat(MyActor, 2, 1, True)
+  If SCLSet.AutoEatActive
+    If MyActor != PlayerRef
+      Float EatTimePassed = ((afCurrentUpdateTime - (JMap.getFlt(ActorData, "LastEatTime")))*24) ;In hours
+      Float Glut = SCLib.getGlutMin(akTarget = MyActor, aiTargetData = ActorData)
+      Float GlutTime = SCLib.getGlutTime(akTarget = MyActor, aiTargetData = ActorData)
+      Int Gluttony = SCLib.getGlutValue(MyActor, ActorData)
+      Float Eaten
+      If EatTimePassed >= 8
+        Notice("Meal not eaten in over 8 hours. Eating...")
+        Eaten = SCLib.actorEat(MyActor, 3, 2, True)
         If Eaten
           JMap.setFlt(ActorData, "LastEatTime", afCurrentUpdateTime)
         EndIf
+      ElseIf EatTimePassed >= 4
+        Location CurrentLoc = MyActor.GetCurrentLocation()
+        If CurrentLoc.HasKeyword(SCLSet.LocTypeInn) || CurrentLoc.HasKeyword(SCLSet.LocTypeHabitationHasInn)
+          Notice("Meal not eaten in over 4 hours and actor is in tavern. Eating...")
+          SCLib.actorEat(MyActor, -2, 60, True)
+          Eaten = SClib.actorEat(MyActor, 2, 1, True)
+          If Eaten
+            JMap.setFlt(ActorData, "LastEatTime", afCurrentUpdateTime)
+          EndIf
+        EndIf
+      ElseIf Gluttony > 50 && EatTimePassed >= GlutTime && afFullness < Glut
+        Notice("Meal not eaten in over " + GlutTime + " hours and fullness below + " + Glut + ". Eating...")
+        Eaten = SCLib.actorEat(MyActor, 1, 2, True)
       EndIf
-    ElseIf Gluttony > 50 && EatTimePassed >= GlutTime && afFullness < Glut
-      Notice("Meal not eaten in over " + GlutTime + " hours and fullness below + " + Glut + ". Eating...")
-      Eaten = SCLib.actorEat(MyActor, 1, 2, True)
-    EndIf
-    If Eaten == 0 && EatTimePassed >= 24
-      If !PlayerThoughtDB(MyActor, "SCLStarvingMessage")
-        SCLSet.SCL_AIFindFoodSpell01a.Cast(MyActor)
+      If Eaten == 0 && EatTimePassed >= 24
+        If !PlayerThoughtDB(MyActor, "SCLStarvingMessage")
+          SCLSet.SCL_AIFindFoodSpell01a.Cast(MyActor)
+        EndIf
       EndIf
     EndIf
   EndIf
 EndFunction
+
+Function checkWF(Float afTimePassed, Float afCurrentUpdateTime)
+  If SCLSet.WF_Active
+    If SCLSet.WF_SolidActive
+      Float SolidAmount = SCLib.WF_getTotalSolidFullness(MyActor, ActorData)
+      Float SolidTimePast = ((afCurrentUpdateTime - (JMap.getFlt(ActorData, "WF_SolidTimePast")))*24) ;In hours
+      Float SolidBase = SCLib.WF_getAdjSolidBase(MyActor, ActorData)
+      If !MyActor.HasSpell(SCLSet.WF_SolidDebuffSpell)
+        If SolidAmount > SolidBase || SolidTimePast > 8
+          MyActor.AddSpell(SCLSet.WF_SolidDebuffSpell, False)
+        EndIf
+      Else
+        If SolidAmount < SolidBase && SolidTimePast > 8
+          MyActor.RemoveSpell(SCLSet.WF_SolidDebuffSpell)
+        EndIf
+      EndIf
+      Float IllnessFlt = JMap.getFlt(ActorData, "WF_SolidIllnessBuildUp")
+      Float Boundary = JMap.getFlt(ActorData, "WF_SolidIllnessThreshold")
+      If IllnessFlt > Boundary
+        JMap.setFlt(ActorData, "WF_SolidIllnessBuildUp", 0)
+        Int IllnessLevel = JMap.getInt(ActorData, "WF_SolidIllnessLevel") + 1
+        SCLib.WF_addSolidIllnessEffect(MyActor, IllnessLevel, ActorData)
+      Else
+        JMap.setFlt(ActorData, "WF_SolidIllnessBuildUp", JMap.getFlt(ActorData, "WF_SolidIllnessBuildUp") - (SCLSet.WF_SolidIllnessBuildUpDecrease * afTimePassed))
+      EndIf
+      JMap.setFlt(ActorData, "WF_SolidTotalFullness", SolidAmount)
+    EndIf
+    If SCLSet.WF_LiquidActive
+      Float LiquidAmount = JMap.getFlt(ActorData, "WF_CurrentLiquidAmount")
+      Float LiquidTimePast = ((afCurrentUpdateTime - (JMap.getFlt(ActorData, "WF_LiquidTimePast")))*24) ;In hours
+      Float LiquidBase = SCLib.WF_getAdjLiquidBase(MyActor, ActorData)
+      If !MyActor.HasSpell(SCLSet.WF_LiquidDebuffSpell)
+        If LiquidAmount > LiquidBase || LiquidTimePast > 8
+          MyActor.AddSpell(SCLSet.WF_LiquidDebuffSpell, False)
+        EndIf
+      Else
+        If LiquidAmount < LiquidBase && LiquidTimePast > 8
+          MyActor.RemoveSpell(SCLSet.WF_LiquidDebuffSpell)
+        EndIf
+      EndIf
+    EndIf
+    ;/If SCLSet.WF_GasActive
+    EndIf/;
+  EndIf
+EndFunction
+
+
 ;/Event OnAnimationEvent(ObjectReference akSource, string asEventName)
   If akSource == MyActor
     Note("Idle Event " + asEventName + " Detected!")
   EndIf
 EndEvent/;
 
-Float Function updateFullness()
+Function updateFullness()
   {Checks each reported fullness, set "STFullness to it"}
-  Int ItemType = JIntMap.nextKey(SCLSet.JI_ItemTypes)
-  Float Total
-  While ItemType
-    String ContentsKey = SCLib.getContentsKey(ItemType)
-    If ContentsKey
+  String AggStr = JMap.nextKey(SCLSet.JM_AggregateValues)
+  While AggStr
+    Int JA_AggValues = JMap.getObj(SCLSet.JM_AggregateValues, AggStr)
+    Float Total
+    Int i = JArray.count(JA_AggValues)
+    While i
+      i -= 1
+      String ContentsKey = JArray.getStr(JA_AggValues, i)
       Total += JMap.getFlt(ActorData, ContentsKey)
-      ItemType = JIntMap.nextKey(SCLSet.JI_ItemTypes, ItemType)
-    EndIf
+    EndWhile
+    JMap.setFlt(ActorData, AggStr, Total)
+    AggStr = JMap.nextKey(SCLSet.JM_AggregateValues, AggStr)
   EndWhile
-  ;Note("Final Fullness = " + Total)
-  ;Notice("updateFullness for " + nameGet(MyActor) + " returned " + Total)
-  Float Max = SCLib.getMax(MyActor, ActorData)
-  If Total > Max && !MyActor.HasSpell(SCLSet.SCL_AllowOverflowAbilityArray[1]) && !SCLSet.GodMode1 && SCLib.canVomit(MyActor)
-    Float Delta = Total - Max
+  Bool FullUpdate
+  ;Check ST Fullness
+  Float Fullness = JMap.getFlt(ActorData, "STFullness")
+  Float Max = SCLib.getMax(MyActor)
+  If Fullness > Max && SCLib.getCurrentPerkLevel(MyActor, "SCLAllowOverflow") < 1 && !SCLSet.GodMode1 && SCLib.canVomit(MyActor)
+    Float Delta = Fullness - Max
     SCLib.vomitAmount(MyActor, Delta, True, 30, True, 20)
-    Total = SCLib.updateFullnessEX(MyActor, True, ActorData)
+    FullUpdate = True
+    Fullness = JMap.getFlt(ActorData, "STFullness")
     JMap.setInt(ActorData, "SCLAllowOverflowTracking", JMap.getInt(ActorData, "SCLAllowOverflowTracking") + 1)
     SCLib.addVomitDamage(MyActor)
+    SCLib.quickUpdate(MyActor)
   EndIf
-  If Total < 0
-    Issue("updateFullness return a total of less than 0. Setting to 0")
-    Total = 0
+  ;Check WF Solid
+  Int MaxItems = SCLib.WF_getSolidMaxNumItems(MyActor, ActorData)
+  Int Items = SCLib.countItemTypes(MyActor, 4, ActorData) + SCLib.countItemTypes(MyActor, 3, ActorData)
+  If Items > MaxItems
+    SCLib.WF_SolidRemoveNum(MyActor, Items - MaxItems, True, ActorData)
+    FullUpdate = True
+    SCLib.addSolidRemoveDamage(MyActor)
   EndIf
-  JMap.setFlt(ActorData, "STFullness", Total)
-  If Total > JMap.getFlt(ActorData, "SCLHighestFullness")
-    JMap.setFlt(ActorData, "SCLHighestFullness", Total)
+  If FullUpdate
+    SCLib.updateFullnessEX(MyActor, True, ActorData)
   EndIf
-  Return Total
+  If Fullness > JMap.getFlt(ActorData, "SCLHighestFullness")
+    JMap.setFlt(ActorData, "SCLHighestFullness", Fullness)
+  EndIf
 EndFunction
 
 Function performDailyUpdate(Actor akTarget)

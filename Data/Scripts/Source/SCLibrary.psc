@@ -405,7 +405,7 @@ EndFunction
 ;-------------------------------------------------------------------------------
 ;Perks
 ;-------------------------------------------------------------------------------
-Int Function addPerkID(String asPerkID, Int JA_Desc, Int JA_Reqs) Global
+Function addPerkID(String asPerkID, Quest akOwnedQuest) Global
   {Adds information regarding a perk to a JMap}
   Int JM_PerkIDs = JDB.solveObj(".SCLExtraData.PerkIDList")
   If !JM_PerkIDs
@@ -413,7 +413,8 @@ Int Function addPerkID(String asPerkID, Int JA_Desc, Int JA_Reqs) Global
     Data.setupPerksList()
     JM_PerkIDs = JDB.solveObj(".SCLExtraData.PerkIDList")
   EndIf
-  Int JM_PerkEntry
+  JMap.setForm(JM_PerkIDs, asPerkID, akOwnedQuest)
+  ;/Int JM_PerkEntry
   If !JMap.hasKey(JM_PerkIDs, asPerkID)
     JM_PerkEntry = JMap.object()
     JMap.setObj(JM_PerkEntry, "PerkDescriptions", JA_Desc)
@@ -422,7 +423,7 @@ Int Function addPerkID(String asPerkID, Int JA_Desc, Int JA_Reqs) Global
   Else
     JM_PerkEntry = JMap.getObj(JM_PerkIDs, asPerkID)
   EndIf
-  Return JM_PerkEntry
+  Return JM_PerkEntry/;
 EndFunction
 
 Function removePerkID(String asPerkID) Global
@@ -467,6 +468,47 @@ EndFunction
 ;-------------------------------------------------------------------------------
 ;Item Types
 ;-------------------------------------------------------------------------------
+Function addAggregateValue(String asKey, Int JA_AggregateKeys) Global
+  {These values will be added together in update functions}
+  Int JM_AggregateValues = JDB.solveObj(".SCLExtraData.AggregateValues")
+  If !JM_AggregateValues
+    SCLDatabase Data = SCLibrary.getSCLDatabase()
+    Data.setupAggregateValues()
+    JM_AggregateValues = JDB.solveObj(".SCLExtraData.AggregateValues")
+  EndIf
+  If JMap.hasKey(JM_AggregateValues, asKey)
+    Int JA_Existing = JMap.getObj(JM_AggregateValues, asKey)
+    JArray.addFromArray(JA_Existing, JA_AggregateKeys)
+    JArray.unique(JA_Existing)
+  Else
+    JMap.setObj(JM_AggregateValues, asKey, JA_AggregateKeys)
+  EndIf
+EndFunction
+
+Function removeAggregateValue(String asKey) Global
+  Int JM_AggregateValues = JDB.solveObj(".SCLExtraData.AggregateValues")
+  If !JM_AggregateValues
+    Return
+  EndIf
+  If JMap.hasKey(JM_AggregateValues, asKey)
+    JMap.removeKey(JM_AggregateValues, asKey)
+  EndIf
+EndFunction
+
+Function removeAggregateValueKey(String asKey, String asAggKey)
+  Int JM_AggregateValues = JDB.solveObj(".SCLExtraData.AggregateValues")
+  If !JM_AggregateValues
+    Return
+  EndIf
+  If JMap.hasKey(JM_AggregateValues, asKey)
+    Int JA_AggValues = JMap.getObj(JM_AggregateValues, asKey)
+    Int i = JArray.findStr(JA_AggValues, asAggKey)
+    If i != -1
+      JArray.eraseIndex(JA_AggValues, i)
+    EndIf
+  EndIf
+EndFunction
+
 Function addItemType(Int aiItemType, String asShort, String asFull, String asContentsKey, Bool abVomitType) Global
   {Allows system to recognize this item type
   Will not allow itemtype 0
@@ -479,11 +521,13 @@ Function addItemType(Int aiItemType, String asShort, String asFull, String asCon
   Int JM_ItemType = JMap.object()
   JMap.setStr(JM_ItemType, "STShortDescription", asShort)
   JMap.setStr(JM_ItemType, "STFullDescription", asFull)
+
   If abVomitType
     JMap.setInt(JM_ItemType, "STisVomitType", 1)
   Else
     JMap.setInt(JM_ItemType, "STisVomitType", 0)
   EndIf
+  ;JMap.setStr(JM_ItemType, "AggregateValue",  asAggregateValue)
   JMap.setStr(JM_ItemType, "ContentsKey", asContentsKey)
   Int JI_Items = JDB.solveObj(".SCLExtraData.ItemTypeMap")
   If !JI_Items
@@ -491,6 +535,7 @@ Function addItemType(Int aiItemType, String asShort, String asFull, String asCon
     Data.setupItemTypes()
     JI_Items = JDB.solveObj(".SCLExtraData.ItemTypeMap")
   EndIf
+
   JIntMap.setObj(JI_Items, aiItemType, JM_ItemType)
 EndFunction
 
@@ -1282,6 +1327,11 @@ Bool Function addToTrackingList(Actor akTarget, Bool abOverride = False)
 EndFunction
 
 Float Function genDigestValue(Form akItem, Bool abMod1 = False, Bool abMod2 = False)
+  If akItem as Actor
+    akItem = (akItem as Actor).GetLeveledActorBase()
+  ElseIf akItem as ObjectReference
+    akItem = (akItem as ObjectReference).GetBaseObject()
+  EndIf
   Int JM_DB_ItemEntry = getItemDataEntry(akItem)
   Float Value
   If JM_DB_ItemEntry && JMap.hasKey(JM_DB_ItemEntry, "WeightOverride")
@@ -1353,14 +1403,9 @@ Int Function getCurrentOverfull(Actor akTarget, Int aiTargetData = 0)
 EndFunction
 
 Float Function getHeavyPercent(Actor akTarget, Int aiTargetData = 0)
-  Int TargetData
-  If aiTargetData
-    TargetData = aiTargetData
-  Else
-    TargetData = getTargetData(akTarget)
-  EndIf
+  Int TargetData = getData(akTarget, aiTargetData)
   Float HeavyPercent
-  Float Fullness = JMap.getFlt(TargetData, "STFullness")  ;Replace this with total?
+  Float Fullness = getTotalCombined(akTarget, TargetData) ;JMap.getFlt(TargetData, "STFullness")  ;Replace this with total?
   Int PerkLevel = JMap.getInt(TargetData, "SCLHeavyBurden")
   Int MaxWeight = 150 * (PerkLevel + 1)
   Int BaseWeight = 100 * (PerkLevel + 1)
@@ -1952,7 +1997,7 @@ Function updateDamage(Actor akTarget, Int aiTargetData = 0)
     JMap.setInt(TargetData, "SCLAppliedHeavyTier", HeavyTier)
   EndIf
 
-  Int Storage = countItemTypes(akTarget, 2, TargetData)
+  Int Storage = countItemTypes(akTarget, 2, True)
   Int StorageMax = getTotalPerkLevel(akTarget, "SCLStoredLimitUp", TargetData)
   If Storage > StorageMax
     Int Level = ((Storage - StorageMax) / 2) + (StorageMax - 1)
@@ -2019,59 +2064,32 @@ Int Function clearInvalidContents(Int JF_ContentsMap, Form akBaseObject)
   JF_eraseKeys(JF_ContentsMap, JA_Remove)
 EndFunction
 
-Float Function updateFullness(Actor akTarget, Bool abNoVomit = False, Int aiTargetData = 0)
-  {Checks each reported fullness, set "STFullness to it"}
-  Int TargetData
-  If aiTargetData
-    TargetData = aiTargetData
-  Else
-    TargetData = getTargetData(akTarget)
-  EndIf
-
-  Int ItemType = JIntMap.nextKey(SCLSet.JI_ItemTypes)
-  Float Total
-  While ItemType
-    String ContentsKey = getContentsKey(ItemType)
-    If ContentsKey
-      Total += JMap.getFlt(TargetData, getContentsKey(ItemType))
-      ItemType = JIntMap.nextKey(SCLSet.JI_ItemTypes, ItemType)
-    EndIf
+Function updateFullness(Actor akTarget, Bool abNoVomit = False, Int aiTargetData = 0)
+  {Updates aggregate values.}
+  Int TargetData = getData(akTarget, aiTargetData)
+  String AggStr = JMap.nextKey(SCLSet.JM_AggregateValues)
+  While AggStr
+    Int JA_AggValues = JMap.getObj(SCLSet.JM_AggregateValues, AggStr)
+    Float Total
+    Int i = JArray.count(JA_AggValues)
+    While i
+      i -= 1
+      String ContentsKey = JArray.getStr(JA_AggValues, i)
+      Total += JMap.getFlt(TargetData, ContentsKey)
+    EndWhile
+    Note(nameGet(akTarget) + ": Total for agg value " + AggStr + " = " + Total)
+    JMap.setFlt(TargetData, AggStr, Total)
+    AggStr = JMap.nextKey(SCLSet.JM_AggregateValues, AggStr)
   EndWhile
-  ;Note("Final Fullness = " + Total)
-  ;Notice("updateFullness for " + nameGet(akTarget) + " returned " + Total)
-  If !abNoVomit
-    Float Max = getMax(akTarget)
-    If Total > Max && !akTarget.HasSpell(SCLSet.SCL_AllowOverflowAbilityArray[1]) && !SCLSet.GodMode1 && canVomit(akTarget)
-      Float Delta = Total - Max
-      vomitAmount(akTarget, Delta, True, 30, True, 20)
-      Total = updateFullnessEX(akTarget, True, aiTargetData)
-      JMap.setInt(TargetData, "SCLAllowOverflowTracking", JMap.getInt(TargetData, "SCLAllowOverflowTracking") + 1)
-      addVomitDamage(akTarget)
-      quickUpdate(akTarget)
-    EndIf
-  EndIf
-  If Total < 0
-    Issue("updateFullness return a total of less than 0. Setting to 0")
-    Total = 0
-  EndIf
-  JMap.setFlt(TargetData, "STFullness", Total)
-  If Total > JMap.getFlt(TargetData, "SCLHighestFullness")
-    JMap.setFlt(TargetData, "SCLHighestFullness", Total)
-  EndIf
-  Return Total
 EndFunction
 
-Float Function updateFullnessEX(Actor akTarget, Bool abNoVomit = False, Int aiTargetData = 0)
-  {Actually goes into each contents list and pulls each DigestValue
-  For most updates, this should be integrated into the digest function}
-  Int TargetData
-  If aiTargetData
-    TargetData = aiTargetData
-  Else
-    TargetData = getTargetData(akTarget)
-  EndIf
+Function updateFullnessEX(Actor akTarget, Bool abNoVomit = False, Int aiTargetData = 0)
+  {Updates AggregateValues after getting and setting total Digest Values}
+  Int TargetData = getData(akTarget, aiTargetData)
   Int ItemType = JIntMap.nextKey(SCLSet.JI_ItemTypes)
+
   Float Total
+  Float WFSolidTotal
   While ItemType
     Int JF_ItemList = JMap.getObj(TargetData, "Contents" + ItemType)
     String ContentsKey = getContentsKey(ItemType)
@@ -2081,32 +2099,11 @@ Float Function updateFullnessEX(Actor akTarget, Bool abNoVomit = False, Int aiTa
         Issue("getFullness for ItemType " + ItemType + " returned less than 0. Setting to 0", 1)
         Fullness = 0
       EndIf
-      Total += Fullness
       JMap.setFlt(TargetData, ContentsKey, Fullness)
     EndIf
     ItemType = JIntMap.nextKey(SCLSet.JI_ItemTypes, ItemType)
   EndWhile
-  If !abNoVomit
-    Float Max = getMax(akTarget)
-    If Total > Max && !akTarget.HasSpell(SCLSet.SCL_AllowOverflowAbilityArray[1]) && !SCLSet.GodMode1 && canVomit(akTarget)
-      Float Delta = Total - Max
-      vomitAmount(akTarget, Delta, True, 30, True, 20)
-      Total = updateFullnessEX(akTarget, True, aiTargetData)
-      JMap.setInt(TargetData, "SCLAllowOverflowTracking", JMap.getInt(TargetData, "SCLAllowOverflowTracking") + 1)
-      addVomitDamage(akTarget)
-      quickUpdate(akTarget)
-
-    EndIf
-  Endif
-  If Total < 0
-    Issue("updateFullness return a total of less than 0. Setting to 0")
-    Total = 0
-  EndIf
-  JMap.setFlt(TargetData, "STFullness", Total)
-  If Total > JMap.getFlt(TargetData, "SCLHighestFullness")
-    JMap.setFlt(TargetData, "SCLHighestFullness", Total)
-  EndIf
-  Return Total
+  updateFullness(akTarget, abNoVomit, TargetData)
 EndFunction
 
 Bool Function canVomit(Actor akTarget)
@@ -2123,13 +2120,16 @@ Function addVomitDamage(Actor akTarget)
   akTarget.AddSpell(SCL_VomitDamageSpell, True)/;
 EndFunction
 
+Function addSolidRemoveDamage(Actor akTarget)
+EndFunction
+
 String Function getContentsKey(Int aiItemType)
   {Returns where that item type's fullness is stored}
   Return JMap.getStr(JIntMap.getObj(SCLSet.JI_ItemTypes, aiItemType), "ContentsKey")
 EndFunction
 
 Float Function updateSingleContents(Actor akTarget, Int aiItemType)
-  {Sets the individual content fullnefss
+  {Sets the individual content fullness
   Call this whenever a content's array is expected to change, IE digestion, or other events.
   Alternatively, use updateFullnessEX to update everything.}
   String ContentsKey = getContentsKey(aiItemType)
@@ -2457,31 +2457,7 @@ EndFunction/;
 
 ;Perk Functions ****************************************************************
 Spell[] Function getAbilityArray(String asPerkID)
-  If asPerkID == "SCLRoomForMore"
-    Return SCLSet.SCL_RoomForMoreAbilityArray
-  ElseIf asPerkID == "SCLStoredLimitUp"
-    Return SCLSet.SCL_StoredLimitUpAbilityArray
-  ElseIf asPerkID == "SCLHeavyBurden"
-    Return SCLSet.SCL_HeavyBurdenAbilityArray
-  ElseIf asPerkID == "SCLAllowOverflow"
-    Return SCLSet.SCL_AllowOverflowAbilityArray
-  ElseIf asPerkID == "SCLEaterRank"
-    Return SCLSet.SCL_EaterRankAbilityArray
-  Else
-    Spell[] ReturnArray
-    Int LibList = SCLSet.JA_LibraryList
-    Int i = JArray.count(LibList)
-    While i && !ReturnArray
-      i -= 1
-      ReturnArray = (JArray.getForm(LibList, i) as Lib_SC).getAbilityArray(asPerkID)
-    EndWhile
-    If ReturnArray
-      Return ReturnArray
-    Else
-      Issue("Invalid perk ID inputted into getAbilityArray function.", 1)
-      Return None
-    EndIf
-  EndIf
+  Return getPerkForm(asPerkID).AbilityArray
 EndFunction
 
 Spell Function getPerkSpell(String asPerkID, Int aiPerkLevel)
@@ -2489,24 +2465,14 @@ Spell Function getPerkSpell(String asPerkID, Int aiPerkLevel)
   Return getAbilityArray(asPerkID)[aiPerkLevel]
 EndFunction
 
-Int Function getPerkEntry(String asPerkID)
-  Return JMap.getObj(SCLSet.JM_PerkIDs, asPerkID)
+SCLPerkBase Function getPerkForm(String asPerkID)
+  Quest OwnedQuest = JMap.getForm(SCLSet.JM_PerkIDs, asPerkID) as Quest
+  Return OwnedQuest.GetAliasByName(asPerkID) as SCLPerkBase
 EndFunction
 
 Int Function getCurrentPerkLevel(Actor akTarget, String asPerkID)
   {Returns the highest perk taken by an actor. If they haven't taken the perk, returns 0}
-  Spell[] a = getAbilityArray(asPerkID)
-  If !a
-    Return -1
-  EndIf
-  Int i = a.length
-  While i > 1 ;Dosen't check 0 index (should be left blank)
-    i -= 1
-    If akTarget.HasSpell(a[i])
-      Return i
-    EndIf
-  EndWhile
-  Return 0
+  Return getPerkForm(asPerkID).getFirstPerkLevel(akTarget)
 EndFunction
 
 Int Function getTotalPerkLevel(Actor akTarget, String asPerkID, Int aiTargetData = 0)
@@ -2519,99 +2485,18 @@ Bool Function canTakePerk(Actor akTarget, String asPerkID, Bool abOverride = Fal
   ;Rewrite this to place limits on the perks
   ;Notice("canTakePerk called for " + nameGet(akTarget) + " for perkID " + asPerkID)
   Int TargetData = getData(akTarget, aiTargetData)
-  Int PerkLevel = getCurrentPerkLevel(akTarget, asPerkID)
-  If abOverride && PerkLevel < getAbilityArray(asPerkID).Length - 1
-    Return True
-  ElseIf asPerkID == "SCLRoomForMore"
-    Int aiPerkLevel = PerkLevel + 1
-    Notice("SCLRoomForMore Level " + aiPerkLevel)
-    Int Req
-    If aiPerkLevel == 1
-      Req = 10
-    ElseIf aiPerkLevel == 2
-      Req = 25
-    ElseIf aiPerkLevel == 3
-      Req = 45
-    ElseIf aiPerkLevel == 4
-      Req = 60
-    ElseIf aiPerkLevel == 5
-      Req = 90
-    ElseIf aiPerkLevel >= 6
-      Return False
-    EndIf
-    ;Notice("SCLRoomForMore Req = " + Req)
-    Float DigestFood = JMap.getFlt(TargetData, "STTotalDigestedFood")
-    If (DigestFood >= Req || abOverride)
-      ;Notice("Returning true")
+  SCLPerkBase CurrentPerk = getPerkForm(asPerkID)
+  If CurrentPerk
+    Int NextPerk = CurrentPerk.getFirstPerkLevel(akTarget, TargetData) + 1
+    If CurrentPerk.canTake(akTarget, NextPerk, SCLSet.DebugEnable)
       Return True
-    Else
-      ;Notice("Returning false")
-      Return False
-    EndIf
-  ElseIf asPerkID == "SCLStoredLimitUp"
-    Int Req
-    Int aiPerkLevel = PerkLevel + 1
-    If aiPerkLevel == 1
-      Req = 25
-    ElseIf aiPerkLevel == 2
-      Req == 50
-    ElseIf aiPerkLevel == 3
-      Req = 75
-    ElseIf aiPerkLevel == 4
-      Req = 115
-    ElseIf aiPerkLevel == 5
-      Req = 150
-    EndIf
-    If aiPerkLevel <= 5 && (abOverride || JMap.getFlt(TargetData, "STBase") >= Req)
-      Return True
-    Else
-      Return False
-    EndIf
-  ElseIf asPerkID == "SCLHeavyBurden"
-    Int aiPerkLevel = PerkLevel + 1
-
-    Int MaxWeight = 150 * (PerkLevel + 1)
-    Int Level = akTarget.GetLevel()
-    If aiPerkLevel <= 5 && (abOverride || (akTarget.HasMagicEffect(SCLSet.SCL_HeavyBurdenReqTrackerEffect) && Level >= MaxWeight / 10))
-      Return True
-    Else
-      Return False
-    EndIf
-  ElseIf asPerkID == "SCLAllowOverflow"
-    If PerkLevel == 0 && (abOverride || JMap.getInt(TargetData, "SCLAllowOverflowTracking") >= 30)
-      Return True
-    Else
-      Return False
-    EndIf
-  ElseIf asPerkID == "SCLEaterRank"
-    Return True
-  Else
-    Bool CanTake
-    Int LibList = SCLSet.JA_LibraryList
-    Int i = JArray.count(LibList)
-    While i && !CanTake
-      i -= 1
-      CanTake = (JArray.getForm(LibList, i) as Lib_SC).canTakePerk(akTarget, asPerkID, PerkLevel, abOverride, TargetData)
-    EndWhile
-    If CanTake
-      Return True
-    Else
-      Issue("Invalid perk ID inputted into canTakePerk function.", 1)
-      Return False
     EndIf
   EndIf
   Return False
 EndFunction
 
 Function takePerk(Actor akTarget, String asPerkID)
-  Spell[] a = getAbilityArray(asPerkID)
-  Int i = getCurrentPerkLevel(akTarget, asPerkID)
-
-  If canTakePerk(akTarget, asPerkID, SCLSet.DebugEnable)
-    akTarget.AddSpell(a[i + 1], True)
-  Else
-    Notice("Actor ineligible for perk")
-  EndIf
+  getPerkForm(asPerkID).takePerk(akTarget)
 EndFunction
 
 Function takeUpPerks(Actor akTarget, String asPerkID, Int aiPerkLevel)
@@ -2646,15 +2531,13 @@ Bool Function canTakeAnyPerk(Actor akTarget)
 EndFunction
 
 String Function getPerkDescription(String asPerkID, Int aiPerkLevel = 0)
-  Int JM_PerkEntry = getPerkEntry(asPerkID)
-  Int JA_Desc = JMap.getObj(JM_PerkEntry, "PerkDescriptions")
-  Return JArray.getStr(JA_Desc, aiPerkLevel)
+  SCLPerkBase PerkEntry = getPerkForm(asPerkID)
+  Return PerkEntry.getDescription(aiPerkLevel)
 EndFunction
 
 String Function getPerkRequirements(String asPerkID, Int aiPerkLevel = 0)
-  Int JM_PerkEntry = getPerkEntry(asPerkID)
-  Int JA_Requirements = JMap.getObj(JM_PerkEntry, "PerkRequirements")
-  Return JArray.getStr(JA_Requirements, aiPerkLevel)
+  SCLPerkBase PerkEntry = getPerkForm(asPerkID)
+  Return PerkEntry.getDescription(aiPerkLevel)
 EndFunction
 
 ;Vomit Functions ***************************************************************
@@ -2885,7 +2768,7 @@ Function vomitSpecificItem(Actor akTarget, Int aiItemType, ObjectReference akRef
         If !abDestroyDigestItems || aiItemType != 1
           VomitContainer.AddItem(akReference as ObjectReference, 1, False)
         EndIf
-        akReference.Delete()
+        ;akReference.Delete()
       EndIf
       sendVomitEvent(akTarget, 3, False, akReference)
       JFormMap.removeKey(JF_ContentsMap, akReference)
@@ -3285,18 +3168,26 @@ Function handleActorMainMenu(Actor akTarget, Int aiOption, Int aiMode)
       showContentsList(akTarget)
     EndIf
   ElseIf aiOption == 7
-    openTransferMenu(akTarget)
+    Int Option = 1
+    If SCLSet.WF_Active
+      Option = SCLSet.SCL_MES_WF_StorageChoice.Show()
+    EndIf
+    If Option == 1
+      openTransferMenu(akTarget)
+    ElseIf Option == 2
+      openTransferMenu(akTarget, "Colon")
+    EndIf
   EndIf
 EndFunction
 ;Transfer Menu *****************************************************************
-Function openTransferMenu(Actor akTarget)
+Function openTransferMenu(Actor akTarget, String asDestination = "Stomach")
   {Places a container at the player's feet that, when items are added, are added to the target's stomach
   Will be deleted after 5 hours}
   Notice("Opening transfer menu for " + nameGet(akTarget))
   ;SCLTransferObject ST_TransferRef = PlayerRef.PlaceAtMe(SCLSet.SCL_TransferBase) as SCLTransferObject
   SCLTransferObject ST_TransferRef = SCLSet.SCL_TransferChest as SCLTransferObject
+  ST_TransferRef.Destination = asDestination  ;Sets properties on the transfer object script before its opened
   ST_TransferRef.TransferTarget = akTarget
-  ST_TransferRef.Destination = "Stomach"  ;Sets properties on the transfer object script before its opened
   ;addToObjectTrashList(ST_TransferRef, 5)
   quickUpdate(akTarget)
   ST_TransferRef.Activate(PlayerRef)
@@ -3355,11 +3246,27 @@ Bool Function buildActorStatsMenu(Actor akTarget)
   LM_ST_Stats.AddEntryItem("Stomach Stretch = " + roundFlt(JMap.getFlt(TargetData, "STStretch"), 1))
   JArray.addStr(JA_Description, "Amount that " + TargetName + "'s stomach can stretch beyond its usual size.")
 
+  LM_ST_Stats.AddEntryItem("Num Items Stored = " + countItemTypes(akTarget, 2, True))
+  JArray.addStr(JA_Description, "Number of Items stored in stomach")
+
   LM_ST_Stats.AddEntryItem("Max Capacity = " + roundFlt(getMax(akTarget), 2))
   JArray.addStr(JA_Description, "Maximum amount " + TargetName + " can hold before being incapacitated. AdjBase x Stomach Stretch.")
 
   LM_ST_Stats.AddEntryItem("Digestion Rate = " + roundFlt(JMap.getFlt(TargetData, "STDigestionRate"), 2))
   JArray.addStr(JA_Description, "Units of food digested per in-game hour.")
+
+  If SCLSet.WF_Active
+    LM_ST_Stats.AddEntryItem("Num Items Stowed Away = " + countItemTypes(akTarget, 4, True))
+    JArray.addStr(JA_Description, "Number of Items stored in colon")
+
+    LM_ST_Stats.AddEntryItem("Current Colon Fullness = " + JMap.getFlt(TargetData, "WF_SolidTotalFullness"))
+    JArray.addStr(JA_Description, "Total weight of items in " + TargetName + "'s colon.")
+
+    If SCLSet.WF_SolidActive
+      LM_ST_Stats.AddEntryItem("Current Illness Level = " + JMap.getInt(TargetData, "WF_SolidIllnessLevel"))
+      JArray.addStr(JA_Description, "How sick actor is. Increases by eating inedible food. Makes them need to go.")
+    EndIf
+  EndIf
 
   Int LibList = SCLSet.JA_LibraryList
   Int i = JArray.count(LibList)
@@ -3408,8 +3315,13 @@ Function showContentsList(Actor akTarget, Int aiMode = 0)
         UIExtensions.OpenMenu("UIListMenu", akTarget)
         Option = UIExtensions.GetMenuResultInt("UIListMenu")
       ElseIf Choice == 1 ;Vomit item
-        Notice("Vomiting " + nameGet(JArray.getForm(JA_OptionList1, Option) as ObjectReference) + ", index " + Option + ", from " + nameGet(akTarget))
-        vomitSpecificItem(akTarget, JArray.getInt(JA_OptionList2, Option), JArray.getForm(JA_OptionList1, Option) as ObjectReference)
+        Notice("Removeing " + nameGet(JArray.getForm(JA_OptionList1, Option) as ObjectReference) + ", index " + Option + ", from " + nameGet(akTarget))
+        Int ItemType = JArray.getInt(JA_OptionList2, Option)
+        If ItemType == 1 || ItemType == 2
+          vomitSpecificItem(akTarget, ItemType, JArray.getForm(JA_OptionList1, Option) as ObjectReference)
+        ElseIf ItemType == 3 || ItemType == 4
+          WF_SolidRemoveSpecific(akTarget, ItemType, JArray.getForm(JA_OptionList1, Option) as ObjectReference)
+        EndIf
         quickUpdate(akTarget, True)
         Return
       ElseIf Choice == 2  ;Switch from stored to digest
@@ -3898,8 +3810,348 @@ Function ShowIssue(String sMessage, Int iSeverity = 0, Int aiID = 0, Bool bOverr
   EndIf
   Debug.Trace(DebugName + sMessage, iSeverity)
 EndFunction
+;*******************************************************************************
+;Waste Functions (WF)
+;*******************************************************************************
+;/Design Doc: Solid, Liquid, Gas system
+Solids/Liquids build up with digestion of solid/liquid foods
+Gases build up with any digestion, affected by the global setting and individual increase
 
+;Solids ************************************************************************
+Solids capacity dosen't increase naturally, instead must be upgraded
+If you eat too much, you poop too much. Simple.
+Max solid capacity acts like stomach capacity, grows and shrinks with size.
+Can also be buffed/debuffed. Raw/Rotten foods will reduce this drastically
+Works on an Int-Float system: When you eat something, will rise w/ float value. If it reaches next Int, give next tier.
+Resets to Nearest Int over time. Allows for "resistance"
+Delecate eaters will get sick with any item, more hearty ones can eat larger/more rotten foods at once
+When you reach max, get "need" debuff. Strength will increase as long as you haven't pooped.
+Speed increases w/sickness
+Will also increases depending on length since last poop (start at 8 hours) regardless of amount
+Will eventually force you to poop
 
+Keys:
+  WF_CurrentSolidAmount
+  WF_SolidBase
+  WF_SolidCapMulti
+  WF_SolidTimePast
+  WF_SolidIllnessBuildUp  Increases when you eat rotten food
+  WF_SolidIllnessThreshold  If gets above this point, adds debuff
+  WF_SolidIllnessLevel
+Contents IDs:
+  Breaking Down Map: 3
+  Stored Map: 4
+ItemData Keys:
+  WF_SolidBaseLower
+Variables:
+  SCLSet.WF_SolidActive
+  SCLSet.WF_SolidAdjBaseMulti
+  SCLSet.WF_SolidIllnessBuildUpDecrease
+
+Perks:
+  WF_BasementStorage: 1: Increases max insert size. 2: Increases max storage capacity.
+;Liquids ***********************************************************************
+Liquids capacity increases based on level.
+When you reach max, get "need" debuff. Strength will increase as long as you haven't peeed.
+Will also increases depending on length since last pee (start at 8 hours) regardless of amount
+Will eventually force you to pee
+Not much here at the moment, need to think about more features.
+
+Keys:
+  WF_CurrentLiquidAmount
+  WF_LiquidBase
+  WF_LiquidTimePast
+  WF_LiquidCapMulti
+Variables:
+  SCLSet.WF_LiquidActive
+  SCLSet.WF_LiquidAdjBaseMulti
+;Gases *************************************************************************
+Maybe not impliment yet.
+
+Keys:
+  WF_CurrentGasAmount
+  WF_GasBase
+  WF_GasTimePast
+  WF_GasCapMulti
+Variables:
+  SCLSet.WF_GasActive
+  SCLSet.WF_GasAdjBaseMulti
+
+;TODO List *********************************************************************
+  Perks
+  Figure out storage
+/;
+
+Float Function WF_getAdjSolidBase(Actor akTarget, Int aiTargetData = 0)
+  Int TargetData = getData(akTarget, aiTargetData)
+  Return JMap.getFlt(TargetData, "WF_SolidBase", 1) * akTarget.GetScale() * NetImmerse.GetNodeScale(akTarget, "NPC Root [Root]", False) * SCLSet.WF_SolidAdjBaseMulti * JMap.getFlt(TargetData, "WF_SolidCapMulti", 1)
+EndFunction
+
+Float Function WF_getTotalSolidFullness(Actor akTarget, Int aiTargetData = 0)
+  Int TargetData = getData(akTarget, aiTargetData)
+  Float ReturnValue = JMap.getFlt(TargetData, "WF_CurrentSolidAmount")
+  ReturnValue += JMap.getFlt(TargetData, getContentsKey(3))
+  ReturnValue += JMap.getFlt(TargetData, getContentsKey(4))
+  Return ReturnValue
+EndFunction
+
+Float Function WF_getAdjLiquidBase(Actor akTarget, Int aiTargetData = 0)
+  Int TargetData = getData(akTarget, aiTargetData)
+  Return JMap.getFlt(TargetData, "WF_LiquidBase", 1) * akTarget.GetScale() * NetImmerse.GetNodeScale(akTarget, "NPC Root [Root]", False) * SCLSet.WF_LiquidAdjBaseMulti * JMap.getFlt(TargetData, "WF_LiquidCapMulti", 1)
+EndFunction
+
+Float Function WF_getSolidMaxInsert(Actor akTarget, Int aiTargetData = 0)
+  Int TargetData = getData(akTarget, aiTargetData)
+  Int FirstPerkLevel = getCurrentPerkLevel(akTarget, "WF_BasementStorage")
+  If FirstPerkLevel <= 0
+    Return 0
+  EndIf
+  Int SecondPerkLevel = getTotalPerkLevel(akTarget, "WF_BasementStorage")
+  Float MaxInsert = Math.pow(SecondPerkLevel, 2) + 0.3
+  If MaxInsert < 0
+    MaxInsert = 0.3
+  EndIf
+  Return MaxInsert
+EndFunction
+
+Int Function WF_getSolidMaxNumItems(Actor akTarget, Int aiTargetData = 0)
+  Int TargetData = getData(akTarget, aiTargetData)
+  Int FirstPerkLevel = getCurrentPerkLevel(akTarget, "WF_BasementStorage")
+  If FirstPerkLevel <= 0
+    Return 0
+  EndIf
+  Return getTotalPerkLevel(akTarget, "WF_BasementStorage", TargetData)
+EndFunction
+
+SCLWFSolidWaste Function WF_SolidRemovePerform(Actor akTarget, Bool bLeveledRemains)
+  If !akTarget.IsSneaking()
+    Int i
+    While !akTarget.IsSneaking() && i < 10
+      Utility.Wait(0.5)
+      akTarget.StartSneaking()
+      i += 1
+    EndWhile
+  EndIf
+  If akTarget == PlayerRef
+    Game.ForceThirdPerson()
+    Game.DisablePlayerControls()
+  EndIf
+  ;Play noise and animation here.
+  SCLWFSolidWaste Waste = WF_placeSolidWaste(akTarget)
+  If akTarget == PlayerRef
+    Game.EnablePlayerControls()
+  EndIf
+  Return Waste
+EndFunction
+
+Function WF_SolidRemove(Actor akTarget, Int aiTargetData = 0)
+  Int TargetData = getData(akTarget, aiTargetData)
+  SCLWFSolidWaste Refuse = WF_SolidRemovePerform(akTarget, False)
+  WF_removeSolidContents(akTarget, Refuse, TargetData)
+  If akTarget.HasSpell(SCLSet.WF_SolidDebuffSpell)
+    akTarget.RemoveSpell(SCLSet.WF_SolidDebuffSpell)
+  EndIf
+  JMap.setFlt(TargetData, "WF_SolidTimePast", 0)
+  JMap.setFlt(TargetData, "WF_CurrentSolidAmount", 0)
+  Int Illness = JMap.getInt(TargetData, "WF_SolidIllnessLevel")
+  Illness -= 2
+  If Illness < 0
+    Illness = 0
+  EndIf
+  WF_addSolidIllnessEffect(akTarget, Illness)
+EndFunction
+
+Function WF_SolidRemoveNum(Actor akTarget, Int aiNumToRemove, Bool abRemoveBreakingDown = False, Int aiTargetData = 0)
+  Int TargetData = getData(akTarget, aiTargetData)
+  Int JF_ContentsMap = getContents(akTarget, 4, TargetData)
+  SCLWFSolidWaste Refuse = WF_SolidRemovePerform(akTarget, False)
+  ObjectReference ItemKey = JFormMap.nextKey(JF_ContentsMap) as ObjectReference
+  Int JA_Remove = JArray.object()
+  While aiNumToRemove && ItemKey
+    If ItemKey
+      If ItemKey as Actor
+        extractActor(akTarget, ItemKey as Actor, 4, Refuse)
+        aiNumToRemove -= 1
+        JArray.addForm(JA_Remove, ItemKey)
+      ElseIf ItemKey as SCLBundle
+        Int NumOfItems = (ItemKey as SCLBundle).NumItems
+        If NumOfItems > aiNumToRemove
+          NumOfItems -= aiNumToRemove
+          Refuse.AddItem((ItemKey as SCLBundle).ItemForm, aiNumToRemove, True)
+          aiNumToRemove = 0
+          (ItemKey as SCLBundle).NumItems = NumOfItems
+        Else
+          Refuse.AddItem((ItemKey as SCLBundle).ItemForm, NumOfItems, True)
+          aiNumToRemove -= NumOfItems
+          JArray.addForm(JA_Remove, ItemKey)
+        EndIf
+      Else
+        Refuse.AddItem(ItemKey, 1, True)
+        aiNumToRemove -= 1
+        JArray.addForm(JA_Remove, ItemKey)
+      EndIf
+    EndIf
+  ItemKey = JFormMap.nextKey(JF_ContentsMap, ItemKey) as ObjectReference
+  EndWhile
+  JF_eraseKeys(JF_ContentsMap, JA_Remove)
+  If abRemoveBreakingDown && aiNumToRemove
+    JF_ContentsMap = getContents(akTarget, 3, TargetData)
+    JA_Remove = JArray.object()
+    ItemKey = JFormMap.nextKey(JF_ContentsMap) as ObjectReference
+    While aiNumToRemove && ItemKey
+      If ItemKey
+        If ItemKey as Actor
+          extractActor(akTarget, ItemKey as Actor, 3, Refuse)
+          aiNumToRemove -= 1
+          JArray.addForm(JA_Remove, ItemKey)
+        ElseIf ItemKey as SCLBundle
+          Int NumOfItems = (ItemKey as SCLBundle).NumItems
+          If NumOfItems > aiNumToRemove
+            NumOfItems -= aiNumToRemove
+            ;Refuse.AddItem((ItemKey as SCLBundle).ItemForm, aiNumToRemove, True)
+            aiNumToRemove = 0
+            (ItemKey as SCLBundle).NumItems = NumOfItems
+          Else
+            ;Refuse.AddItem((ItemKey as SCLBundle).ItemForm, NumOfItems, True)
+            aiNumToRemove -= NumOfItems
+            JArray.addForm(JA_Remove, ItemKey)
+          EndIf
+        Else
+          ;Refuse.AddItem(ItemKey, 1 True)
+          aiNumToRemove -= 1
+          JArray.addForm(JA_Remove, ItemKey)
+        EndIf
+      EndIf
+      ItemKey = JFormMap.nextKey(JF_ContentsMap, ItemKey) as ObjectReference
+    EndWhile
+  EndIf
+EndFunction
+
+Function WF_SolidRemoveSpecific(Actor akTarget, Int aiItemType, ObjectReference akReference = None, Form akBaseObject = None, Int aiItemCount = 1, Bool abDestroyDigestItems = True)
+  If !akReference && !akBaseObject
+    Return
+  EndIf
+  If aiItemType != 3 || aiItemType != 4
+    Return
+  EndIf
+  Int JF_ContentsMap = getContents(akTarget, aiItemType)
+  SCLWFSolidWaste Refuse = WF_SolidRemovePerform(akTarget, False)
+  If akReference
+    If akReference as Actor
+      extractActor(akTarget, akReference as Actor, aiItemType, Refuse)
+    ElseIf akReference as SCLBundle
+      If !abDestroyDigestItems || aiItemType != 3
+        Refuse.addItem((akReference as SCLBundle).ItemForm, (akReference as SCLBundle).NumItems, False)
+      EndIf
+      akReference.Delete()
+    Else
+      If !abDestroyDigestItems || aiItemType != 3
+        Refuse.AddItem(akReference as ObjectReference, 1, False)
+      EndIf
+      ;akReference.Delete()
+    EndIf
+    WF_sendSolidRemoveEvent(akTarget, 3, False, akReference)
+    JFormMap.removeKey(JF_ContentsMap, akReference)
+  Else
+    SCLBundle Bundle = findFormBundle(JF_ContentsMap, akBaseObject)
+    If Bundle
+      Bool bEmpty = False
+      Int AddItems = Bundle.NumItems
+      Bundle.NumItems -= aiItemCount
+      If Bundle.NumItems > 0
+        AddItems = aiItemCount
+        bEmpty = True
+      EndIf
+      If !abDestroyDigestItems || aiItemType != 1
+        Refuse.addItem(Bundle.ItemForm, AddItems, False)
+      EndIf
+      If bEmpty
+        JFormMap.removeKey(JF_ContentsMap, Bundle)
+        Bundle.Delete()
+      Else
+        Int JM_ItemEntry = JFormMap.getObj(JF_ContentsMap, Bundle)
+        JMap.setFlt(JM_ItemEntry, "DigestValue", JMap.getFlt(JM_ItemEntry, "ActiveDVal") + (JMap.getFlt(JM_ItemEntry, "IndvDVal") * Bundle.NumItems))
+      EndIf
+      WF_sendSolidRemoveEvent(akTarget, 3, False, Bundle)
+    EndIf
+  EndIf
+EndFunction
+
+Function WF_sendSolidRemoveEvent(Actor akTarget, Int aiSolidRemoveType, Bool bLeveledRemains, Form akSpecificItem = None)
+  Int E = ModEvent.Create("SCLWFRemoveSolidEvent")
+  ModEvent.PushForm(E, akTarget)
+  ModEvent.PushInt(E, aiSolidRemoveType)
+  ModEvent.PushBool(E, bLeveledRemains)
+  ModEvent.PushForm(E, akSpecificItem)
+  ModEvent.Send(E)
+EndFunction
+
+SCLWFSolidWaste Function WF_placeSolidWaste(ObjectReference akPosition, Int aiType = 0)
+  SCLWFSolidWaste Refuse
+  If aiType == 0
+    Refuse = akPosition.PlaceAtMe(SCLSet.SCL_WF_RefuseBase) as SCLWFSolidWaste
+  ;ElseIf aiType == 1
+  EndIf
+  Refuse.MoveTo(akPosition, 64 * Math.Sin(akPosition.GetAngleZ()), 64 * Math.Cos(akPosition.GetAngleZ()), 0, False)
+  Refuse.SetAngle(0, 0, 0)
+  SCLibrary.addToObjectTrashList(Refuse, 5)
+  Return Refuse
+EndFunction
+
+Function WF_addSolidIllnessEffect(Actor akTarget, Int afIllnessLevel, Int aiTargetData = 0)
+  Int TargetData = getData(akTarget, aiTargetData)
+  Int CurrentLevel = JMap.getInt(TargetData, "WF_SolidIllnessLevel")
+  If afIllnessLevel > 0
+    If afIllnessLevel != CurrentLevel
+      SCLSet.WF_SolidIllnessDebuffSpells[afIllnessLevel].Cast(akTarget)
+      JMap.setInt(TargetData, "WF_SolidIllnessLevel", afIllnessLevel)
+    EndIf
+  Else
+    If CurrentLevel != 0
+      SCLSet.WF_SolidIllnessDebuffSpells[0].Cast(akTarget)
+      JMap.setInt(TargetData, "WF_SolidIllnessLevel", 0)
+    EndIf
+  EndIf
+EndFunction
+
+Function WF_RemoveSolidContents(Actor akTarget, ObjectReference akTargetContainer, Int aiTargetData = 0)
+  Int TargetData = getData(akTarget, aiTargetData)
+  Int JF_Contents = getContents(akTarget, 3, TargetData)
+  If !JValue.empty(JF_Contents)
+    ObjectReference CurrentItem = JFormMap.nextKey(JF_Contents) as ObjectReference
+    While CurrentItem
+      If CurrentItem as SCLBundle
+        Int ItemNum = (CurrentItem as SCLBundle).NumItems
+        Form CurrentForm = (CurrentItem as SCLBundle).ItemForm
+        akTargetContainer.AddItem(CurrentForm, ItemNum, False)
+      ElseIf CurrentItem as Actor
+        extractActor(akTarget, CurrentItem as Actor, 3, akTargetContainer)
+      ElseIf CurrentItem
+        akTargetContainer.addItem(CurrentItem, 1, False)
+      EndIf
+      CurrentItem = JFormMap.nextKey(JF_Contents, CurrentItem) as ObjectReference
+    EndWhile
+  EndIf
+  JFormMap.clear(JF_Contents)
+
+  JF_Contents = getContents(akTarget, 4, TargetData)
+  If !JValue.empty(JF_Contents)
+    ObjectReference CurrentItem = JFormMap.nextKey(JF_Contents) as ObjectReference
+    While CurrentItem
+      If CurrentItem as SCLBundle
+        Int ItemNum = (CurrentItem as SCLBundle).NumItems
+        Form CurrentForm = (CurrentItem as SCLBundle).ItemForm
+        akTargetContainer.AddItem(CurrentForm, ItemNum, False)
+      ElseIf CurrentItem as Actor
+        extractActor(akTarget, CurrentItem as Actor, 3, akTargetContainer)
+      ElseIf CurrentItem
+        akTargetContainer.addItem(CurrentItem, 1, False)
+      EndIf
+      CurrentItem = JFormMap.nextKey(JF_Contents, CurrentItem) as ObjectReference
+    EndWhile
+  EndIf
+  JFormMap.clear(JF_Contents)
+EndFunction
 ;/String Function getPerkDescription(String asPerkID, Int aiPerkLevel = 0)
   {Returns basic perk description, since you can't pull descriptions from perks themselves}
   If asPerkID == "SCLRoomForMore"
@@ -4015,3 +4267,148 @@ String Function getPerkRequirements(String asPerkID, Int aiPerkLevel)
     EndIf
   EndIf
 EndFunction/;
+
+;/Spell[] Function getAbilityArray(String asPerkID)
+  If asPerkID == "SCLRoomForMore"
+    Return SCLSet.SCL_RoomForMoreAbilityArray
+  ElseIf asPerkID == "SCLStoredLimitUp"
+    Return SCLSet.SCL_StoredLimitUpAbilityArray
+  ElseIf asPerkID == "SCLHeavyBurden"
+    Return SCLSet.SCL_HeavyBurdenAbilityArray
+  ElseIf asPerkID == "SCLAllowOverflow"
+    Return SCLSet.SCL_AllowOverflowAbilityArray
+  ElseIf asPerkID == "SCLEaterRank"
+    Return SCLSet.SCL_EaterRankAbilityArray
+  ElseIf asPerkID == "WF_BasementStorage"
+    Return SCLSet.SCL_WF_BasementStorageAbilityArray
+  Else
+    Spell[] ReturnArray
+    Int LibList = SCLSet.JA_LibraryList
+    Int i = JArray.count(LibList)
+    While i && !ReturnArray
+      i -= 1
+      ReturnArray = (JArray.getForm(LibList, i) as Lib_SC).getAbilityArray(asPerkID)
+    EndWhile
+    If ReturnArray
+      Return ReturnArray
+    Else
+      Issue("Invalid perk ID inputted into getAbilityArray function.", 1)
+      Return None
+    EndIf
+  EndIf
+EndFunction
+
+Int Function getCurrentPerkLevel(Actor akTarget, String asPerkID)
+  Spell[] a = getAbilityArray(asPerkID)
+  If !a
+    Return -1
+  EndIf
+  Int i = a.length
+  While i > 1 ;Dosen't check 0 index (should be left blank)
+    i -= 1
+    If akTarget.HasSpell(a[i])
+      Return i
+    EndIf
+  EndWhile
+  Return 0
+EndFunction
+
+Bool Function canTakePerk(Actor akTarget, String asPerkID, Bool abOverride = False, Int aiTargetData = 0)
+  ;Rewrite this to place limits on the perks
+  ;Notice("canTakePerk called for " + nameGet(akTarget) + " for perkID " + asPerkID)
+  Int TargetData = getData(akTarget, aiTargetData)
+  Int PerkLevel = getCurrentPerkLevel(akTarget, asPerkID)
+  If abOverride && PerkLevel < getAbilityArray(asPerkID).Length - 1
+    Return True
+  ElseIf asPerkID == "SCLRoomForMore"
+    Int aiPerkLevel = PerkLevel + 1
+    Notice("SCLRoomForMore Level " + aiPerkLevel)
+    Int Req
+    If aiPerkLevel == 1
+      Req = 10
+    ElseIf aiPerkLevel == 2
+      Req = 25
+    ElseIf aiPerkLevel == 3
+      Req = 45
+    ElseIf aiPerkLevel == 4
+      Req = 60
+    ElseIf aiPerkLevel == 5
+      Req = 90
+    ElseIf aiPerkLevel >= 6
+      Return False
+    EndIf
+    ;Notice("SCLRoomForMore Req = " + Req)
+    Float DigestFood = JMap.getFlt(TargetData, "STTotalDigestedFood")
+    If (DigestFood >= Req || abOverride)
+      ;Notice("Returning true")
+      Return True
+    Else
+      ;Notice("Returning false")
+      Return False
+    EndIf
+  ElseIf asPerkID == "SCLStoredLimitUp"
+    Int Req
+    Int aiPerkLevel = PerkLevel + 1
+    If aiPerkLevel == 1
+      Req = 25
+    ElseIf aiPerkLevel == 2
+      Req == 50
+    ElseIf aiPerkLevel == 3
+      Req = 75
+    ElseIf aiPerkLevel == 4
+      Req = 115
+    ElseIf aiPerkLevel == 5
+      Req = 150
+    EndIf
+    If aiPerkLevel <= 5 && (abOverride || JMap.getFlt(TargetData, "STBase") >= Req)
+      Return True
+    Else
+      Return False
+    EndIf
+  ElseIf asPerkID == "SCLHeavyBurden"
+    Int aiPerkLevel = PerkLevel + 1
+
+    Int MaxWeight = 150 * (PerkLevel + 1)
+    Int Level = akTarget.GetLevel()
+    If aiPerkLevel <= 5 && (abOverride || (akTarget.HasMagicEffect(SCLSet.SCL_HeavyBurdenReqTrackerEffect) && Level >= MaxWeight / 10))
+      Return True
+    Else
+      Return False
+    EndIf
+  ElseIf asPerkID == "SCLAllowOverflow"
+    If PerkLevel == 0 && (abOverride || JMap.getInt(TargetData, "SCLAllowOverflowTracking") >= 30)
+      Return True
+    Else
+      Return False
+    EndIf
+  ElseIf asPerkID == "SCLEaterRank"
+    Return True
+  Else
+    Bool CanTake
+    Int LibList = SCLSet.JA_LibraryList
+    Int i = JArray.count(LibList)
+    While i && !CanTake
+      i -= 1
+      CanTake = (JArray.getForm(LibList, i) as Lib_SC).canTakePerk(akTarget, asPerkID, PerkLevel, abOverride, TargetData)
+    EndWhile
+    If CanTake
+      Return True
+    Else
+      Issue("Invalid perk ID inputted into canTakePerk function.", 1)
+      Return False
+    EndIf
+  EndIf
+  Return False
+EndFunction
+
+Function takePerk(Actor akTarget, String asPerkID)
+  Spell[] a = getAbilityArray(asPerkID)
+  Int i = getCurrentPerkLevel(akTarget, asPerkID)
+
+  If canTakePerk(akTarget, asPerkID, SCLSet.DebugEnable)
+    akTarget.AddSpell(a[i + 1], True)
+  Else
+    Notice("Actor ineligible for perk")
+  EndIf
+EndFunction
+/;

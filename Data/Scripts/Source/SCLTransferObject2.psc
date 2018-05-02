@@ -40,30 +40,37 @@ EndFunction
 Event OnItemAdded(Form akBaseItem, int aiItemCount, ObjectReference akItemReference, ObjectReference akSourceContainer)
   UpdateLock()
 
-  Int ItemType
-  If (akBaseItem as Potion || akBaseItem as Ingredient) && SCLib.isDigestible(akBaseItem)
-    ItemType = 1
-  Else
-    ItemType = 2
-  EndIf
-
-  While aiItemCount
-    If ItemType == 1
-      If akItemReference
-        RemoveItem(akItemReference, 1, False, Target)
-        Target.EquipItem(akItemReference, False, False)
-      Else
-        RemoveItem(akBaseItem, 1, False, Target)
-        Target.EquipItem(akBaseItem, False, False)
-      EndIf
-    ElseIf ItemType == 2
-      SCLib.addItem(Target, akItemReference, akBaseItem, ItemType)
-      If !akItemReference
-        RemoveItem(akBaseItem, 1, False)
-      EndIf
+  If Destination == "Stomach"
+    Int ItemType
+    If (akBaseItem as Potion || akBaseItem as Ingredient) && SCLib.isDigestible(akBaseItem)
+      ItemType = 1
+    Else
+      ItemType = 2
     EndIf
-    aiItemCount -= 1
-  EndWhile
+
+    While aiItemCount
+      If ItemType == 1
+        If akItemReference
+          RemoveItem(akItemReference, 1, False, Target)
+          Target.EquipItem(akItemReference, False, False)
+        Else
+          RemoveItem(akBaseItem, 1, False, Target)
+          Target.EquipItem(akBaseItem, False, False)
+        EndIf
+      ElseIf ItemType == 2
+        SCLib.addItem(Target, akItemReference, akBaseItem, ItemType)
+        If !akItemReference
+          RemoveItem(akBaseItem, 1, False)
+        EndIf
+      EndIf
+      aiItemCount -= 1
+    EndWhile
+  ElseIf Destination == "Colon"
+    SCLib.addItem(Target, akItemReference, akBaseItem, 4)
+    If !akItemReference
+      RemoveItem(akBaseItem, 1, False)
+    EndIf
+  EndIf
   UpdateUnlock()
 EndEvent
 

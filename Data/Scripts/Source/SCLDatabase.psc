@@ -27,13 +27,19 @@ EndFunction
 
 Bool Property DatabaseInitialized Auto
 Event OnInit()
+  SCLibrary.addToReloadList(Self)
   setDatabase()
 EndEvent
 
+Int ScriptVersion = 1
 Int Function GetStage()
+  Int StoredVersion = JDB.solveInt(".SCLExtraData.VersionRecords.SCLItemDatabase")
   If SCLResetted
     setDatabase()
     SCLResetted = False
+  ElseIf ScriptVersion != StoredVersion
+    setDatabase()
+    JDB.solveIntSetter(".SCLExtraData.VersionRecords.SCLItemDatabase", ScriptVersion, True)
   EndIf
   RegisterForModEvent("SCLReset", "OnSCLReset")
   Return Parent.GetStage()
@@ -49,6 +55,7 @@ Function setDatabase()
   setupPerksList()
   setupBellyValues()
   setupTotalValues()
+  setupAggregateValues()
   ;setupDynMorphList()
   setupEditBodyEntries()
   setupMessages()
@@ -93,6 +100,8 @@ Function setupItemTypes()
     JDB.solveObjSetter(".SCLExtraData.ItemTypeMap", SCLSet.JI_ItemTypes, True)
     SCLibrary.addItemType(1, "Digesting", "Food digesting in actor's stomach.", "ContentsFullness1", True)
     SCLibrary.addItemType(2, "Stored", "Items held within the actor's stomach.", "ContentsFullness2", True)
+    SCLibrary.addItemType(3, "Breaking Down", "Items breaking down within the actor's colon.", "ContentsFullness3", False)
+    SCLibrary.addItemType(4, "Stowed Away", "Items held within the actor's colon.", "ContentsFullness4", False)
   EndIf
 EndFunction
 
@@ -100,7 +109,7 @@ Function setupPerksList()
   If !SCLSet.JM_PerkIDs
     SCLSet.JM_PerkIDs = JMap.object()
     JDB.solveObjSetter(".SCLExtraData.PerkIDList", SCLSet.JM_PerkIDs, True)
-
+;/
     ;Room For More ***************************************************************
     Int JA_Desc = JArray.object()
     JArray.addStr(JA_Desc, "Increases base capacity.")
@@ -168,6 +177,36 @@ Function setupPerksList()
     JArray.addStr(JA_Reqs, "Overeat and vomit at least 30 times, and reach level 30.")
 
     SCLibrary.addPerkID("SCLAllowOverflow", JA_Desc, JA_Reqs)
+
+    ;Basement Storage **********************************************************
+    JA_Desc = JArray.object()
+    Jarray.addStr(JA_Desc, "Allows actor to store items in colon.")
+    Jarray.addStr(JA_Desc, "Allows actor to store items in colon.")
+
+    JA_Reqs = JArray.object()
+    JArray.addStr(JA_Reqs, "No Requirements.")
+    JArray.addStr(JA_Reqs, "Reach Level 5.")
+
+    SCLibrary.addPerkID("WF_BasementStorage", JA_Desc, JA_Reqs)/;
+  EndIf
+EndFunction
+
+Function setupAggregateValues()
+  If !SCLSet.JM_AggregateValues
+    SCLSet.JM_AggregateValues = JMap.object()
+    JDB.solveObjSetter(".SCLExtraData.AggregateValues", SCLSet.JM_AggregateValues, True)
+
+    Int JA_AggValues = JArray.object()
+    JArray.addStr(JA_AggValues, "ContentsFullness1")
+    JArray.addStr(JA_AggValues, "ContentsFullness2")
+    SCLibrary.addAggregateValue("STFullness", JA_AggValues)
+
+    JA_AggValues = JArray.object()
+    JArray.addStr(JA_AggValues, "ContentsFullness3")
+    JArray.addStr(JA_AggValues, "ContentsFullness4")
+    JArray.addStr(JA_AggValues, "WF_CurrentSolidAmount")
+
+    SCLibrary.addAggregateValue("WF_SolidTotalFullness", JA_AggValues)
   EndIf
 EndFunction
 
@@ -176,6 +215,7 @@ Function setupBellyValues()
     SCLSet.JA_BellyValuesList = JArray.object()
     JDB.solveObjSetter(".SCLExtraData.BellyValueList", SCLSet.JA_BellyValuesList, True)
     SCLibrary.addBellyValue("STFullness")
+    SCLibrary.addBellyValue("WF_SolidTotalFullness")
   EndIf
 EndFunction
 

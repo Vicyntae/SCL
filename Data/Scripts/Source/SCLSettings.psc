@@ -24,7 +24,6 @@ Int Property ActionKey
     Int iKey = SCL_SET_ActionKey.GetValueInt()
     If _ActionKey != iKey  ;In case someone changes the global when we aren't looking
       Int KeyModChange = ModEvent.Create("SCLActionKeyChange")
-      ModEvent.PushInt(KeyModChange, iKey)
       ModEvent.Send(KeyModChange)
       _ActionKey = iKey
     EndIf
@@ -34,7 +33,6 @@ Int Property ActionKey
     SCL_SET_ActionKey.SetValueInt(a_val)
     _ActionKey = a_val
     Int KeyModChange = ModEvent.Create("SCLActionKeyChange")
-    ModEvent.PushInt(KeyModChange, a_val)
     ModEvent.Send(KeyModChange)
   EndFunction
 EndProperty
@@ -298,12 +296,6 @@ ObjectReference Property SCL_TransferChest Auto
 Faction Property PotentialFollowerFaction Auto
 
 ;Perks
-MagicEffect Property SCL_HeavyBurdenReqTrackerEffect Auto ;goes on a spell attached to reference alias, conditioned to recognize heavy effects
-Spell[] Property SCL_RoomForMoreAbilityArray Auto
-Spell[] Property SCL_StoredLimitUpAbilityArray Auto
-Spell[] Property SCL_HeavyBurdenAbilityArray Auto
-Spell[] Property SCL_AllowOverflowAbilityArray Auto
-Spell[] Property SCL_EaterRankAbilityArray Auto
 
 Formlist Property TrackingSpellList Auto
 FormList Property TrackingDispelList Auto
@@ -388,3 +380,132 @@ Int Property JA_LibraryList Auto
 Int Property JM_PerkIDs Auto
 Int Property JM_DynMorphList Auto
 Int Property JM_BellyInflateData Auto
+Int Property JM_AggregateValues Auto
+
+;AutoEat Properties ************************************************************
+GlobalVariable Property SCL_SET_AutoEat_Active Auto
+Bool Property AutoEatActive
+  Bool Function Get()
+    Return SCL_SET_AutoEat_Active.GetValueInt() as Bool
+  EndFunction
+
+  Function Set(Bool a_val)
+    If a_val
+      SCL_SET_AutoEat_Active.SetValueInt(1)
+    Else
+      SCL_SET_AutoEat_Active.SetValueInt(0)
+    EndIf
+  EndFunction
+EndProperty
+
+
+;WF Properties *****************************************************************
+GlobalVariable Property SCL_SET_WF_Active Auto
+Bool Property WF_Active
+  Bool Function Get()
+    Return SCL_SET_WF_Active.GetValueInt() as Bool
+  EndFunction
+
+  Function Set(Bool a_val)
+    If a_val
+      SCL_SET_WF_Active.SetValueInt(1)
+    Else
+      SCL_SET_WF_Active.SetValueInt(0)
+    EndIf
+  EndFunction
+EndProperty
+
+GlobalVariable Property SCL_SET_WF_ActionKey Auto ;Default 24
+Int _WF_ActionKey = 24
+Int Property WF_ActionKey
+  Int Function Get()
+    Int iKey = SCL_SET_WF_ActionKey.GetValueInt()
+    If _WF_ActionKey != iKey  ;In case someone changes the global when we aren't looking
+      Int KeyModChange = ModEvent.Create("SCLActionKeyChange")
+      ModEvent.Send(KeyModChange)
+      _WF_ActionKey = iKey
+    EndIf
+    Return iKey
+  EndFunction
+  Function Set(Int a_val)
+    SCL_SET_WF_ActionKey.SetValueInt(a_val)
+    _WF_ActionKey = a_val
+    Int KeyModChange = ModEvent.Create("SCLActionKeyChange")
+    ModEvent.Send(KeyModChange)
+  EndFunction
+EndProperty
+Message Property SCL_MES_WF_StorageChoice Auto
+
+
+;Solids ------------------------------------------------------------------------
+GlobalVariable Property SCL_SET_WF_SolidActive Auto
+Bool Property WF_SolidActive
+  Bool Function Get()
+    Return SCL_SET_WF_SolidActive.GetValueInt() as Bool
+  EndFunction
+
+  Function Set(Bool a_val)
+    If a_val
+      SCL_SET_WF_SolidActive.SetValueInt(1)
+    Else
+      SCL_SET_WF_SolidActive.SetValueInt(0)
+    EndIf
+  EndFunction
+EndProperty
+
+GlobalVariable Property SCL_SET_WF_SolidAdjBaseMulti Auto ;Default: 1
+Float Property WF_SolidAdjBaseMulti
+  Float Function Get()
+    Return SCL_SET_WF_SolidAdjBaseMulti.GetValue()
+  EndFunction
+  Function Set(Float a_val)
+    If a_val >= 0
+      SCL_SET_WF_SolidAdjBaseMulti.SetValue(a_val)
+    EndIf
+  EndFunction
+EndProperty
+
+GlobalVariable Property SCL_SET_WF_SolidIllnessBuildUpDecrease Auto
+Float Property WF_SolidIllnessBuildUpDecrease
+  Float Function Get()
+    Return SCL_SET_WF_SolidIllnessBuildUpDecrease.GetValue()
+  EndFunction
+  Function Set(Float a_val)
+    If a_val >= 0
+      SCL_SET_WF_SolidIllnessBuildUpDecrease.SetValue(a_val)
+    EndIf
+  EndFunction
+EndProperty
+Spell Property WF_SolidDebuffSpell Auto
+Spell[] Property WF_SolidDebuffSpells Auto
+Spell[] Property WF_SolidIllnessDebuffSpells Auto
+Container Property SCL_WF_RefuseBase Auto
+;Liquids -----------------------------------------------------------------------
+GlobalVariable Property SCL_SET_WF_LiquidActive Auto
+Bool Property WF_LiquidActive
+  Bool Function Get()
+    Return SCL_SET_WF_LiquidActive.GetValueInt() as Bool
+  EndFunction
+
+  Function Set(Bool a_val)
+    If a_val
+      SCL_SET_WF_LiquidActive.SetValueInt(1)
+    Else
+      SCL_SET_WF_LiquidActive.SetValueInt(0)
+    EndIf
+  EndFunction
+EndProperty
+
+GlobalVariable Property SCL_SET_WF_LiquidAdjBaseMulti Auto ;Default: 1
+Float Property WF_LiquidAdjBaseMulti
+  Float Function Get()
+    Return SCL_SET_WF_LiquidAdjBaseMulti.GetValue()
+  EndFunction
+  Function Set(Float a_val)
+    If a_val >= 0
+      SCL_SET_WF_LiquidAdjBaseMulti.SetValue(a_val)
+    EndIf
+  EndFunction
+EndProperty
+
+Spell Property WF_LiquidDebuffSpell Auto

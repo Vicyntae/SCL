@@ -131,9 +131,22 @@ Event OnPageReset(string a_page)
         AddTextOptionST("DisplayDigestRate_T", "$Base Digestion Rate", SCLib.roundFlt(JMap.getFlt(SelectedData, "STDigestionRate"), 1))
         AddTextOptionST("DisplayGluttony_T", "$Gluttony", JMap.getFlt(SelectedData, "SCLGluttony"))
       EndIf
+      AddTextOptionST("DisplayNumStored_T", "$Num Items Stored", SCLib.countItemTypes(SelectedActor, 2, True))
       AddTextOptionST("DisplayFullness_T", "$Fullness", JMap.getFlt(SelectedData, "STFullness"))  ;12
       AddTextOptionST("DisplayMax_T", "$Max Capacity", SCLib.getMax(SelectedActor)) ;14
-
+      If SCLSet.WF_Active
+        If SCLSet.DebugEnable
+          AddSliderOptionST("WF_EditMaxStorage_S", "$Set Max Num Items To Stow", SCLib.WF_getSolidMaxNumItems(SelectedActor, SelectedData))
+        Else
+          AddTextOptionST("WF_DisplayMaxStorage_T", "$Max Num Items To Stow", SCLib.WF_getSolidMaxNumItems(SelectedActor, SelectedData))
+        EndIf
+        AddTextOptionST("WF_DisplayMaxInsert_T", "$Max Insertable Size", SCLib.WF_getSolidMaxInsert(SelectedActor, SelectedData))
+        AddTextOptionST("DisplayNumStowedItems_T", "$Num Items Stowed Away", SCLib.countItemTypes(SelectedActor, 4, True))
+        If SCLSet.WF_SolidActive
+          AddTextOptionST("DisplaySolidFullness_T", "$Solid Fulless", SCLib.roundFlt(SCLib.WF_getTotalSolidFullness(SelectedActor, SelectedData), 1))
+          AddTextOptionST("DisplaySolidIllness", "$Solid Illness Level", JMap.getInt(SelectedData, "WF_SolidIllnessLevel"))
+        EndIf
+      EndIf
   		AddMenuOptionST("DisplayStomachContents_M", "$Show Stomach Contents", "") ;18
     Else
       AddTextOptionST("ChooseActorMessage_T", "$Choose an actor.", "")
@@ -143,10 +156,12 @@ Event OnPageReset(string a_page)
     AddMenuOptionST("SelectedActor_M", "$Actor", SelectedActorName);0
     AddEmptyOption()
     If SelectedActor
+      ;addAllPerkOptions(2)
       addPerkOption(SelectedActor, "SCLRoomForMore") ;7
       addPerkOption(SelectedActor, "SCLStoredLimitUp") ;9
       addPerkOption(SelectedActor, "SCLHeavyBurden") ;11
       addPerkOption(SelectedActor, "SCLAllowOverflow") ;13
+      addPerkOption(SelectedActor, "WF_BasementStorage")
     Else
       AddTextOptionST("ChooseActorMessage_T", "$Choose an actor.", "")
     EndIf
@@ -191,7 +206,20 @@ Event OnPageReset(string a_page)
       AddTextOptionST("ResetEquipmentTiers_T", "Reset All Thresholds", "")
       AddEmptyOption()
     EndIf/;
+    AddEmptyOption()
+    AddEmptyOption()
+    AddHeaderOption("Waste Function Settings")
+    AddToggleOptionST("WF_Enable_TOG", "$Enable Waste Functions", SCLSet.WF_Active)
+    If SCLSet.WF_Active
+      AddKeyMapOptionST("WF_ActionKeyPick_KM", "$Choose Waste Function Action Key", SCLSet.WF_ActionKey)
+      AddToggleOptionST("WF_SolidEnable_TOG", "$Enable Solid Waste Functions", SCLSet.WF_SolidActive)
+      AddSliderOptionST("WF_SolidIllnessBuildUpDecrease_S", "Build Up Decrease Rate", SCLSet.WF_SolidIllnessBuildUpDecrease, "{1}/hr")
+      AddEmptyOption()
+      AddToggleOptionST("WF_LiquidEnable_TOG", "$Enable Liquid Waste Functions", SCLSet.WF_LiquidActive)
 
+      ;AddToggleOptionST("WF_GasEnable_TOG", "$Enable Gas Waste Functions", SCLSet.WF_GasActive)
+      ;AddEmptyOption()
+    EndIf
     AddHeaderOption("$Other Settings")
     AddHeaderOption("")
     AddSliderOptionST("PlayerMessagePOV_S", "$Message POV", SCLSet.PlayerMessagePOV, SCLib.addIntSuffix(SCLSet.PlayerMessagePOV))
@@ -451,6 +479,41 @@ State DisplayMax_T
   EndEvent
 EndState
 
+State WF_EditMaxStorage_S
+	Event OnSliderOpenST()
+		SetSliderDialogStartValue(SCLib.WF_getSolidMaxNumItems(SelectedActor))
+		SetSliderDialogDefaultValue(SCLib.WF_getSolidMaxNumItems(SelectedActor))
+		SetSliderDialogRange(0, 200)
+		SetSliderDialogInterval(1)
+	EndEvent
+
+	Event OnSliderAcceptST(float a_value)
+		JMap.setFlt(SelectedData, "WF_BasementStorage", a_value)
+    ForcePageReset()
+	EndEvent
+
+	Event OnDefaultST()
+		JMap.setFlt(SelectedData, "WF_BasementStorage", 0)
+    ForcePageReset()
+	EndEvent
+
+	Event OnHighlightST()
+		SetInfoText("Set how many items can the actor store in their colon.")
+	EndEvent
+EndState
+
+State WF_DisplayMaxStorage_T
+  Event OnHighlightST()
+    SetInfoText("How many items can the actor store in their colon.")
+  EndEvent
+EndState
+
+State WF_DisplayMaxInsert_T
+  Event OnHighlightST()
+    SetInfoText("Max size of item actor can fit in their colon (Determined by max storage size).")
+  EndEvent
+EndState
+
 State DisplayTotalDigest_T
   Event OnHighlightST()
     SetInfoText("Total amount of food that the actor has digested.")
@@ -606,6 +669,36 @@ State SCLAllowOverflow_TB
 
   Event OnHighlightST()
     setPerkInfo(SelectedActor, "SCLAllowOverflow", -1)
+	EndEvent
+EndState
+
+State WF_BasementStorage_TA
+  Event OnSelectST()
+    setPerkOption(SelectedActor, "WF_BasementStorage")
+  EndEvent
+
+  Event OnHighlightST()
+    setPerkInfo(SelectedActor, "WF_BasementStorage", 1)
+  EndEvent
+EndState
+
+State WF_BasementStorage_T
+	Event OnSelectST()
+    ShowMessage(SCLib.getPerkDescription("WF_BasementStorage", SCLib.getCurrentPerkLevel(SelectedActor, "WF_BasementStorage")), False, "OK", "")
+	EndEvent
+
+  Event OnHighlightST()
+    setPerkInfo(SelectedActor, "WF_BasementStorage", 0)
+	EndEvent
+EndState
+
+State WF_BasementStorage_TB
+	Event OnSelectST()
+    ShowMessage(SCLib.getPerkDescription("WF_BasementStorage", SCLib.getCurrentPerkLevel(SelectedActor, "WF_BasementStorage") - 1), False, "OK", "")
+	EndEvent
+
+  Event OnHighlightST()
+    setPerkInfo(SelectedActor, "WF_BasementStorage", -1)
 	EndEvent
 EndState
 
@@ -1047,6 +1140,83 @@ State GodMode1_TOG
 	EndEvent
 EndState
 
+;Waste Functions Options *******************************************************
+State WF_Enable_TOG
+	Event OnSelectST()
+		SCLSet.WF_Active = !SCLSet.WF_Active
+    ForcePageReset()
+	EndEvent
+
+	Event OnDefaultST()
+    SCLSet.WF_Active = False
+    ForcePageReset()
+	EndEvent
+
+	Event OnHighlightST()
+		SetInfoText("Allow waste functions.")
+	EndEvent
+EndState
+
+State WF_SolidEnable_TOG
+	Event OnSelectST()
+		SCLSet.WF_SolidActive = !SCLSet.WF_SolidActive
+    ForcePageReset()
+	EndEvent
+
+	Event OnDefaultST()
+    SCLSet.WF_SolidActive = False
+    ForcePageReset()
+	EndEvent
+
+	Event OnHighlightST()
+		SetInfoText("Allows solid waste functions.")
+	EndEvent
+EndState
+
+State WF_LiquidEnable_TOG
+	Event OnSelectST()
+		SCLSet.WF_LiquidActive = !SCLSet.WF_LiquidActive
+    ForcePageReset()
+	EndEvent
+
+	Event OnDefaultST()
+    SCLSet.WF_LiquidActive = False
+    ForcePageReset()
+	EndEvent
+
+	Event OnHighlightST()
+		SetInfoText("Allow liquid waste functions.")
+	EndEvent
+EndState
+
+State WF_ActionKeyPick_KM
+	Event OnKeyMapChangeST(int a_keyCode, string a_conflictControl, string a_conflictName)
+		Bool Continue = True
+		If a_conflictControl != ""
+			String msg
+			If a_conflictName != ""
+				msg = a_conflictControl + ": This key is already registered to " + a_conflictName + ". Are sure you want to continue?"
+			Else
+				msg = a_conflictControl + ": This key is already registered. Are you sure you want to continue?"
+			EndIf
+			Continue = ShowMessage(msg, true, "Yes", "No")
+		EndIf
+		If Continue
+			SCLSet.WF_ActionKey = a_keyCode
+			SetKeyMapOptionValueST(a_keyCode)
+		EndIf
+	EndEvent
+
+  Event OnDefaultST()
+    SCLSet.WF_ActionKey = 0
+    SetKeyMapOptionValueST(0)
+  EndEvent
+
+  Event OnHighlightST()
+    SetInfoText("Set key for manual pooping.")
+  EndEvent
+EndState
+
 State DebugEnable_TOG
 	Event OnSelectST()
 		SCLSet.DebugEnable = !SCLSet.DebugEnable
@@ -1174,9 +1344,104 @@ State ShowDebugMessages06_TOG
     SetInfoText("Show debug notifications ID 06")
   EndEvent
 EndState
+
+Event OnOptionHighlight(int a_option)
+  CurrentHighlightedOption = a_option
+EndEvent
+
+Event OnOptionSelect(int a_option)
+  CurrentSelectedOption = a_option
+EndEvent
+
+State PerkState_TA
+  Event OnSelectST()
+    setPerkOption(SelectedActor, getPerkIDFromOption(CurrentSelectedOption))
+  EndEvent
+
+  Event OnHighlightST()
+    setPerkInfo(SelectedActor, getPerkIDFromOption(CurrentHighlightedOption), 1)
+  EndEvent
+EndState
+
+State PerkState_T
+  Event OnSelectST()
+    String PerkID = getPerkIDFromOption(CurrentSelectedOption)
+    ShowMessage(SCLib.getPerkDescription("PerkID", SCLib.getCurrentPerkLevel(SelectedActor, "PerkID")), False, "OK", "")
+  EndEvent
+
+  Event OnHighlightST()
+    setPerkInfo(SelectedActor, getPerkIDFromOption(CurrentHighlightedOption), 0)
+  EndEvent
+EndState
+
+State PerkState_TB
+  Event OnSelectST()
+    String PerkID = getPerkIDFromOption(CurrentSelectedOption)
+    ShowMessage(SCLib.getPerkDescription(PerkID, SCLib.getCurrentPerkLevel(SelectedActor, PerkID) - 1), False, "OK", "")
+  EndEvent
+
+  Event OnHighlightST()
+    setPerkInfo(SelectedActor, getPerkIDFromOption(CurrentHighlightedOption), 1)
+  EndEvent
+EndState
 ;*******************************************************************************
 ;Functions
 ;*******************************************************************************
+Function addAllPerkOptions(Int aiCursorPosition)
+  Int NumPerks = JMap.count(SCLSet.JM_PerkIDs)
+  PerkPositions = Utility.CreateIntArray(NumPerks, 0)
+  PerkIDs = Utility.CreateStringArray(NumPerks, "")
+  Int i
+  String PerkKey = JMap.nextKey(SCLSet.JM_PerkIDs)
+  While PerkKey
+    addPerkOption(SelectedActor, PerkKey)
+    PerkPositions[i] = aiCursorPosition
+    PerkIDs[i] = PerkKey
+    i += 1
+    aiCursorPosition += 2
+    PerkKey = JMap.nextKey(SCLSet.JM_PerkIDs, PerkKey)
+  EndWhile
+EndFunction
+
+Int[] Property PerkPositions Auto
+String[] Property PerkIDs Auto
+Int Property CurrentHighlightedOption Auto
+Int Property CurrentSelectedOption Auto
+
+String Function getPerkIDFromOption(Int aiOption)
+  Int i = PerkPositions.Find(aiOption)
+  If i == -1
+    Return ""
+  Else
+    Return PerkIDs[i]
+  EndIf
+EndFunction
+
+;/Function addPerkOption(Actor akTarget, String asPerkID)
+  Int CurrentPerkValue = SCLib.getCurrentPerkLevel(akTarget, asPerkID)
+  Int MaxValue = SCLib.getAbilityArray(asPerkID).Length - 1
+  If CurrentPerkValue
+    If CurrentPerkValue == MaxValue
+      AddTextOptionST("PerkState_TB", SCLib.getPerkName(asPerkID, CurrentPerkValue - 1), "Taken")
+      AddTextOptionST("PerkState_T", SCLib.getPerkName(asPerkID, CurrentPerkValue), "Taken")
+    Else
+      AddTextOptionST("PerkState_T", SCLib.getPerkName(asPerkID, CurrentPerkValue), "Taken")
+      If SCLSet.DebugEnable
+        AddTextOptionST("PerkState_TA", SCLib.getPerkName(asPerkID, CurrentPerkValue + 1), "Take Perk")
+      Else
+        AddTextOptionST("PerkState_TA", "?????", "Take Perk")
+      EndIf
+    EndIf
+  Else
+    AddEmptyOption()
+    If SCLSet.DebugEnable
+      AddTextOptionST("PerkState_TA", SCLib.getPerkName(asPerkID, CurrentPerkValue + 1), "Take Perk")
+    Else
+      AddTextOptionST("PerkState_TA", "?????", "?????")
+    EndIf
+  EndIf
+EndFunction/;
+
 Function addPerkOption(Actor akTarget, String asPerkID)
   Int CurrentPerkValue = SCLib.getCurrentPerkLevel(akTarget, asPerkID)
   Int MaxValue = SCLib.getAbilityArray(asPerkID).Length - 1
@@ -1257,6 +1522,8 @@ EndFunction/;
 String Function GetCustomControl(int keyCode)
 	If (keyCode == SCLSet.ActionKey)
 		Return " SCL Action Key"
+  ElseIf keyCode == SCLSet.WF_ActionKey
+    Return "SCL WF Action Key"
 	Else
 		Return ""
 	EndIf

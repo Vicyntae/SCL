@@ -13,25 +13,36 @@ Actor Target
 Int TargetData
 Float MaxWeight = 100.0
 Float CurrentWeight
+Int NumItems
+Int MaxNumItems
 
 Actor Property TransferTarget
   Function Set(Actor akActor)
     Target = akActor
     TargetData = SCLib.getTargetData(akActor)
-    MaxWeight = SCLib.getMax(akActor)
-    CurrentWeight = JMap.getFlt(TargetData, "STFullness")
+    If Destination == "Stomach"
+      MaxWeight = SCLib.getMax(akActor)
+      CurrentWeight = JMap.getFlt(TargetData, "STFullness")
+    ElseIf Destination == "Colon"
+      MaxWeight = SCLib.WF_getSolidMaxInsert(akActor, TargetData)
+      NumItems = JFormMap.count(SCLib.getContents(akActor, 4, TargetData))
+      MaxNumItems = SCLib.WF_getSolidMaxNumItems(akActor, TargetData)
+    EndIf
   EndFunction
 EndProperty
 String Property Destination Auto
 
-Event OnInit()
-  RegisterForMenu("ContainerMenu")
+Event OnActivate(ObjectReference akActionRef)
+  If akActionRef == PlayerRef
+    RegisterForMenu("ContainerMenu")
+  EndIf
 EndEvent
 
 Event OnMenuClose(string menuName)
-  SCL_TransferChest2.TransferTarget = Target
   SCL_TransferChest2.Destination = Destination
+  SCL_TransferChest2.TransferTarget = Target
   RemoveAllItems(SCL_TransferChest2, True, True)
+  UnregisterForAllMenus()
 EndEvent
 
 Bool _UpdateLocked = False
@@ -50,17 +61,33 @@ EndFunction
 
 Event OnItemAdded(Form akBaseItem, int aiItemCount, ObjectReference akItemReference, ObjectReference akSourceContainer)
   UpdateLock()
-  Float DigestValue = SCLib.genDigestValue(akBaseItem)
-  If MaxWeight >= CurrentWeight + DigestValue
-    CurrentWeight += DigestValue
-  Else
-    If !PlayerThought(Target, "I can't eat anymore!", "You can't eat anymore!", "%p can't eat anymore!")
-      Debug.Notification("I'm sorry, but I can't eat anymore.")
-    EndIf
-    If akItemReference
-      RemoveItem(akItemReference, aiItemCount, False, PlayerRef)
+  If Destination == "Stomach"
+    Float DigestValue = SCLib.genDigestValue(akBaseItem)
+    If MaxWeight >= CurrentWeight + DigestValue
+      CurrentWeight += DigestValue
     Else
-      RemoveItem(akBaseItem, aiItemCount, False, PlayerRef)
+      If !PlayerThought(Target, "I can't eat anymore!", "You can't eat anymore!", PlayerRef.GetLeveledActorBase().GetName() + " can't eat anymore!")
+        Debug.Notification("I'm sorry, but I can't eat anymore.")
+      EndIf
+      If akItemReference
+        RemoveItem(akItemReference, aiItemCount, False, PlayerRef)
+      Else
+        RemoveItem(akBaseItem, aiItemCount, False, PlayerRef)
+      EndIf
+    EndIf
+  ElseIf Destination == "Colon"
+    Float DigestValue = SCLib.genDigestValue(akBaseItem)
+    If DigestValue <= MaxWeight && NumItems < MaxNumItems
+      NumItems += 1
+    Else
+      If !PlayerThought(Target, "I can't fit that!", "You can't fit that!", PlayerRef.GetLeveledActorBase().GetName() + " can't fit that!")
+        Debug.Notification("I'm sorry, but I can't fit that.")
+      EndIf
+      If akItemReference
+        RemoveItem(akItemReference, aiItemCount, False, PlayerRef)
+      Else
+        RemoveItem(akBaseItem, aiItemCount, False, PlayerRef)
+      EndIf
     EndIf
   EndIf
   UpdateUnlock()
