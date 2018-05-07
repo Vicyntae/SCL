@@ -16,6 +16,7 @@ Int DMID = 1
 
 Event OnInit()
   ;Note("Setting up perk " + GetName())
+  Utility.Wait(2)
   Setup()
   SCLibrary.addPerkID(GetName(), GetOwningQuest())
 EndEvent
