@@ -1,6 +1,7 @@
 ScriptName SCLSettings Extends Quest
 {Holds settings and properties}
 
+Quest Property SCLStartUpQuest Auto
 
 ;Settings **********************************************************************
 

@@ -380,6 +380,65 @@ Function setupItemDatabase()
   ;MQ101JuniperMead
   JFormDB.setEntry("SCLItemDatabase", Game.GetFormFromFile(0x00107A8A, "Skyrim.esm"), JM_AlcoholProfile)
 
+;Raw Meats *********************************************************************
+
+  ;Chicken Breast
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x000f2011, "Skyrim.esm"), ".SCLItemDatabase.Durability", 0.8, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x000f2011, "Skyrim.esm"), ".SCLItemDatabase.LiquidRatio", 0.1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x000f2011, "Skyrim.esm"), ".SCLItemDatabase.WF_IllnessAmount", 0.75, True)
+
+  ;Clam Meat
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x000eba03, "Skyrim.esm"), ".SCLItemDatabase.Durability", 0.8, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x000eba03, "Skyrim.esm"), ".SCLItemDatabase.LiquidRatio", 0.3, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x000eba03, "Skyrim.esm"), ".SCLItemDatabase.WF_IllnessAmount", 0.1, True)
+
+  ;Dog Meat
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x000edb2e, "Skyrim.esm"), ".SCLItemDatabase.Durability", 0.7, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x000edb2e, "Skyrim.esm"), ".SCLItemDatabase.WeightModifier", 0.7, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x000edb2e, "Skyrim.esm"), ".SCLItemDatabase.LiquidRatio", 0.1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x000edb2e, "Skyrim.esm"), ".SCLItemDatabase.WF_IllnessAmount", 0.75, True)
+
+  ;Horker Meat
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9b, "Skyrim.esm"), ".SCLItemDatabase.Durability", 0.8, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9b, "Skyrim.esm"), ".SCLItemDatabase.LiquidRatio", 0.1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9b, "Skyrim.esm"), ".SCLItemDatabase.WF_IllnessAmount", 0.5, True)
+
+  ;Horse Meat
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9c, "Skyrim.esm"), ".SCLItemDatabase.Durability", 0.8, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9c, "Skyrim.esm"), ".SCLItemDatabase.LiquidRatio", 0.1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9c, "Skyrim.esm"), ".SCLItemDatabase.WF_IllnessAmount", 1.5, True)
+
+  ;Leg of Goat
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9a, "Skyrim.esm"), ".SCLItemDatabase.Durability", 0.8, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9a, "Skyrim.esm"), ".SCLItemDatabase.LiquidRatio", 0.1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9a, "Skyrim.esm"), ".SCLItemDatabase.WF_IllnessAmount", 0.75, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9a, "Skyrim.esm"), ".SCLItemDatabase.WeightModifier", 0.7, True)
+
+  ;Mammoth Snout
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x000669a4, "Skyrim.esm"), ".SCLItemDatabase.Durability", 0.6, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x000669a4, "Skyrim.esm"), ".SCLItemDatabase.LiquidRatio", 0.1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x000669a4, "Skyrim.esm"), ".SCLItemDatabase.WF_IllnessAmount", 0.1, True)
+
+  ;Pheasant Breast
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9d, "Skyrim.esm"), ".SCLItemDatabase.Durability", 0.8, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9d, "Skyrim.esm"), ".SCLItemDatabase.LiquidRatio", 0.1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9d, "Skyrim.esm"), ".SCLItemDatabase.WF_IllnessAmount", 0.75, True)
+
+  ;Raw Beef
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c99, "Skyrim.esm"), ".SCLItemDatabase.Durability", 0.8, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c99, "Skyrim.esm"), ".SCLItemDatabase.LiquidRatio", 0.1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c99, "Skyrim.esm"), ".SCLItemDatabase.WF_IllnessAmount", 0.75, True)
+
+  ;Raw Rabbit Leg
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9e, "Skyrim.esm"), ".SCLItemDatabase.Durability", 0.8, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9e, "Skyrim.esm"), ".SCLItemDatabase.LiquidRatio", 0.1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9e, "Skyrim.esm"), ".SCLItemDatabase.WF_IllnessAmount", 0.5, True)
+
+  ;Venison
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x000669a2, "Skyrim.esm"), ".SCLItemDatabase.Durability", 0.8, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x000669a2, "Skyrim.esm"), ".SCLItemDatabase.LiquidRatio", 0.1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x000669a2, "Skyrim.esm"), ".SCLItemDatabase.WF_IllnessAmount", 0.5, True)
+
   ;ALL OF THIS INFORMATION WENT UNUSED!
   ;FOR WHEN I ACTUALLY HAVE STUFF TO PUT IN HERE
   ;All races are going to be integrated into the SCLItemDatabase
@@ -505,14 +564,14 @@ EndFunction
 
 Function setupDawnguard(Int JFD_Items)
   ;DLC1RedwaterDenSkooma
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0201391D, "Dawnguard.esm"), ".SCLItemDatabase.WeightModifier", 0.7)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0201391D, "Dawnguard.esm"), ".SCLItemDatabase.Durability", 1.1)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0201391D, "Dawnguard.esm"), ".SCLItemDatabase.LiquidRatio", 1)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0201391D, "Dawnguard.esm"), ".SCLItemDatabase.WeightModifier", 0.7, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0201391D, "Dawnguard.esm"), ".SCLItemDatabase.Durability", 1.1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0201391D, "Dawnguard.esm"), ".SCLItemDatabase.LiquidRatio", 1, True)
 
   ;DLC1BloodPotion
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02018EF3, "Dawnguard.esm"), ".SCLItemDatabase.WeightModifier", 0.7)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02018EF3, "Dawnguard.esm"), ".SCLItemDatabase.Durability", 0.8)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02018EF3, "Dawnguard.esm"), ".SCLItemDatabase.LiquidRatio", 1)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02018EF3, "Dawnguard.esm"), ".SCLItemDatabase.WeightModifier", 0.7, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02018EF3, "Dawnguard.esm"), ".SCLItemDatabase.Durability", 0.8, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02018EF3, "Dawnguard.esm"), ".SCLItemDatabase.LiquidRatio", 1, True)
 
 EndFunction
 
@@ -525,26 +584,31 @@ EndFunction
 
 Function setupHearthfires(Int JFD_Items)
   ;BYOHFoodMilk
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003534, "HearthFires.esm"), ".SCLItemDatabase.WeightModifier", 0.7)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003534, "HearthFires.esm"), ".SCLItemDatabase.Durability", 1.1)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003534, "HearthFires.esm"), ".SCLItemDatabase.LiquidRatio", 0.95)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003534, "HearthFires.esm"), ".SCLItemDatabase.IsDrink", 1)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003534, "HearthFires.esm"), ".SCLItemDatabase.WeightModifier", 0.7, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003534, "HearthFires.esm"), ".SCLItemDatabase.Durability", 1.1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003534, "HearthFires.esm"), ".SCLItemDatabase.LiquidRatio", 0.95, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003534, "HearthFires.esm"), ".SCLItemDatabase.IsDrink", 1, True)
 
   ;BYOHFoodWineBottle04, Argonian Bloodwine
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003535, "HearthFires.esm"), ".SCLItemDatabase.WeightModifier", 0.7)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003535, "HearthFires.esm"), ".SCLItemDatabase.Durability", 1.1)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003535, "HearthFires.esm"), ".SCLItemDatabase.LiquidRatio", 1)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003535, "HearthFires.esm"), ".SCLItemDatabase.IsDrink", 1)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003535, "HearthFires.esm"), ".SCLItemDatabase.Alcoholic", 1)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003535, "HearthFires.esm"), ".SCLItemDatabase.WeightModifier", 0.7, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003535, "HearthFires.esm"), ".SCLItemDatabase.Durability", 1.1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003535, "HearthFires.esm"), ".SCLItemDatabase.LiquidRatio", 1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003535, "HearthFires.esm"), ".SCLItemDatabase.IsDrink", 1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003535, "HearthFires.esm"), ".SCLItemDatabase.Alcoholic", 1, True)
 
 
   ;BYOHFoodWineBottle03, Surilie Brothers Wine
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003536, "HearthFires.esm"), ".SCLItemDatabase.WeightModifier", 0.7)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003536, "HearthFires.esm"), ".SCLItemDatabase.Durability", 1.1)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003536, "HearthFires.esm"), ".SCLItemDatabase.LiquidRatio", 1)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003536, "HearthFires.esm"), ".SCLItemDatabase.IsDrink", 1)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003536, "HearthFires.esm"), ".SCLItemDatabase.Alcoholic", 1)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003536, "HearthFires.esm"), ".SCLItemDatabase.WeightModifier", 0.7, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003536, "HearthFires.esm"), ".SCLItemDatabase.Durability", 1.1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003536, "HearthFires.esm"), ".SCLItemDatabase.LiquidRatio", 1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003536, "HearthFires.esm"), ".SCLItemDatabase.IsDrink", 1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003536, "HearthFires.esm"), ".SCLItemDatabase.Alcoholic", 1, True)
 
+  ;MudCrabLegs
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003540, "HearthFires.esm"), ".SCLItemDatabase.WeightModifier", 0.5, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003540, "HearthFires.esm"), ".SCLItemDatabase.Durability", 1.2, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003540, "HearthFires.esm"), ".SCLItemDatabase.LiquidRatio", 0.4, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003540, "HearthFires.esm"), ".SCLItemDatabase.WF_IllnessAmount", 0.2, True)
 EndFunction
 
 Function removeHearthfires(Int JFD_Items)
@@ -556,64 +620,83 @@ Function removeHearthfires(Int JFD_Items)
 
   ;BYOHFoodWineBottle03, Surilie Brothers Wine
   JFormMap.removeKey(JFD_Items, Game.GetFormFromFile(0x02003536, "HearthFires.esm"))
+
+  ;MudCrabLegs
+  JFormMap.removeKey(JFD_Items, Game.GetFormFromFile(0x02003540, "HearthFires.esm"))
+
 EndFunction
 
 Function setupDragonborn(Int JFD_Items)
   ;DLC2Flin
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020207e5, "Dragonborn.esm"), ".SCLItemDatabase.WeightModifier", 0.7)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020207e5, "Dragonborn.esm"), ".SCLItemDatabase.Durability", 1.1)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020207e5, "Dragonborn.esm"), ".SCLItemDatabase.LiquidRatio", 1)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020207e5, "Dragonborn.esm"), ".SCLItemDatabase.IsDrink", 1)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020207e5, "Dragonborn.esm"), ".SCLItemDatabase.Alcoholic", 1)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020207e5, "Dragonborn.esm"), ".SCLItemDatabase.WeightModifier", 0.7, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020207e5, "Dragonborn.esm"), ".SCLItemDatabase.Durability", 1.1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020207e5, "Dragonborn.esm"), ".SCLItemDatabase.LiquidRatio", 1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020207e5, "Dragonborn.esm"), ".SCLItemDatabase.IsDrink", 1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020207e5, "Dragonborn.esm"), ".SCLItemDatabase.Alcoholic", 1, True)
 
   ;DLC2Sujamma
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020207e6, "Dragonborn.esm"), ".SCLItemDatabase.WeightModifier", 0.7)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020207e6, "Dragonborn.esm"), ".SCLItemDatabase.Durability", 1.1)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020207e6, "Dragonborn.esm"), ".SCLItemDatabase.LiquidRatio", 1)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020207e6, "Dragonborn.esm"), ".SCLItemDatabase.IsDrink", 1)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020207e6, "Dragonborn.esm"), ".SCLItemDatabase.Alcoholic", 1)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020207e6, "Dragonborn.esm"), ".SCLItemDatabase.WeightModifier", 0.7, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020207e6, "Dragonborn.esm"), ".SCLItemDatabase.Durability", 1.1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020207e6, "Dragonborn.esm"), ".SCLItemDatabase.LiquidRatio", 1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020207e6, "Dragonborn.esm"), ".SCLItemDatabase.IsDrink", 1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020207e6, "Dragonborn.esm"), ".SCLItemDatabase.Alcoholic", 1, True)
 
 
   ;DLC2Shein
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020248CC, "Dragonborn.esm"), ".SCLItemDatabase.WeightModifier", 0.7)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020248CC, "Dragonborn.esm"), ".SCLItemDatabase.Durability", 1.1)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020248CC, "Dragonborn.esm"), ".SCLItemDatabase.LiquidRatio", 1)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020248CC, "Dragonborn.esm"), ".SCLItemDatabase.IsDrink", 1)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020248CC, "Dragonborn.esm"), ".SCLItemDatabase.Alcoholic", 1)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020248CC, "Dragonborn.esm"), ".SCLItemDatabase.WeightModifier", 0.7, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020248CC, "Dragonborn.esm"), ".SCLItemDatabase.Durability", 1.1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020248CC, "Dragonborn.esm"), ".SCLItemDatabase.LiquidRatio", 1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020248CC, "Dragonborn.esm"), ".SCLItemDatabase.IsDrink", 1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020248CC, "Dragonborn.esm"), ".SCLItemDatabase.Alcoholic", 1, True)
 
 
   ;DLC2Matze
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020248CE, "Dragonborn.esm"), ".SCLItemDatabase.WeightModifier", 0.7)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020248CE, "Dragonborn.esm"), ".SCLItemDatabase.Durability", 1.1)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020248CE, "Dragonborn.esm"), ".SCLItemDatabase.LiquidRatio", 1)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020248CE, "Dragonborn.esm"), ".SCLItemDatabase.IsDrink", 1)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020248CE, "Dragonborn.esm"), ".SCLItemDatabase.Alcoholic", 1)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020248CE, "Dragonborn.esm"), ".SCLItemDatabase.WeightModifier", 0.7, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020248CE, "Dragonborn.esm"), ".SCLItemDatabase.Durability", 1.1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020248CE, "Dragonborn.esm"), ".SCLItemDatabase.LiquidRatio", 1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020248CE, "Dragonborn.esm"), ".SCLItemDatabase.IsDrink", 1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020248CE, "Dragonborn.esm"), ".SCLItemDatabase.Alcoholic", 1, True)
 
 
   ;DLC2RRF04Sujamma
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02024E0B, "Dragonborn.esm"), ".SCLItemDatabase.WeightModifier", 0.7)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02024E0B, "Dragonborn.esm"), ".SCLItemDatabase.Durability", 1.1)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02024E0B, "Dragonborn.esm"), ".SCLItemDatabase.LiquidRatio", 1)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02024E0B, "Dragonborn.esm"), ".SCLItemDatabase.IsDrink", 1)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02024E0B, "Dragonborn.esm"), ".SCLItemDatabase.Alcoholic", 1)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02024E0B, "Dragonborn.esm"), ".SCLItemDatabase.WeightModifier", 0.7, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02024E0B, "Dragonborn.esm"), ".SCLItemDatabase.Durability", 1.1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02024E0B, "Dragonborn.esm"), ".SCLItemDatabase.LiquidRatio", 1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02024E0B, "Dragonborn.esm"), ".SCLItemDatabase.IsDrink", 1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02024E0B, "Dragonborn.esm"), ".SCLItemDatabase.Alcoholic", 1, True)
 
 
   ;DLC2RRFavor01EmberbrandWine
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020320DF, "Dragonborn.esm"), ".SCLItemDatabase.WeightModifier", 0.7)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020320DF, "Dragonborn.esm"), ".SCLItemDatabase.Durability", 1.1)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020320DF, "Dragonborn.esm"), ".SCLItemDatabase.LiquidRatio", 1)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020320DF, "Dragonborn.esm"), ".SCLItemDatabase.IsDrink", 1)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020320DF, "Dragonborn.esm"), ".SCLItemDatabase.Alcoholic", 1)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020320DF, "Dragonborn.esm"), ".SCLItemDatabase.WeightModifier", 0.7, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020320DF, "Dragonborn.esm"), ".SCLItemDatabase.Durability", 1.1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020320DF, "Dragonborn.esm"), ".SCLItemDatabase.LiquidRatio", 1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020320DF, "Dragonborn.esm"), ".SCLItemDatabase.IsDrink", 1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020320DF, "Dragonborn.esm"), ".SCLItemDatabase.Alcoholic", 1, True)
 
 
   ;DLC2FoodAshfireMead
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203572f, "Dragonborn.esm"), ".SCLItemDatabase.WeightModifier", 0.7)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203572f, "Dragonborn.esm"), ".SCLItemDatabase.Durability", 1.1)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203572f, "Dragonborn.esm"), ".SCLItemDatabase.LiquidRatio", 1)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203572f, "Dragonborn.esm"), ".SCLItemDatabase.IsDrink", 1)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203572f, "Dragonborn.esm"), ".SCLItemDatabase.Alcoholic", 1)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203572f, "Dragonborn.esm"), ".SCLItemDatabase.WeightModifier", 0.7, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203572f, "Dragonborn.esm"), ".SCLItemDatabase.Durability", 1.1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203572f, "Dragonborn.esm"), ".SCLItemDatabase.LiquidRatio", 1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203572f, "Dragonborn.esm"), ".SCLItemDatabase.IsDrink", 1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203572f, "Dragonborn.esm"), ".SCLItemDatabase.Alcoholic", 1, True)
 
+  ;Ash Hopper Leg
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203d125, "Dragonborn.esm"), ".SCLItemDatabase.WeightModifier", 0.5, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203d125, "Dragonborn.esm"), ".SCLItemDatabase.Durability", 1.2, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203d125, "Dragonborn.esm"), ".SCLItemDatabase.LiquidRatio", 0.2, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203d125, "Dragonborn.esm"), ".SCLItemDatabase.WF_IllnessAmount", 0.2, True)
 
+  ;Ash Hopper Meat
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203bd15, "Dragonborn.esm"), ".SCLItemDatabase.WeightModifier", 0.9, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203bd15, "Dragonborn.esm"), ".SCLItemDatabase.Durability", 1.2, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203bd15, "Dragonborn.esm"), ".SCLItemDatabase.LiquidRatio", 0.2, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203bd15, "Dragonborn.esm"), ".SCLItemDatabase.WF_IllnessAmount", 0.2, True)
+
+  ;Boar Meat
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203bd14, "Dragonborn.esm"), ".SCLItemDatabase.Durability", 0.7, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203bd14, "Dragonborn.esm"), ".SCLItemDatabase.LiquidRatio", 0.1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203bd14, "Dragonborn.esm"), ".SCLItemDatabase.WF_IllnessAmount", 1.2, True)
 EndFunction
 
 Function removeDragonborn(Int JFD_Items)
@@ -637,4 +720,13 @@ Function removeDragonborn(Int JFD_Items)
 
   ;DLC2FoodAshfireMead
   JFormMap.removeKey(JFD_Items, Game.GetFormFromFile(0x0203572f, "Dragonborn.esm"))
+
+  ;Ash Hopper Leg
+  JFormMap.removeKey(JFD_Items, Game.GetFormFromFile(0x0203d125, "Dragonborn.esm"))
+
+  ;Ash Hopper Meat
+  JFormMap.removeKey(JFD_Items, Game.GetFormFromFile(0x0203bd15, "Dragonborn.esm"))
+
+  ;Boar Meat
+  JFormMap.removeKey(JFD_Items, Game.GetFormFromFile(0x0203bd14, "Dragonborn.esm"))
 EndFunction

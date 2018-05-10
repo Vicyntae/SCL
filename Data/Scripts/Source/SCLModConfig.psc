@@ -63,6 +63,7 @@ Function initializeMCM()
   Pages[2] = "$Actor Records"
   Pages[3] = "$Settings"
   SCLib.startupAllQuests()
+  SCLSet.SCLStartUpQuest.Stop()
   MCMInitialized = True
   Int MenuEvent = ModEvent.Create("SCLMenuStart")
   ModEvent.Send(MenuEvent)

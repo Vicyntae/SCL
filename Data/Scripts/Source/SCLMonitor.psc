@@ -142,7 +142,7 @@ Event OnQuickUpdate()
     Float ReactChance = Utility.RandomFloat()
     ReactChance *= Percent + 1
     If ReactChance >= 0.9
-      Note("*Groaning Noise*")
+      ;Note("*Groaning Noise*")
       ;Play groaning topic
       PlayerThoughtDB(MyActor, "SCLOverfullMessage")
     EndIf
@@ -159,7 +159,7 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
       SCLib.updateSingleContents(MyActor, 1)
       If SCLSet.WF_Active
         If SCLSet.WF_SolidActive
-          Float Illness = JMap.getFlt(JM_Entry, "WF_SolidBaseLower")
+          Float Illness = JMap.getFlt(JM_Entry, "WF_IllnessAmount")
           If Illness
             JMap.setFlt(ActorData, "WF_SolidIllnessBuildUp", JMap.getFlt(ActorData, "WF_SolidIllnessBuildUp") + Illness)
           EndIf
@@ -445,7 +445,7 @@ Function checkWF(Float afTimePassed, Float afCurrentUpdateTime)
         EndIf
       EndIf
       Float IllnessFlt = JMap.getFlt(ActorData, "WF_SolidIllnessBuildUp")
-      Float Boundary = JMap.getFlt(ActorData, "WF_SolidIllnessThreshold")
+      Float Boundary = JMap.getFlt(ActorData, "WF_SolidIllnessThreshold", 1)
       If IllnessFlt > Boundary
         JMap.setFlt(ActorData, "WF_SolidIllnessBuildUp", 0)
         Int IllnessLevel = JMap.getInt(ActorData, "WF_SolidIllnessLevel") + 1

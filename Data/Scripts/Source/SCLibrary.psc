@@ -2077,7 +2077,7 @@ Function updateFullness(Actor akTarget, Bool abNoVomit = False, Int aiTargetData
       String ContentsKey = JArray.getStr(JA_AggValues, i)
       Total += JMap.getFlt(TargetData, ContentsKey)
     EndWhile
-    Note(nameGet(akTarget) + ": Total for agg value " + AggStr + " = " + Total)
+    ;Note(nameGet(akTarget) + ": Total for agg value " + AggStr + " = " + Total)
     JMap.setFlt(TargetData, AggStr, Total)
     AggStr = JMap.nextKey(SCLSet.JM_AggregateValues, AggStr)
   EndWhile
