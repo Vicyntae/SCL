@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<SliderGroups>
+    <Group name="SCL CBBE Bellies">
+        <Member name="SCL_FBelly CBBE"/>
+    </Group>
+    <Group name="SCL SAM Bellies">
+        <Member name="SCL_MBelly SAM"/>
+    </Group>
+    <Group name="CBAdvanced">
+      <Member name="SCL_FBelly CBBE"/>
+    </Group>
+    <Group name="CBBE Bodies">
+      <Member name="SCL_FBelly CBBE"/>
+    </Group>
+</SliderGroups>

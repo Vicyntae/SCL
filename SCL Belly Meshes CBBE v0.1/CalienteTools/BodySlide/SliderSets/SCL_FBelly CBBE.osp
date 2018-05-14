@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<SliderSetInfo version="1">
+    <SliderSet name="SCL_FBelly CBBE">
+        <DataFolder>SCL_FBelly CBBE</DataFolder>
+        <SourceFile>SCL_FBelly CBBE.nif</SourceFile>
+        <OutputPath>Meshes\SCL</OutputPath>
+        <OutputFile GenWeights="true">SCL_FBelly</OutputFile>
+        <Shape target="FBelly" DataFolder="SCL_FBelly CBBE">FBelly</Shape>
+        <Slider name="Breasts" invert="true" small="20" big="100">
+            <Data name="FBellyBreasts" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyBreasts</Data>
+        </Slider>
+        <Slider name="BreastsSmall" invert="true" small="100" big="100">
+            <Data name="FBellyBreastsSmall" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyBreastsSmall</Data>
+        </Slider>
+        <Slider name="BreastsSH" invert="false" small="0" big="0">
+            <Data name="FBellyBreastsSH" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyBreastsSH</Data>
+        </Slider>
+        <Slider name="BreastsSSH" invert="false" small="0" big="0">
+            <Data name="FBellyBreastsSSH" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyBreastsSSH</Data>
+        </Slider>
+        <Slider name="BreastsFantasy" invert="false" small="0" big="0">
+            <Data name="FBellyBreastsFantasy" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyBreastsFantasy</Data>
+        </Slider>
+        <Slider name="DoubleMelon" invert="false" small="0" big="0">
+            <Data name="FBellyDoubleMelon" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyDoubleMelon</Data>
+        </Slider>
+        <Slider name="BreastCleavage" invert="false" small="0" big="0">
+            <Data name="FBellyBreastCleavage" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyBreastCleavage</Data>
+        </Slider>
+        <Slider name="BreastFlatness" invert="false" small="0" big="0">
+            <Data name="FBellyBreastFlatness" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyBreastFlatness</Data>
+        </Slider>
+        <Slider name="BreastGravity" invert="false" small="0" big="0">
+            <Data name="FBellyBreastGravity" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyBreastGravity</Data>
+        </Slider>
+        <Slider name="PushUp" invert="false" small="0" big="0">
+            <Data name="FBellyPushUp" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyPushUp</Data>
+        </Slider>
+        <Slider name="BreastHeight" invert="false" small="0" big="0">
+            <Data name="FBellyBreastHeight" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyBreastHeight</Data>
+        </Slider>
+        <Slider name="BreastPerkiness" invert="false" small="0" big="0">
+            <Data name="FBellyBreastPerkiness" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyBreastPerkiness</Data>
+        </Slider>
+        <Slider name="BreastWidth" invert="false" small="0" big="0">
+            <Data name="FBellyBreastWidth" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyBreastWidth</Data>
+        </Slider>
+        <Slider name="NippleAreola" invert="false" small="0" big="0">
+            <Data name="FBellyNippleAreola" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyNippleAreola</Data>
+        </Slider>
+        <Slider name="NippleUp" invert="false" small="0" big="0">
+            <Data name="FBellyNippleUp" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyNippleUp</Data>
+        </Slider>
+        <Slider name="NippleDown" invert="false" small="0" big="0">
+            <Data name="FBellyNippleDown" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyNippleDown</Data>
+        </Slider>
+        <Slider name="ShoulderWidth" invert="true" small="100" big="100">
+            <Data name="FBellyShoulderWidth" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyShoulderWidth</Data>
+        </Slider>
+        <Slider name="BigTorso" invert="false" small="0" big="0">
+            <Data name="FBellyBigTorso" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyBigTorso</Data>
+        </Slider>
+        <Slider name="Waist" invert="false" small="0" big="100">
+            <Data name="FBellyWaist" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyWaist</Data>
+        </Slider>
+        <Slider name="WideWaistLine" invert="false" small="0" big="0">
+            <Data name="FBellyWideWaistLine" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyWideWaistLine</Data>
+        </Slider>
+        <Slider name="ChubbyWaist" invert="false" small="0" big="0">
+            <Data name="FBellyChubbyWaist" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyChubbyWaist</Data>
+        </Slider>
+        <Slider name="Belly" invert="false" small="0" big="0">
+            <Data name="FBellyBelly" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyBelly</Data>
+        </Slider>
+        <Slider name="BigBelly" invert="false" small="0" big="0">
+            <Data name="FBellyBigBelly" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyBigBelly</Data>
+        </Slider>
+        <Slider name="PregnancyBelly" invert="false" small="0" big="0">
+            <Data name="FBellyPregnancyBelly" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyPregnancyBelly</Data>
+        </Slider>
+        <Slider name="TummyTuck" invert="false" small="0" big="0">
+            <Data name="FBellyTummyTuck" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyTummyTuck</Data>
+        </Slider>
+        <Slider name="Back" invert="false" small="0" big="0">
+            <Data name="FBellyBack" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyBack</Data>
+        </Slider>
+        <Slider name="Hipbone" invert="false" small="0" big="0">
+            <Data name="FBellyHipbone" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyHipbone</Data>
+        </Slider>
+        <Slider name="Hips" invert="false" small="0" big="0">
+            <Data name="FBellyHips" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyHips</Data>
+        </Slider>
+        <Slider name="Butt" invert="true" small="0" big="100">
+            <Data name="FBellyButt" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyButt</Data>
+        </Slider>
+        <Slider name="ButtSmall" invert="true" small="100" big="100">
+            <Data name="FBellyButtSmall" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyButtSmall</Data>
+        </Slider>
+        <Slider name="ButtShape2" invert="false" small="0" big="0">
+            <Data name="FBellyButtShape2" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyButtShape2</Data>
+        </Slider>
+        <Slider name="BigButt" invert="false" small="0" big="0">
+            <Data name="FBellyBigButt" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyBigButt</Data>
+        </Slider>
+        <Slider name="ChubbyButt" invert="false" small="0" big="0">
+            <Data name="FBellyChubbyButt" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyChubbyButt</Data>
+        </Slider>
+        <Slider name="AppleCheeks" invert="false" small="0" big="0">
+            <Data name="FBellyAppleCheeks" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellyAppleCheeks</Data>
+        </Slider>
+        <Slider name="SlimThighs" invert="false" small="0" big="0">
+            <Data name="FBellySlimThighs" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellySlimThighs</Data>
+        </Slider>
+        <Slider name="SCLBigBelly" invert="false" small="0" big="0">
+            <Data name="FBellySCLBigBelly" target="FBelly" local="true">SCL_FBelly CBBE.osd\FBellySCLBigBelly</Data>
+        </Slider>
+    </SliderSet>
+</SliderSetInfo>

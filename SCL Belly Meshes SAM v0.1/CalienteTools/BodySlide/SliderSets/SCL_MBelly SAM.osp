@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<SliderSetInfo version="1">
+    <SliderSet name="SCL_MBelly SAM">
+        <DataFolder>SCL_MBelly SAM</DataFolder>
+        <SourceFile>SCL_MBelly SAM.nif</SourceFile>
+        <OutputPath>Meshes\SCL</OutputPath>
+        <OutputFile GenWeights="true">SCL_MBelly</OutputFile>
+        <Shape target="MBelly2" DataFolder="SCL_MBelly SAM">MBelly2</Shape>
+        <Slider name="Sam_0" invert="false" small="0" big="0">
+            <Data name="MBelly2Sam_0" target="MBelly2" local="true">SCL_MBelly SAM.osd\MBelly2Sam_0</Data>
+        </Slider>
+        <Slider name="Sam_1" invert="false" small="0" big="0">
+            <Data name="MBelly2Sam_1" target="MBelly2" local="true">SCL_MBelly SAM.osd\MBelly2Sam_1</Data>
+        </Slider>
+        <Slider name="Samson" invert="false" small="0" big="0">
+            <Data name="MBelly2Samson" target="MBelly2" local="true">SCL_MBelly SAM.osd\MBelly2Samson</Data>
+        </Slider>
+        <Slider name="Samuel" invert="false" small="0" big="0">
+            <Data name="MBelly2Samuel" target="MBelly2" local="true">SCL_MBelly SAM.osd\MBelly2Samuel</Data>
+        </Slider>
+        <Slider name="SCLBigBelly" invert="false" small="0" big="0">
+            <Data name="MBelly2SCLBigBelly" target="MBelly2" local="true">SCL_MBelly SAM.osd\MBelly2SCLBigBelly</Data>
+        </Slider>
+        <Slider name="_0" invert="false" small="100" big="0">
+            <Data name="MBelly2_0" target="MBelly2" local="true">SCL_MBelly SAM.osd\MBelly2_0</Data>
+        </Slider>
+    </SliderSet>
+</SliderSetInfo>
