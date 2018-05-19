@@ -1,1 +1,0 @@
-ScriptName SCLAddItemThread07 Extends SCLAddItemThread

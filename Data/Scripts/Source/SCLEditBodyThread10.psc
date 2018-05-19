@@ -1,1 +1,0 @@
-ScriptName SCLEditBodyThread10 Extends SCLEditBodyThread

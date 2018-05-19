@@ -1,1 +1,0 @@
-ScriptName SCLDigestThread04 Extends SCLDigestThread
