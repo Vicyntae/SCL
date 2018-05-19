@@ -486,7 +486,7 @@ Function updateFullness()
   String AggStr = JMap.nextKey(SCLSet.JM_AggregateValues)
   While AggStr
     Int JA_AggValues = JMap.getObj(SCLSet.JM_AggregateValues, AggStr)
-    Float Total
+    Float Total = 0
     Int i = JArray.count(JA_AggValues)
     While i
       i -= 1
