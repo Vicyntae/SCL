@@ -157,15 +157,10 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
       Notice(akBaseObject.GetName() + " was eaten!")
       SCLib.addItem(MyActor, akReference, akBaseObject, 1)
       SCLib.updateSingleContents(MyActor, 1)
-      If SCLSet.WF_Active
-        If SCLSet.WF_SolidActive
-          Float Illness = JMap.getFlt(JM_Entry, "WF_IllnessAmount")
-          If Illness
-            JMap.setFlt(ActorData, "WF_SolidIllnessBuildUp", JMap.getFlt(ActorData, "WF_SolidIllnessBuildUp") + Illness)
-          EndIf
-        EndIf
+      Float Illness = JMap.getFlt(JM_Entry, "IllnessAmount")
+      If Illness
+        JMap.setFlt(ActorData, "IllnessBuildUp", JMap.getFlt(ActorData, "IllnessBuildUp") + Illness)
       EndIf
-
       SCLib.quickUpdate(MyActor)
       ;Unlock()
     EndIf
@@ -361,6 +356,17 @@ Function fullActorUpdate(Float afTimePassed, Float afCurrentUpdateTime, Bool abD
     SCLSet.SCL_StoredDamageArray[0].cast(MyActor)
     JMap.setInt(ActorData, "SCLAppliedStorageTier", 0)
   EndIf
+
+  Float IllnessFlt = JMap.getFlt(ActorData, "IllnessBuildUp")
+  Float Boundary = JMap.getFlt(ActorData, "IllnessThreshold", 1)
+  If IllnessFlt > Boundary
+    JMap.setFlt(ActorData, "IllnessBuildUp", 0)
+    Int IllnessLevel = JMap.getInt(ActorData, "IllnessLevel") + 1
+    SCLib.WF_addSolidIllnessEffect(MyActor, IllnessLevel, ActorData)
+  Else
+    JMap.setFlt(ActorData, "IllnessBuildUp", JMap.getFlt(ActorData, "IllnessBuildUp") - (SCLSet.IllnessBuildUpDecrease * afTimePassed))
+  EndIf
+
   checkAutoEat(Fullness, afCurrentUpdateTime)
   ;SCLib.updateItemProcess(MyActor, afTimePassed)
   ;Float CurrentFullness = SCLib.updateFullness(MyActor, ActorData)
@@ -444,15 +450,15 @@ Function checkWF(Float afTimePassed, Float afCurrentUpdateTime)
           MyActor.RemoveSpell(SCLSet.WF_SolidDebuffSpell)
         EndIf
       EndIf
-      Float IllnessFlt = JMap.getFlt(ActorData, "WF_SolidIllnessBuildUp")
-      Float Boundary = JMap.getFlt(ActorData, "WF_SolidIllnessThreshold", 1)
+      ;/Float IllnessFlt = JMap.getFlt(ActorData, "IllnessBuildUp")
+      Float Boundary = JMap.getFlt(ActorData, "IllnessThreshold", 1)
       If IllnessFlt > Boundary
-        JMap.setFlt(ActorData, "WF_SolidIllnessBuildUp", 0)
-        Int IllnessLevel = JMap.getInt(ActorData, "WF_SolidIllnessLevel") + 1
+        JMap.setFlt(ActorData, "IllnessBuildUp", 0)
+        Int IllnessLevel = JMap.getInt(ActorData, "IllnessLevel") + 1
         SCLib.WF_addSolidIllnessEffect(MyActor, IllnessLevel, ActorData)
       Else
-        JMap.setFlt(ActorData, "WF_SolidIllnessBuildUp", JMap.getFlt(ActorData, "WF_SolidIllnessBuildUp") - (SCLSet.WF_SolidIllnessBuildUpDecrease * afTimePassed))
-      EndIf
+        JMap.setFlt(ActorData, "IllnessBuildUp", JMap.getFlt(ActorData, "IllnessBuildUp") - (SCLSet.IllnessBuildUpDecrease * afTimePassed))
+      EndIf/;
       JMap.setFlt(ActorData, "WF_SolidTotalFullness", SolidAmount)
     EndIf
     If SCLSet.WF_LiquidActive

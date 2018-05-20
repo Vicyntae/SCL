@@ -467,7 +467,7 @@ Float Property WF_SolidAdjBaseMulti
 EndProperty
 
 GlobalVariable Property SCL_SET_WF_SolidIllnessBuildUpDecrease Auto
-Float Property WF_SolidIllnessBuildUpDecrease
+Float Property IllnessBuildUpDecrease
   Float Function Get()
     Return SCL_SET_WF_SolidIllnessBuildUpDecrease.GetValue()
   EndFunction

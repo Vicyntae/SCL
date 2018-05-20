@@ -10,4 +10,5 @@ Event OnMenuClose(string menuName)
   If GetNumItems() == 0
     DeleteWhenAble()
   EndIf
+  UnregisterForMenu("ContainerMenu")
 EndEvent

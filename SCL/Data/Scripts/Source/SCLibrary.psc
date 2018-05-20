@@ -2831,6 +2831,11 @@ Function sendVomitEvent(Actor akTarget, Int aiVomitType, Bool bLeveledRemains, F
   ModEvent.Send(E)
 EndFunction
 
+
+Function addVomitAcidDamageEffect(Actor akTarget, Int aiTargetData = 0)
+  {Adds health damage effect when you are forced to vomit on an empty stomach}
+EndFunction
+
 Function removeTrackingSpells(Actor akTarget)
   {Will REMOVE spells listed in TrackingSpellList}
   Int i = SCLSet.TrackingSpellList.GetSize()
@@ -3270,7 +3275,7 @@ Bool Function buildActorStatsMenu(Actor akTarget)
     JArray.addStr(JA_Description, "Total weight of items in " + TargetName + "'s colon.")
 
     If SCLSet.WF_SolidActive
-      LM_ST_Stats.AddEntryItem("Current Illness Level = " + JMap.getInt(TargetData, "WF_SolidIllnessLevel"))
+      LM_ST_Stats.AddEntryItem("Current Illness Level = " + JMap.getInt(TargetData, "IllnessLevel"))
       JArray.addStr(JA_Description, "How sick actor is. Increases by eating inedible food. Makes them need to go.")
     EndIf
   EndIf
@@ -3842,9 +3847,9 @@ Keys:
   WF_SolidBase
   WF_SolidCapMulti
   WF_SolidTimePast
-  WF_SolidIllnessBuildUp  Increases when you eat rotten food
-  WF_SolidIllnessThreshold  If gets above this point, adds debuff
-  WF_SolidIllnessLevel
+  IllnessBuildUp  Increases when you eat rotten food
+  IllnessThreshold  If gets above this point, adds debuff
+  IllnessLevel
 Contents IDs:
   Breaking Down Map: 3
   Stored Map: 4
@@ -3853,7 +3858,7 @@ ItemData Keys:
 Variables:
   SCLSet.WF_SolidActive
   SCLSet.WF_SolidAdjBaseMulti
-  SCLSet.WF_SolidIllnessBuildUpDecrease
+  SCLSet.IllnessBuildUpDecrease
 
 Perks:
   WF_BasementStorage: 1: Increases max insert size. 2: Increases max storage capacity.
@@ -3907,6 +3912,7 @@ Float Function WF_getAdjLiquidBase(Actor akTarget, Int aiTargetData = 0)
   Return JMap.getFlt(TargetData, "WF_LiquidBase", 1) * akTarget.GetScale() * NetImmerse.GetNodeScale(akTarget, "NPC Root [Root]", False) * SCLSet.WF_LiquidAdjBaseMulti * JMap.getFlt(TargetData, "WF_LiquidCapMulti", 1)
 EndFunction
 
+
 Float Function WF_getSolidMaxInsert(Actor akTarget, Int aiTargetData = 0)
   Int TargetData = getData(akTarget, aiTargetData)
   Int FirstPerkLevel = getCurrentPerkLevel(akTarget, "WF_BasementStorage")
@@ -3928,6 +3934,15 @@ Int Function WF_getSolidMaxNumItems(Actor akTarget, Int aiTargetData = 0)
     Return 0
   EndIf
   Return getTotalPerkLevel(akTarget, "WF_BasementStorage", TargetData)
+EndFunction
+
+Function WF_LiquidRemove(Actor akTarget, Int aiTargetData = 0)
+  Int TargetData = getData(akTarget, aiTargetData)
+  Debug.Notification("Urinating...")
+  If akTarget.HasSpell(SCLSet.WF_LiquidDebuffSpell)
+    akTarget.RemoveSpell(SCLSet.WF_LiquidDebuffSpell)
+  EndIf
+  JMap.setFlt(TargetData, "WF_CurrentLiquidAmount", 0)
 EndFunction
 
 SCLWFSolidWaste Function WF_SolidRemovePerform(Actor akTarget, Bool bLeveledRemains)
@@ -3960,8 +3975,8 @@ Function WF_SolidRemove(Actor akTarget, Int aiTargetData = 0)
   EndIf
   JMap.setFlt(TargetData, "WF_SolidTimePast", 0)
   JMap.setFlt(TargetData, "WF_CurrentSolidAmount", 0)
-  Int Illness = JMap.getInt(TargetData, "WF_SolidIllnessLevel")
-  Illness -= 2
+  Int Illness = JMap.getInt(TargetData, "IllnessLevel")
+  Illness -= 1
   If Illness < 0
     Illness = 0
   EndIf
@@ -4107,16 +4122,16 @@ EndFunction
 
 Function WF_addSolidIllnessEffect(Actor akTarget, Int afIllnessLevel, Int aiTargetData = 0)
   Int TargetData = getData(akTarget, aiTargetData)
-  Int CurrentLevel = JMap.getInt(TargetData, "WF_SolidIllnessLevel")
+  Int CurrentLevel = JMap.getInt(TargetData, "IllnessLevel")
   If afIllnessLevel > 0
     If afIllnessLevel != CurrentLevel
       SCLSet.WF_SolidIllnessDebuffSpells[afIllnessLevel].Cast(akTarget)
-      JMap.setInt(TargetData, "WF_SolidIllnessLevel", afIllnessLevel)
+      JMap.setInt(TargetData, "IllnessLevel", afIllnessLevel)
     EndIf
   Else
     If CurrentLevel != 0
       SCLSet.WF_SolidIllnessDebuffSpells[0].Cast(akTarget)
-      JMap.setInt(TargetData, "WF_SolidIllnessLevel", 0)
+      JMap.setInt(TargetData, "IllnessLevel", 0)
     EndIf
   EndIf
 EndFunction

@@ -183,6 +183,8 @@ Event OnPageReset(string a_page)
     AddSliderOptionST("GlobalDigest_S", "$Global Digestion Rate", SCLSet.GlobalDigestMulti, "x{1}")
     AddSliderOptionST("UpdateRate_S", "$Update Rate", SCLSet.UpdateRate, "Every {1} Seconds")
     AddSliderOptionST("UpdateDelay_S", "$Update Delay", SCLSet.UpdateDelay, "Pause for {1} Seconds")
+    AddToggleOptionST("AutoEatEnable_TOG", "$Enable Auto Eat", SCLSet.AutoEatActive)
+    AddSliderOptionST("WF_SolidIllnessBuildUpDecrease_S", "Build Up Decrease Rate", SCLSet.IllnessBuildUpDecrease, "{1}/hr")
     AddEmptyOption()
 
     AddHeaderOption("Expand Settings") ;7
@@ -214,8 +216,6 @@ Event OnPageReset(string a_page)
     If SCLSet.WF_Active
       AddKeyMapOptionST("WF_ActionKeyPick_KM", "$Choose Waste Function Action Key", SCLSet.WF_ActionKey)
       AddToggleOptionST("WF_SolidEnable_TOG", "$Enable Solid Waste Functions", SCLSet.WF_SolidActive)
-      AddSliderOptionST("WF_SolidIllnessBuildUpDecrease_S", "Build Up Decrease Rate", SCLSet.WF_SolidIllnessBuildUpDecrease, "{1}/hr")
-      AddEmptyOption()
       AddToggleOptionST("WF_LiquidEnable_TOG", "$Enable Liquid Waste Functions", SCLSet.WF_LiquidActive)
 
       ;AddToggleOptionST("WF_GasEnable_TOG", "$Enable Gas Waste Functions", SCLSet.WF_GasActive)
@@ -819,11 +819,27 @@ State DefaultExpandBonus_S
 	EndEvent
 EndState
 
+State AutoEatEnable_TOG
+  Event OnSelectST()
+    SCLSet.AutoEatActive = !SCLSet.AutoEatActive
+    ForcePageReset()
+  EndEvent
+
+  Event OnDefaultST()
+    SCLSet.AutoEatActive = False
+    ForcePageReset()
+  EndEvent
+
+  Event OnHighlightST()
+    SetInfoText("Have actors automatically eat items from inventory periodically.")
+  EndEvent
+EndState
+
 State BellyInflateMethod_M
 	Event OnMenuOpenST()
 		SetMenuDialogOptions(SCLSet.InflateMethodArray)
 		SetMenuDialogStartIndex(SCLSet.BellyInflateMethod)
-		SetMenuDialogDefaultIndex(1)
+		SetMenuDialogDefaultIndex(0)
 	EndEvent
 
 	Event OnMenuAcceptST(int a_index)
@@ -832,7 +848,7 @@ State BellyInflateMethod_M
 	EndEvent
 
 	Event OnDefaultST()
-    SCLSet.BellyInflateMethod = 1
+    SCLSet.BellyInflateMethod = 0
     ForcePageReset()
 	EndEvent
 
@@ -867,7 +883,7 @@ EndState
 State MaxBelly_S
 	Event OnSliderOpenST()
 		SetSliderDialogStartValue(SCLSet.BellyMax)
-		SetSliderDialogDefaultValue(10)
+		SetSliderDialogDefaultValue(100)
 		SetSliderDialogRange(0.5, 1000)
 		SetSliderDialogInterval(0.5)
 	EndEvent
@@ -878,7 +894,7 @@ State MaxBelly_S
 	EndEvent
 
 	Event OnDefaultST()
-		SCLSet.BellyMax = 10
+		SCLSet.BellyMax = 100
     ForcePageReset()
 	EndEvent
 
@@ -987,7 +1003,7 @@ EndState
 State DynEquipModifier_S
   Event OnSliderOpenST()
     SetSliderDialogStartValue(SCLSet.DynEquipModifier)
-    SetSliderDialogDefaultValue(0.7)
+    SetSliderDialogDefaultValue(0.3)
     SetSliderDialogRange(0, 5)
     SetSliderDialogInterval(0.05)
   EndEvent
@@ -999,7 +1015,7 @@ State DynEquipModifier_S
 
   Event OnDefaultST()
     SCLSet.DynEquipModifier = 0.7
-    SetSliderOptionValueST(0.7, "x{2}")
+    SetSliderOptionValueST(0.3, "x{2}")
   EndEvent
 
   Event OnHighlightST()

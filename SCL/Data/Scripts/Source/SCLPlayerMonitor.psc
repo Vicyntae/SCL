@@ -109,6 +109,12 @@ Event OnKeyDown(int keyCode)
     If SCLSet.WF_Active
       If MyActor.IsSneaking()
         SCLib.WF_SolidRemove(MyActor, ActorData)
+      Else
+        If MyActor.GetLeveledActorBase().GetSex() == 1
+          MyActor.StartSneaking()
+        EndIf
+        SCLib.WF_LiquidRemove(MyActor, ActorData)
+        ;Play animation here
       EndIf
     EndIf
     UnlockEX()

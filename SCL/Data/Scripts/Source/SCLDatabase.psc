@@ -248,7 +248,7 @@ Function setupEditBodyEntries()
     JMap.setFlt(BellyEntry, "Minimum", 1)
     JMap.setFlt(BellyEntry, "Maximum", 10)
     JMap.setFlt(BellyEntry, "Curve", 1.75)
-    JMap.setFlt(BellyEntry, "DynEquipMultiplier", 0.7)
+    JMap.setFlt(BellyEntry, "DynEquipMultiplier", 0.3)
 
     Int JI_DynEquipSetList = JIntMap.object()
     JMap.setObj(BellyEntry, "DynEquipSetList", JI_DynEquipSetList)
@@ -392,59 +392,59 @@ Function setupItemDatabase()
   ;Chicken Breast
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x000f2011, "Skyrim.esm"), ".SCLItemDatabase.Durability", 0.8, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x000f2011, "Skyrim.esm"), ".SCLItemDatabase.LiquidRatio", 0.1, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x000f2011, "Skyrim.esm"), ".SCLItemDatabase.WF_IllnessAmount", 0.75, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x000f2011, "Skyrim.esm"), ".SCLItemDatabase.IllnessAmount", 0.75, True)
 
   ;Clam Meat
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x000eba03, "Skyrim.esm"), ".SCLItemDatabase.Durability", 0.8, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x000eba03, "Skyrim.esm"), ".SCLItemDatabase.LiquidRatio", 0.3, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x000eba03, "Skyrim.esm"), ".SCLItemDatabase.WF_IllnessAmount", 0.1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x000eba03, "Skyrim.esm"), ".SCLItemDatabase.IllnessAmount", 0.1, True)
 
   ;Dog Meat
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x000edb2e, "Skyrim.esm"), ".SCLItemDatabase.Durability", 0.7, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x000edb2e, "Skyrim.esm"), ".SCLItemDatabase.WeightModifier", 0.7, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x000edb2e, "Skyrim.esm"), ".SCLItemDatabase.LiquidRatio", 0.1, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x000edb2e, "Skyrim.esm"), ".SCLItemDatabase.WF_IllnessAmount", 0.75, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x000edb2e, "Skyrim.esm"), ".SCLItemDatabase.IllnessAmount", 0.75, True)
 
   ;Horker Meat
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9b, "Skyrim.esm"), ".SCLItemDatabase.Durability", 0.8, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9b, "Skyrim.esm"), ".SCLItemDatabase.LiquidRatio", 0.1, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9b, "Skyrim.esm"), ".SCLItemDatabase.WF_IllnessAmount", 0.5, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9b, "Skyrim.esm"), ".SCLItemDatabase.IllnessAmount", 0.5, True)
 
   ;Horse Meat
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9c, "Skyrim.esm"), ".SCLItemDatabase.Durability", 0.8, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9c, "Skyrim.esm"), ".SCLItemDatabase.LiquidRatio", 0.1, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9c, "Skyrim.esm"), ".SCLItemDatabase.WF_IllnessAmount", 1.5, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9c, "Skyrim.esm"), ".SCLItemDatabase.IllnessAmount", 1.5, True)
 
   ;Leg of Goat
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9a, "Skyrim.esm"), ".SCLItemDatabase.Durability", 0.8, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9a, "Skyrim.esm"), ".SCLItemDatabase.LiquidRatio", 0.1, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9a, "Skyrim.esm"), ".SCLItemDatabase.WF_IllnessAmount", 0.75, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9a, "Skyrim.esm"), ".SCLItemDatabase.IllnessAmount", 0.75, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9a, "Skyrim.esm"), ".SCLItemDatabase.WeightModifier", 0.7, True)
 
   ;Mammoth Snout
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x000669a4, "Skyrim.esm"), ".SCLItemDatabase.Durability", 0.6, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x000669a4, "Skyrim.esm"), ".SCLItemDatabase.LiquidRatio", 0.1, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x000669a4, "Skyrim.esm"), ".SCLItemDatabase.WF_IllnessAmount", 0.1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x000669a4, "Skyrim.esm"), ".SCLItemDatabase.IllnessAmount", 0.1, True)
 
   ;Pheasant Breast
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9d, "Skyrim.esm"), ".SCLItemDatabase.Durability", 0.8, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9d, "Skyrim.esm"), ".SCLItemDatabase.LiquidRatio", 0.1, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9d, "Skyrim.esm"), ".SCLItemDatabase.WF_IllnessAmount", 0.75, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9d, "Skyrim.esm"), ".SCLItemDatabase.IllnessAmount", 0.75, True)
 
   ;Raw Beef
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c99, "Skyrim.esm"), ".SCLItemDatabase.Durability", 0.8, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c99, "Skyrim.esm"), ".SCLItemDatabase.LiquidRatio", 0.1, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c99, "Skyrim.esm"), ".SCLItemDatabase.WF_IllnessAmount", 0.75, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c99, "Skyrim.esm"), ".SCLItemDatabase.IllnessAmount", 0.75, True)
 
   ;Raw Rabbit Leg
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9e, "Skyrim.esm"), ".SCLItemDatabase.Durability", 0.8, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9e, "Skyrim.esm"), ".SCLItemDatabase.LiquidRatio", 0.1, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9e, "Skyrim.esm"), ".SCLItemDatabase.WF_IllnessAmount", 0.5, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x00065c9e, "Skyrim.esm"), ".SCLItemDatabase.IllnessAmount", 0.5, True)
 
   ;Venison
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x000669a2, "Skyrim.esm"), ".SCLItemDatabase.Durability", 0.8, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x000669a2, "Skyrim.esm"), ".SCLItemDatabase.LiquidRatio", 0.1, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x000669a2, "Skyrim.esm"), ".SCLItemDatabase.WF_IllnessAmount", 0.5, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x000669a2, "Skyrim.esm"), ".SCLItemDatabase.IllnessAmount", 0.5, True)
 
   ;ALL OF THIS INFORMATION WENT UNUSED!
   ;FOR WHEN I ACTUALLY HAVE STUFF TO PUT IN HERE
@@ -647,7 +647,7 @@ Function setupHearthfires(Int JFD_Items)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003540, "HearthFires.esm"), ".SCLItemDatabase.WeightModifier", 0.5, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003540, "HearthFires.esm"), ".SCLItemDatabase.Durability", 1.2, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003540, "HearthFires.esm"), ".SCLItemDatabase.LiquidRatio", 0.4, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003540, "HearthFires.esm"), ".SCLItemDatabase.WF_IllnessAmount", 0.2, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02003540, "HearthFires.esm"), ".SCLItemDatabase.IllnessAmount", 0.2, True)
 EndFunction
 
 Function removeHearthfires(Int JFD_Items)
@@ -724,18 +724,18 @@ Function setupDragonborn(Int JFD_Items)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203d125, "Dragonborn.esm"), ".SCLItemDatabase.WeightModifier", 0.5, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203d125, "Dragonborn.esm"), ".SCLItemDatabase.Durability", 1.2, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203d125, "Dragonborn.esm"), ".SCLItemDatabase.LiquidRatio", 0.2, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203d125, "Dragonborn.esm"), ".SCLItemDatabase.WF_IllnessAmount", 0.2, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203d125, "Dragonborn.esm"), ".SCLItemDatabase.IllnessAmount", 0.2, True)
 
   ;Ash Hopper Meat
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203bd15, "Dragonborn.esm"), ".SCLItemDatabase.WeightModifier", 0.9, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203bd15, "Dragonborn.esm"), ".SCLItemDatabase.Durability", 1.2, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203bd15, "Dragonborn.esm"), ".SCLItemDatabase.LiquidRatio", 0.2, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203bd15, "Dragonborn.esm"), ".SCLItemDatabase.WF_IllnessAmount", 0.2, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203bd15, "Dragonborn.esm"), ".SCLItemDatabase.IllnessAmount", 0.2, True)
 
   ;Boar Meat
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203bd14, "Dragonborn.esm"), ".SCLItemDatabase.Durability", 0.7, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203bd14, "Dragonborn.esm"), ".SCLItemDatabase.LiquidRatio", 0.1, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203bd14, "Dragonborn.esm"), ".SCLItemDatabase.WF_IllnessAmount", 1.2, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203bd14, "Dragonborn.esm"), ".SCLItemDatabase.IllnessAmount", 1.2, True)
 EndFunction
 
 Function removeDragonborn(Int JFD_Items)
@@ -775,43 +775,43 @@ Function setupiNeed(Int JFD_Items)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x0200437F, "iNeed.esp"), ".SCLItemDatabase.WeightOverride", 1, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x0200437F, "iNeed.esp"), ".SCLItemDatabase.Durability", 0.7, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x0200437F, "iNeed.esp"), ".SCLItemDatabase.LiquidRatio", 1, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0200437F, "iNeed.esp"), ".SCLItemDatabase.WF_IllnessAmount", 0, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0200437F, "iNeed.esp"), ".SCLItemDatabase.IllnessAmount", 0, True)
 
   ;Water Skin 1/3 (Unknown)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203b2c5, "iNeed.esp"), ".SCLItemDatabase.WeightOverride", 1, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203b2c5, "iNeed.esp"), ".SCLItemDatabase.Durability", 0.7, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203b2c5, "iNeed.esp"), ".SCLItemDatabase.LiquidRatio", 1, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203b2c5, "iNeed.esp"), ".SCLItemDatabase.WF_IllnessAmount", 0.5, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203b2c5, "iNeed.esp"), ".SCLItemDatabase.IllnessAmount", 0.5, True)
 
   ;Water Skin 2/3
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x0200437d, "iNeed.esp"), ".SCLItemDatabase.WeightOverride", 1, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x0200437d, "iNeed.esp"), ".SCLItemDatabase.Durability", 0.7, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x0200437d, "iNeed.esp"), ".SCLItemDatabase.LiquidRatio", 1, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0200437d, "iNeed.esp"), ".SCLItemDatabase.WF_IllnessAmount", 0, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0200437d, "iNeed.esp"), ".SCLItemDatabase.IllnessAmount", 0, True)
 
   ;Water Skin 2/3 (Unknown)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203b2c8, "iNeed.esp"), ".SCLItemDatabase.WeightOverride", 1, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203b2c8, "iNeed.esp"), ".SCLItemDatabase.Durability", 0.7, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203b2c8, "iNeed.esp"), ".SCLItemDatabase.LiquidRatio", 1, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203b2c8, "iNeed.esp"), ".SCLItemDatabase.WF_IllnessAmount", 0.5, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203b2c8, "iNeed.esp"), ".SCLItemDatabase.IllnessAmount", 0.5, True)
 
   ;Water Skin 3/3
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x02004376, "iNeed.esp"), ".SCLItemDatabase.WeightOverride", 1, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x02004376, "iNeed.esp"), ".SCLItemDatabase.Durability", 0.7, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x02004376, "iNeed.esp"), ".SCLItemDatabase.LiquidRatio", 1, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02004376, "iNeed.esp"), ".SCLItemDatabase.WF_IllnessAmount", 0, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x02004376, "iNeed.esp"), ".SCLItemDatabase.IllnessAmount", 0, True)
 
   ;Water Skin 3/3 (Unknown)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203b2cc, "iNeed.esp"), ".SCLItemDatabase.WeightOverride", 1, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203b2cc, "iNeed.esp"), ".SCLItemDatabase.Durability", 0.7, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203b2cc, "iNeed.esp"), ".SCLItemDatabase.LiquidRatio", 1, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203b2cc, "iNeed.esp"), ".SCLItemDatabase.WF_IllnessAmount", 0.5, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0203b2cc, "iNeed.esp"), ".SCLItemDatabase.IllnessAmount", 0.5, True)
 
   ;Snow
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x020387ad, "iNeed.esp"), ".SCLItemDatabase.WeightModifier", 0.9, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x020387ad, "iNeed.esp"), ".SCLItemDatabase.Durability", 0.7, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x020387ad, "iNeed.esp"), ".SCLItemDatabase.LiquidRatio", 1, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020387ad, "iNeed.esp"), ".SCLItemDatabase.WF_IllnessAmount", 0.2, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x020387ad, "iNeed.esp"), ".SCLItemDatabase.IllnessAmount", 0.2, True)
 EndFunction
 
 Function removeiNeed(Int JFD_Items)
@@ -841,7 +841,7 @@ Function setupHunterborn(Int JFD_Items)
   ;Raw Bear Meat
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x04014795, "Hunterborn.esp"), ".SCLItemDatabase.Durability", 0.7, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x04014795, "Hunterborn.esp"), ".SCLItemDatabase.LiquidRatio", 0.2, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x04014795, "Hunterborn.esp"), ".SCLItemDatabase.WF_IllnessAmount", 1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x04014795, "Hunterborn.esp"), ".SCLItemDatabase.IllnessAmount", 1, True)
 
   ;Raw Bear Meat Frozen
   JFormDB.solveIntSetter(Game.GetFormFromFile(0x04152b41, "Hunterborn.esp"), ".SCLItemDatabase.isNotFood", 1, True)
@@ -849,7 +849,7 @@ Function setupHunterborn(Int JFD_Items)
   ;Raw Chaurus Meat
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x04027783, "Hunterborn.esp"), ".SCLItemDatabase.Durability", 0.9, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x04027783, "Hunterborn.esp"), ".SCLItemDatabase.LiquidRatio", 0.5, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x04027783, "Hunterborn.esp"), ".SCLItemDatabase.WF_IllnessAmount", 0.4, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x04027783, "Hunterborn.esp"), ".SCLItemDatabase.IllnessAmount", 0.4, True)
 
   ;Raw Chaurus Meat Frozen
   JFormDB.solveIntSetter(Game.GetFormFromFile(0x04152b46, "Hunterborn.esp"), ".SCLItemDatabase.isNotFood", 1, True)
@@ -857,12 +857,12 @@ Function setupHunterborn(Int JFD_Items)
   ;Raw Dragon Meat
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x04029849, "Hunterborn.esp"), ".SCLItemDatabase.Durability", 0.4, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x04029849, "Hunterborn.esp"), ".SCLItemDatabase.LiquidRatio", 0.1, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x04029849, "Hunterborn.esp"), ".SCLItemDatabase.WF_IllnessAmount", 0.1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x04029849, "Hunterborn.esp"), ".SCLItemDatabase.IllnessAmount", 0.1, True)
 
   ;Raw Elk Meat
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x04014d21, "Hunterborn.esp"), ".SCLItemDatabase.Durability", 0.8, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x04014d21, "Hunterborn.esp"), ".SCLItemDatabase.LiquidRatio", 0.2, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x04014d21, "Hunterborn.esp"), ".SCLItemDatabase.WF_IllnessAmount", 0.8, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x04014d21, "Hunterborn.esp"), ".SCLItemDatabase.IllnessAmount", 0.8, True)
 
   ;Raw Elk Meat Frozen
   JFormDB.solveIntSetter(Game.GetFormFromFile(0x04152b48, "Hunterborn.esp"), ".SCLItemDatabase.isNotFood", 1, True)
@@ -871,7 +871,7 @@ Function setupHunterborn(Int JFD_Items)
   ;Raw Fox Meat
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x04014795, "Hunterborn.esp"), ".SCLItemDatabase.Durability", 0.8, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x04014795, "Hunterborn.esp"), ".SCLItemDatabase.LiquidRatio", 0.2, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x04014795, "Hunterborn.esp"), ".SCLItemDatabase.WF_IllnessAmount", 0.8, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x04014795, "Hunterborn.esp"), ".SCLItemDatabase.IllnessAmount", 0.8, True)
 
   ;Raw Fox Meat Frozen
   JFormDB.solveIntSetter(Game.GetFormFromFile(0x04152b4a, "Hunterborn.esp"), ".SCLItemDatabase.isNotFood", 1, True)
@@ -879,7 +879,7 @@ Function setupHunterborn(Int JFD_Items)
   ;Raw Goat Meat
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x0401479a, "Hunterborn.esp"), ".SCLItemDatabase.Durability", 0.8, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x0401479a, "Hunterborn.esp"), ".SCLItemDatabase.LiquidRatio", 0.2, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0401479a, "Hunterborn.esp"), ".SCLItemDatabase.WF_IllnessAmount", 0.8, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0401479a, "Hunterborn.esp"), ".SCLItemDatabase.IllnessAmount", 0.8, True)
 
   ;Raw Goat Meat Frozen
   JFormDB.solveIntSetter(Game.GetFormFromFile(0x04152b4c, "Hunterborn.esp"), ".SCLItemDatabase.isNotFood", 1, True)
@@ -887,7 +887,7 @@ Function setupHunterborn(Int JFD_Items)
   ;Raw Hare Meat
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x040147a2, "Hunterborn.esp"), ".SCLItemDatabase.Durability", 0.8, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x040147a2, "Hunterborn.esp"), ".SCLItemDatabase.LiquidRatio", 0.2, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x040147a2, "Hunterborn.esp"), ".SCLItemDatabase.WF_IllnessAmount", 0.8, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x040147a2, "Hunterborn.esp"), ".SCLItemDatabase.IllnessAmount", 0.8, True)
 
   ;Raw Hare Meat Frozen
   JFormDB.solveIntSetter(Game.GetFormFromFile(0x04152b4e, "Hunterborn.esp"), ".SCLItemDatabase.isNotFood", 1, True)
@@ -895,7 +895,7 @@ Function setupHunterborn(Int JFD_Items)
   ;Raw Mammoth Meat
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x0401479e, "Hunterborn.esp"), ".SCLItemDatabase.Durability", 0.8, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x0401479e, "Hunterborn.esp"), ".SCLItemDatabase.LiquidRatio", 0.2, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0401479e, "Hunterborn.esp"), ".SCLItemDatabase.WF_IllnessAmount", 0.8, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0401479e, "Hunterborn.esp"), ".SCLItemDatabase.IllnessAmount", 0.8, True)
 
   ;Raw Mammoth Meat Frozen
   JFormDB.solveIntSetter(Game.GetFormFromFile(0x04152b50, "Hunterborn.esp"), ".SCLItemDatabase.isNotFood", 1, True)
@@ -903,7 +903,7 @@ Function setupHunterborn(Int JFD_Items)
   ;Raw Mudcrab Meat
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x04014d22, "Hunterborn.esp"), ".SCLItemDatabase.Durability", 1.2, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x04014d22, "Hunterborn.esp"), ".SCLItemDatabase.LiquidRatio", 0.5, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x04014d22, "Hunterborn.esp"), ".SCLItemDatabase.WF_IllnessAmount", 0.5, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x04014d22, "Hunterborn.esp"), ".SCLItemDatabase.IllnessAmount", 0.5, True)
 
   ;Raw Mudcrab Meat Frozen
   JFormDB.solveIntSetter(Game.GetFormFromFile(0x04152b52, "Hunterborn.esp"), ".SCLItemDatabase.isNotFood", 1, True)
@@ -911,7 +911,7 @@ Function setupHunterborn(Int JFD_Items)
   ;Raw Sabrecat Meat
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x040147a0, "Hunterborn.esp"), ".SCLItemDatabase.Durability", 0.8, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x040147a0, "Hunterborn.esp"), ".SCLItemDatabase.LiquidRatio", 0.2, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x040147a0, "Hunterborn.esp"), ".SCLItemDatabase.WF_IllnessAmount", 0.8, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x040147a0, "Hunterborn.esp"), ".SCLItemDatabase.IllnessAmount", 0.8, True)
 
   ;Raw Sabrecat Meat Frozen
   JFormDB.solveIntSetter(Game.GetFormFromFile(0x04152b54, "Hunterborn.esp"), ".SCLItemDatabase.isNotFood", 1, True)
@@ -919,7 +919,7 @@ Function setupHunterborn(Int JFD_Items)
   ;Raw Skeever Meat
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x04014796, "Hunterborn.esp"), ".SCLItemDatabase.Durability", 0.9, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x04014796, "Hunterborn.esp"), ".SCLItemDatabase.LiquidRatio", 0.2, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x04014796, "Hunterborn.esp"), ".SCLItemDatabase.WF_IllnessAmount", 1.5, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x04014796, "Hunterborn.esp"), ".SCLItemDatabase.IllnessAmount", 1.5, True)
 
   ;Raw Skeever Meat Frozen
   JFormDB.solveIntSetter(Game.GetFormFromFile(0x04152b56, "Hunterborn.esp"), ".SCLItemDatabase.isNotFood", 1, True)
@@ -927,7 +927,7 @@ Function setupHunterborn(Int JFD_Items)
   ;Raw Slaughterfish Meat
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x04014d24, "Hunterborn.esp"), ".SCLItemDatabase.Durability", 0.9, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x04014d24, "Hunterborn.esp"), ".SCLItemDatabase.LiquidRatio", 0.4, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x04014d24, "Hunterborn.esp"), ".SCLItemDatabase.WF_IllnessAmount", 0.2, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x04014d24, "Hunterborn.esp"), ".SCLItemDatabase.IllnessAmount", 0.2, True)
 
   ;Raw Slaughterfish Meat Frozen
   JFormDB.solveIntSetter(Game.GetFormFromFile(0x04152b58, "Hunterborn.esp"), ".SCLItemDatabase.isNotFood", 1, True)
@@ -935,7 +935,7 @@ Function setupHunterborn(Int JFD_Items)
   ;Raw Spider Meat
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x04029846, "Hunterborn.esp"), ".SCLItemDatabase.Durability", 0.9, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x04029846, "Hunterborn.esp"), ".SCLItemDatabase.LiquidRatio", 0.4, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x04029846, "Hunterborn.esp"), ".SCLItemDatabase.WF_IllnessAmount", 1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x04029846, "Hunterborn.esp"), ".SCLItemDatabase.IllnessAmount", 1, True)
 
   ;Raw Spider Meat Frozen
   JFormDB.solveIntSetter(Game.GetFormFromFile(0x04152b5a, "Hunterborn.esp"), ".SCLItemDatabase.isNotFood", 1, True)
@@ -943,7 +943,7 @@ Function setupHunterborn(Int JFD_Items)
   ;Raw Troll Meat
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x04029847, "Hunterborn.esp"), ".SCLItemDatabase.Durability", 0.5, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x04029847, "Hunterborn.esp"), ".SCLItemDatabase.LiquidRatio", 0.1, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x04029847, "Hunterborn.esp"), ".SCLItemDatabase.WF_IllnessAmount", 1, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x04029847, "Hunterborn.esp"), ".SCLItemDatabase.IllnessAmount", 1, True)
 
   ;Raw Troll Meat Frozen
   JFormDB.solveIntSetter(Game.GetFormFromFile(0x04152b5c, "Hunterborn.esp"), ".SCLItemDatabase.isNotFood", 1, True)
@@ -951,7 +951,7 @@ Function setupHunterborn(Int JFD_Items)
   ;Raw Wolf Meat
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x0401479c, "Hunterborn.esp"), ".SCLItemDatabase.Durability", 0.5, True)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x0401479c, "Hunterborn.esp"), ".SCLItemDatabase.LiquidRatio", 0.1, True)
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0401479c, "Hunterborn.esp"), ".SCLItemDatabase.WF_IllnessAmount", 0.7, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x0401479c, "Hunterborn.esp"), ".SCLItemDatabase.IllnessAmount", 0.7, True)
 
   ;Raw Wolf Meat Frozen
   JFormDB.solveIntSetter(Game.GetFormFromFile(0x04152b5e, "Hunterborn.esp"), ".SCLItemDatabase.isNotFood", 1, True)
@@ -1023,7 +1023,7 @@ Function setupHunterborn(Int JFD_Items)
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x04017e13, "Hunterborn.esp"), ".SCLItemDatabase.LiquidRatio", 0.5, True)
 
   ;Smelly Meat
-  JFormDB.solveFltSetter(Game.GetFormFromFile(0x04152b62, "Hunterborn.esp"), ".SCLItemDatabase.WF_IllnessAmount", 0.8, True)
+  JFormDB.solveFltSetter(Game.GetFormFromFile(0x04152b62, "Hunterborn.esp"), ".SCLItemDatabase.IllnessAmount", 0.8, True)
 
   ;Poisoner's Stew
   JFormDB.solveFltSetter(Game.GetFormFromFile(0x040314c9, "Hunterborn.esp"), ".SCLItemDatabase.WeightOverride", 0.9, True)
