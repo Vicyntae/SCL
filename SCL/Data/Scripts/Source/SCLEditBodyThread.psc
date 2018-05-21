@@ -69,14 +69,13 @@ Event OnEditBodyCall(Int aiID)
     ;Note("Initial Value = " + Value)
     Float SizeValue = Value * JMap.getFlt(InflateEntry, "Multiplier", 1) * (((MyActor.GetLeveledActorBase().GetWeight() / 100) * JMap.getFlt(InflateEntry, "HighScale")) + 1)
     If SizeValue
-      SizeValue /= MyActor.GetScale()  ;Should take into consideration bone scale as well.
+      SizeValue /= MyActor.GetScale() * NetImmerse.GetNodeScale(MyActor, "NPC Root [Root]", False) ;Should take into consideration bone scale as well.
 
       ;Float NodeScale = NetImmerse.GetNodeScale(MyActor, "NPC Root [Root]", False)
       ;Note("NodeScale = " + NodeScale)
-      SizeValue /= NetImmerse.GetNodeScale(MyActor, "NPC Root [Root]", False)
       ;SizeValue /= NodeScale
     EndIf
-    SizeValue = clampFlt(SizeValue, JMap.getFlt(InflateEntry, "Minimum", 1), JMap.getFlt(InflateEntry, "Maximum", 10))
+    SizeValue = clampFlt(SizeValue, JMap.getFlt(InflateEntry, "Minimum", 1), JMap.getFlt(InflateEntry, "Maximum", 100))
     SizeValue = curveBoneValue(SizeValue, JMap.getFlt(InflateEntry, "Curve"))
     ;Note("Processed Value = " + SizeValue)
     String OldMethod = JMap.getStr(TargetData, "SCL" + Type + "InflateMethod")
@@ -132,6 +131,21 @@ Event OnEditBodyCall(Int aiID)
       EndIf
     ElseIf NewMethod == "Dynamic Equipment"
       ;Note("Method = Dynamic Equipment")
+
+      Float MinSize = JMap.getFlt(InflateEntry, "DynMinSize", 20)
+      Note("SizeValue = " + SizeValue + ", DynMinSize = " + MinSize)
+      If SizeValue < MinSize
+        If JMap.getInt(TargetData, "SCL" + Type + "DynEquipSet") != 0
+          JMap.setInt(TargetData, "SCL" + Type + "DynEquipSet", 0)
+          purgeEquipSets(InflateEntry)
+        EndIf
+        JMap.setFlt(TargetData, "VisualCurrentBellySize", 0)
+        Result = 0
+        clear_thread_vars()
+        ;thread_ready = True
+        thread_queued = False
+        Return
+      EndIf
 
       Float AltSizeValue = (SizeValue - JMap.getFlt(InflateEntry, "Minimum", 1)) / 100
       ;Note("AltSizeValue = " + AltSizeValue)

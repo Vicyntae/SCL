@@ -259,6 +259,17 @@ Float Property DynEquipModifier
   EndFunction
 EndProperty
 
+Float Property DynMinSize
+  Float Function Get()
+    Return JDB.solveFlt(".SCLExtraData.SCLBellyInflateData.DynMinSize")
+  EndFunction
+  Function Set(Float a_val)
+    If a_val >= 0
+      JDB.solveFltSetter(".SCLExtraData.SCLBellyInflateData.DynMinSize", a_val, True)
+    EndIf
+  EndFunction
+EndProperty
+
 
 ;Mod Checks --------------------------------------------------------------------
 Bool Property UIExtensionsInstalled Auto

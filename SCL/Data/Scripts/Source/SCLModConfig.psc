@@ -202,6 +202,8 @@ Event OnPageReset(string a_page)
     AddSliderOptionST("CurveBelly_S", "$Belly Curve", SCLSet.BellyCurve, "{2}")
     AddSliderOptionST("IncBelly_S", "$Belly Increment", SCLSet.BellyIncr, "{1}") ;17
     AddSliderOptionST("DynEquipModifier_S", "$Dynamic Equipment Multiplier", SCLSet.DynEquipModifier, "x{2}")
+    AddSliderOptionST("DynMinSize_S", "$Dynamic Equipment Minimum Value", SCLSet.DynMinSize, "{1}")
+    AddEmptyOption()
 
     ;/If SCLSet.InflateMethodArray[SCLSet.BellyInflateMethod] == "Equipment"
       AddSliderOptionST("EquipmentTierSelect_S", "Select Tier", SelectedEquipmentTier, "Tier {0}") ;17
@@ -996,7 +998,7 @@ State CurveBelly_S
   EndEvent
 
   Event OnHighlightST()
-    SetInfoText("Dampens size at larger values to better simulate volume. The closer to 0, the more extreme the dampening. Set to 2 to remove dampening entirely.")
+    SetInfoText("$Dampens size at larger values to better simulate volume. The closer to 0, the more extreme the dampening. Set to 2 to remove dampening entirely.")
   EndEvent
 EndState
 
@@ -1019,7 +1021,30 @@ State DynEquipModifier_S
   EndEvent
 
   Event OnHighlightST()
-    SetInfoText("Modifies applied size of Dynamic Equipment.")
+    SetInfoText("$Modifies applied size of Dynamic Equipment.")
+  EndEvent
+EndState
+
+State DynMinSize_S
+  Event OnSliderOpenST()
+    SetSliderDialogStartValue(SCLSet.DynMinSize)
+    SetSliderDialogDefaultValue(10)
+    SetSliderDialogRange(0, 50)
+    SetSliderDialogInterval(0.5)
+  EndEvent
+
+  Event OnSliderAcceptST(float a_value)
+    SCLSet.DynMinSize = a_value
+    SetSliderOptionValueST(a_value, "{1}")
+  EndEvent
+
+  Event OnDefaultST()
+    SCLSet.DynMinSize = 10
+    SetSliderOptionValueST(0.3, "{1}")
+  EndEvent
+
+  Event OnHighlightST()
+    SetInfoText("$Sets minimum fullness before dynamic equipment will be applied.")
   EndEvent
 EndState
 
