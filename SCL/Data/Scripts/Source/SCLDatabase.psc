@@ -586,15 +586,26 @@ String[] Function setupInstalledMods()
   EndIf
 
 ;Frostfall ---------------------------------------------------------------------
-If SCLibrary.isModInstalled("FrostFall.esp") && !Frostfall_Initialized
-  setupFrostfall(JFD_Items)
-  Frostfall_Initialized = True
-  JArray.addStr(JA_ModsChanged, "Added FrostFall.esp")
-ElseIf !SCLibrary.isModInstalled("FrostFall.esp") && Frostfall_Initialized
-  removeFrostfall(JFD_Items)
-  Frostfall_Initialized = False
-  JArray.addStr(JA_ModsChanged, "Removed FrostFall.esp")
-EndIf
+  If SCLibrary.isModInstalled("FrostFall.esp") && !Frostfall_Initialized
+    setupFrostfall(JFD_Items)
+    Frostfall_Initialized = True
+    JArray.addStr(JA_ModsChanged, "Added FrostFall.esp")
+  ElseIf !SCLibrary.isModInstalled("FrostFall.esp") && Frostfall_Initialized
+    removeFrostfall(JFD_Items)
+    Frostfall_Initialized = False
+    JArray.addStr(JA_ModsChanged, "Removed FrostFall.esp")
+  EndIf
+
+  If SCLibrary.isModInstalled("FNIS.esp") && !SCLSet.FNIS_Initialized
+    setupFNIS(JFD_Items)
+    SCLSet.FNIS_Initialized = True
+    JArray.addStr(JA_ModsChanged, "Added FNIS.esp")
+  ElseIf !SCLibrary.isModInstalled("FNIS.esp") && SCLSet.FNIS_Initialized
+    removeFNIS(JFD_Items)
+    SCLSet.FNIS_Initialized = False
+    JArray.addStr(JA_ModsChanged, "Removed FNIS.esp")
+  EndIf
+
 ;*******************************************************************************
   String[] Results = Utility.CreateStringArray(JArray.count(JA_ModsChanged), "")
   JArray.writeToStringPArray(JA_ModsChanged, Results)
@@ -1380,4 +1391,10 @@ Function removeFrostfall(Int JFD_Items)
 
   ;Snowberry Extract
   JFormMap.removeKey(JFD_Items, Game.GetFormFromFile(0x0301d430, "Frostfall.esp"))
+EndFunction
+
+Function setupFNIS(Int JFD_Items)
+EndFunction
+
+Function removeFNIS(Int JFD_Items)
 EndFunction

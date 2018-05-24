@@ -2809,7 +2809,7 @@ ObjectReference Function vomitPerform(Actor akTarget, Bool bLeveledRemains)
     Game.ForceThirdPerson()
     Game.DisablePlayerControls()
   EndIf
-  If SCLibrary.isModInstalled("FNIS.esp")
+  If SCLSet.FNIS_Initialized
     Debug.SendAnimationEvent(akTarget, "SCL_VomitEvent01")
     Utility.Wait(2.5)
     Debug.SendAnimationEvent(akTarget, "IdleForceDefaultState")

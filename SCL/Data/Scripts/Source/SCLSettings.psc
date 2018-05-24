@@ -278,6 +278,7 @@ Bool Property HideUIEWarning Auto
 Bool Property NiOverrideInstalled Auto
 Bool Property HideNiOverrideWarning Auto
 
+Bool Property FNIS_Initialized Auto
 ;Others ************************************************************************
 Container Property SCL_TransferBase Auto
 
