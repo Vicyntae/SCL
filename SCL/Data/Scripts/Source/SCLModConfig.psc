@@ -51,6 +51,9 @@ Bool Property TriggerVomit = False Auto
 Bool Property TriggerVomitEverything = False Auto
 Actor Property VomitTarget = None Auto
 Bool Property SCLResetted = False Auto
+Int Property JI_PerkIndex Auto
+Int Property JM_PerkValues Auto
+Int Property JM_SelectedPerkLevel Auto
 ;Events ************************************************************************
 Event OnConfigInit()
   checkBaseDependencies()
@@ -96,8 +99,13 @@ Event OnConfigClose()
 EndEvent
 
 Event OnPageReset(string a_page)
+  JI_PerkIndex = JValue.releaseAndRetain(JI_PerkIndex, JIntMap.object())
+  JM_PerkValues = JValue.releaseAndRetain(JM_PerkValues, JMap.object())
+  If !JM_SelectedPerkLevel
+    JM_SelectedPerkLevel = JValue.retain(JMap.object())
+  EndIf
   If !MCMInitialized
-    AddTextOptionST("StartMod_T", "Start SCL", "")
+    AddTextOptionST("StartMod_T", "$Start SCL", "")
   ElseIf(a_page == "$Actor Information")
     SetCursorFillMode(LEFT_TO_RIGHT)
     AddMenuOptionST("SelectedActor_M", "$Actor", SelectedActorName);0
@@ -139,7 +147,7 @@ Event OnPageReset(string a_page)
         If SCLSet.DebugEnable
           AddSliderOptionST("WF_EditMaxStorage_S", "$Set Max Num Items To Stow", SCLib.WF_getSolidMaxNumItems(SelectedActor, SelectedData))
         Else
-          AddTextOptionST("WF_DisplayMaxStorage_T", "$Max Num Items To Stow", SCLib.WF_getSolidMaxNumItems(SelectedActor, SelectedData))
+          AddTextOptionST("WF_DisplayMaxStorage_T", "$Max Num Items Can Stow", SCLib.WF_getSolidMaxNumItems(SelectedActor, SelectedData))
         EndIf
         AddTextOptionST("WF_DisplayMaxInsert_T", "$Max Insertable Size", SCLib.WF_getSolidMaxInsert(SelectedActor, SelectedData))
         AddTextOptionST("DisplayNumStowedItems_T", "$Num Items Stowed Away", SCLib.countItemTypes(SelectedActor, 4, True))
@@ -157,12 +165,11 @@ Event OnPageReset(string a_page)
     AddMenuOptionST("SelectedActor_M", "$Actor", SelectedActorName);0
     AddEmptyOption()
     If SelectedActor
-      ;addAllPerkOptions(2)
-      addPerkOption(SelectedActor, "SCLRoomForMore") ;7
-      addPerkOption(SelectedActor, "SCLStoredLimitUp") ;9
-      addPerkOption(SelectedActor, "SCLHeavyBurden") ;11
-      addPerkOption(SelectedActor, "SCLAllowOverflow") ;13
-      addPerkOption(SelectedActor, "WF_BasementStorage")
+      String asPerkID = JMap.nextKey(SCLSet.JM_PerkIDs)
+      While asPerkID
+        addPerkOption(SelectedActor, asPerkID)
+        asPerkID = JMap.nextKey(SCLSet.JM_PerkIDs, asPerkID)
+      EndWhile
     Else
       AddTextOptionST("ChooseActorMessage_T", "$Choose an actor.", "")
     EndIf
@@ -213,7 +220,7 @@ Event OnPageReset(string a_page)
     EndIf/;
     AddEmptyOption()
     AddEmptyOption()
-    AddHeaderOption("Waste Function Settings")
+    AddHeaderOption("$Waste Function Settings")
     AddToggleOptionST("WF_Enable_TOG", "$Enable Waste Functions", SCLSet.WF_Active)
     If SCLSet.WF_Active
       AddKeyMapOptionST("WF_ActionKeyPick_KM", "$Choose Waste Function Action Key", SCLSet.WF_ActionKey)
@@ -246,6 +253,65 @@ EndEvent
 ;*******************************************************************************
 ;Options
 ;*******************************************************************************
+Event OnOptionSelect(Int Option)
+  String sPerkID = JIntMap.getStr(JI_PerkIndex, Option)
+  If sPerkID
+    If SCLib.canTakePerk(SelectedActor, sPerkID, SCLSet.DebugEnable)
+      Int CurrentPerkValue = JMap.getInt(JM_PerkValues, sPerkID)
+      If ShowMessage(SCLib.getPerkDescription(sPerkID, CurrentPerkValue + 1) + "\n Take Perk " + SCLib.getPerkName(sPerkID, CurrentPerkValue + 1) + "?", True, "Yes", "No")
+        SCLib.takePerk(SelectedActor, sPerkID, True)
+        ShowMessage("Perk " + SCLib.getPerkName(sPerkID, SCLib.getCurrentPerkLevel(SelectedActor, sPerkID)) + " taken! Some perk effects will not show until the menu is exited", False, "OK")
+        ForcePageReset()
+      EndIf
+    Else
+      ShowMessage(SCLib.getPerkRequirements(sPerkID, JMap.getInt(JM_PerkValues, sPerkID) + 1), False, "OK")
+    EndIf
+  EndIf
+EndEvent
+
+Event OnOptionMenuOpen(int a_option)
+  String asPerkID = JIntMap.getStr(JI_PerkIndex, a_option)
+  If asPerkID
+    Int CurrentPerkValue = SCLib.getCurrentPerkLevel(SelectedActor, asPerkID)
+    String[] EntryArray = Utility.CreateStringArray(CurrentPerkValue, "")
+    Int i = 0
+    While i < CurrentPerkValue
+      i += 1
+      EntryArray[i - 1] = SCLib.getPerkName(asPerkID, i)
+    EndWhile
+    SetMenuDialogStartIndex(JMap.getInt(JM_SelectedPerkLevel, asPerkID, 1) - 1)
+    SetMenuDialogDefaultIndex(CurrentPerkValue - 1)
+    SetMenuDialogOptions(EntryArray)
+  EndIf
+EndEvent
+
+Event OnOptionMenuAccept(int a_option, int a_index)
+  String asPerkID = JIntMap.getStr(JI_PerkIndex, a_option)
+  JMap.setInt(JM_SelectedPerkLevel, asPerkID, a_index + 1)
+  SetMenuOptionValue(a_option, "Taken")
+EndEvent
+
+Event OnOptionHighlight(int a_option)
+  String sPerkID = JIntMap.getStr(JI_PerkIndex, a_option)
+  If sPerkID
+    Int CurrentPerkValue = JMap.getInt(JM_PerkValues, sPerkID)
+    If a_option % 2 == 0
+      If CurrentPerkValue == 0
+        SetInfoText("Requirements: " + SCLib.getPerkRequirements(sPerkID, 1))
+      Else
+        SetInfoText(SCLib.getPerkDescription(sPerkID, JMap.getInt(JM_SelectedPerkLevel, sPerkID)) + "\n Requirements: " + SCLib.getPerkRequirements(sPerkID, JMap.getInt(JM_SelectedPerkLevel, sPerkID)))
+      EndIf
+    Else
+      Int MaxPerkValue = SCLib.getAbilityArray(sPerkID).Length - 1
+      If CurrentPerkValue >= MaxPerkValue
+        SetInfoText(SCLib.getPerkDescription(sPerkID, CurrentPerkValue))
+      Else
+        SetInfoText("Requirements: " + SCLib.getPerkRequirements(sPerkID, JMap.getInt(JM_SelectedPerkLevel, sPerkID)))
+      EndIf
+    EndIF
+  EndIf
+EndEvent
+
 State StartMod_T
   Event OnSelectST()
     SetTextOptionValueST("Please Close MCM")
@@ -998,7 +1064,7 @@ State CurveBelly_S
   EndEvent
 
   Event OnHighlightST()
-    SetInfoText("$Dampens size at larger values to better simulate volume. The closer to 0, the more extreme the dampening. Set to 2 to remove dampening entirely.")
+    SetInfoText("Dampens size at larger values to better simulate volume. The closer to 0, the more extreme the dampening. Set to 2 to remove dampening entirely.")
   EndEvent
 EndState
 
@@ -1021,7 +1087,7 @@ State DynEquipModifier_S
   EndEvent
 
   Event OnHighlightST()
-    SetInfoText("$Modifies applied size of Dynamic Equipment.")
+    SetInfoText("Modifies applied size of Dynamic Equipment.")
   EndEvent
 EndState
 
@@ -1044,7 +1110,7 @@ State DynMinSize_S
   EndEvent
 
   Event OnHighlightST()
-    SetInfoText("$Sets minimum fullness before dynamic equipment will be applied.")
+    SetInfoText("Sets minimum fullness before dynamic equipment will be applied.")
   EndEvent
 EndState
 
@@ -1387,15 +1453,7 @@ State ShowDebugMessages06_TOG
   EndEvent
 EndState
 
-Event OnOptionHighlight(int a_option)
-  CurrentHighlightedOption = a_option
-EndEvent
-
-Event OnOptionSelect(int a_option)
-  CurrentSelectedOption = a_option
-EndEvent
-
-State PerkState_TA
+;/State PerkState_TA
   Event OnSelectST()
     setPerkOption(SelectedActor, getPerkIDFromOption(CurrentSelectedOption))
   EndEvent
@@ -1425,27 +1483,12 @@ State PerkState_TB
   Event OnHighlightST()
     setPerkInfo(SelectedActor, getPerkIDFromOption(CurrentHighlightedOption), 1)
   EndEvent
-EndState
+EndState/;
 ;*******************************************************************************
 ;Functions
 ;*******************************************************************************
-Function addAllPerkOptions(Int aiCursorPosition)
-  Int NumPerks = JMap.count(SCLSet.JM_PerkIDs)
-  PerkPositions = Utility.CreateIntArray(NumPerks, 0)
-  PerkIDs = Utility.CreateStringArray(NumPerks, "")
-  Int i
-  String PerkKey = JMap.nextKey(SCLSet.JM_PerkIDs)
-  While PerkKey
-    addPerkOption(SelectedActor, PerkKey)
-    PerkPositions[i] = aiCursorPosition
-    PerkIDs[i] = PerkKey
-    i += 1
-    aiCursorPosition += 2
-    PerkKey = JMap.nextKey(SCLSet.JM_PerkIDs, PerkKey)
-  EndWhile
-EndFunction
 
-Int[] Property PerkPositions Auto
+;/Int[] Property PerkPositions Auto
 String[] Property PerkIDs Auto
 Int Property CurrentHighlightedOption Auto
 Int Property CurrentSelectedOption Auto
@@ -1457,34 +1500,40 @@ String Function getPerkIDFromOption(Int aiOption)
   Else
     Return PerkIDs[i]
   EndIf
-EndFunction
-
-;/Function addPerkOption(Actor akTarget, String asPerkID)
-  Int CurrentPerkValue = SCLib.getCurrentPerkLevel(akTarget, asPerkID)
-  Int MaxValue = SCLib.getAbilityArray(asPerkID).Length - 1
-  If CurrentPerkValue
-    If CurrentPerkValue == MaxValue
-      AddTextOptionST("PerkState_TB", SCLib.getPerkName(asPerkID, CurrentPerkValue - 1), "Taken")
-      AddTextOptionST("PerkState_T", SCLib.getPerkName(asPerkID, CurrentPerkValue), "Taken")
-    Else
-      AddTextOptionST("PerkState_T", SCLib.getPerkName(asPerkID, CurrentPerkValue), "Taken")
-      If SCLSet.DebugEnable
-        AddTextOptionST("PerkState_TA", SCLib.getPerkName(asPerkID, CurrentPerkValue + 1), "Take Perk")
-      Else
-        AddTextOptionST("PerkState_TA", "?????", "Take Perk")
-      EndIf
-    EndIf
-  Else
-    AddEmptyOption()
-    If SCLSet.DebugEnable
-      AddTextOptionST("PerkState_TA", SCLib.getPerkName(asPerkID, CurrentPerkValue + 1), "Take Perk")
-    Else
-      AddTextOptionST("PerkState_TA", "?????", "?????")
-    EndIf
-  EndIf
 EndFunction/;
 
 Function addPerkOption(Actor akTarget, String asPerkID)
+  Int CurrentPerkValue = SCLib.getCurrentPerkLevel(akTarget, asPerkID)
+  Int MaxValue = SCLib.getAbilityArray(asPerkID).Length - 1
+  Int PerkIndex01
+  Int PerkIndex02
+  If !CurrentPerkValue
+    If SCLSet.DebugEnable
+      PerkIndex01 = AddTextOption(SCLib.getPerkName(asPerkID, CurrentPerkValue + 1), "Take Perk")
+    Else
+      PerkIndex01 = AddTextOption("?????", "Take Perk")
+    EndIf
+    PerkIndex02 = AddEmptyOption()
+  Else
+    If CurrentPerkValue == MaxValue
+      PerkIndex01 = AddMenuOption(SCLib.getPerkName(asPerkID, CurrentPerkValue - 1), "Taken")
+      PerkIndex02 = AddTextOption(SCLib.getPerkName(asPerkID, CurrentPerkValue), "Taken")
+    Else
+      PerkIndex01 = AddMenuOption(SCLib.getPerkName(asPerkID, CurrentPerkValue), "Taken")
+      If SCLSet.DebugEnable
+        PerkIndex02 = AddTextOption(SCLib.getPerkName(asPerkID, CurrentPerkValue + 1), "Take Perk")
+      Else
+        PerkIndex02 = AddTextOption("?????", "Take Perk")
+      EndIf
+    EndIf
+  EndIf
+  JMap.setInt(JM_PerkValues, asPerkID, CurrentPerkValue)
+  JIntMap.setStr(JI_PerkIndex, PerkIndex01, asPerkID)
+  JIntMap.setStr(JI_PerkIndex, PerkIndex02, asPerkID)
+EndFunction
+
+;Go back to this one
+;/Function addPerkOption(Actor akTarget, String asPerkID)
   Int CurrentPerkValue = SCLib.getCurrentPerkLevel(akTarget, asPerkID)
   Int MaxValue = SCLib.getAbilityArray(asPerkID).Length - 1
   If CurrentPerkValue
@@ -1507,7 +1556,7 @@ Function addPerkOption(Actor akTarget, String asPerkID)
       AddTextOptionST(asPerkID + "_TA", "?????", "?????")
     EndIf
   EndIf
-EndFunction
+EndFunction/;
 
 
 ;/Bool Function addPerkOption(Actor akTarget, String asPerkID)

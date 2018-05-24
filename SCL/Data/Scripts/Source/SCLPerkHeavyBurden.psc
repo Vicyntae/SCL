@@ -20,12 +20,28 @@ Function Setup()
 EndFunction
 
 Bool Function canTake(Actor akTarget, Int aiPerkLevel, Bool abOverride, Int aiTargetData = 0)
+  If abOverride && aiPerkLevel < AbilityArray.Length
+    Return True
+  EndIf
   Int TargetData = SCLib.getData(akTarget, aiTargetData)
   Int MaxWeight = 150 * (aiPerkLevel + 1)
   Int Level = akTarget.GetLevel()
-  If aiPerkLevel <= 5 && (abOverride || (akTarget.HasMagicEffect(SCL_HeavyBurdenReqTrackerEffect) && Level >= MaxWeight / 10))
+  If aiPerkLevel <= 5 && akTarget.HasMagicEffect(SCL_HeavyBurdenReqTrackerEffect) && Level >= MaxWeight / 10
     Return True
   Else
+    Return False
+  EndIf
+EndFunction
+
+Bool Function takePerk(Actor akTarget, Bool abOverride = False, Int aiTargetData = 0)
+  Int TargetData = SCLib.getData(akTarget, aiTargetData)
+  Int i = getFirstPerkLevel(akTarget) + 1
+  If canTake(akTarget, i, abOverride)
+    JMap.setFlt(TargetData, "SCLHeavyBurden", JMap.getFlt(TargetData, "SCLHeavyBurden") + 1)
+    akTarget.AddSpell(AbilityArray[i], True)
+    Return True
+  Else
+    Notice("Actor ineligible for perk")
     Return False
   EndIf
 EndFunction

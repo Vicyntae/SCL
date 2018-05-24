@@ -133,7 +133,7 @@ Event OnEditBodyCall(Int aiID)
       ;Note("Method = Dynamic Equipment")
 
       Float MinSize = JMap.getFlt(InflateEntry, "DynMinSize", 20)
-      Note("SizeValue = " + SizeValue + ", DynMinSize = " + MinSize)
+      ;Note("SizeValue = " + SizeValue + ", DynMinSize = " + MinSize)
       If SizeValue < MinSize
         If JMap.getInt(TargetData, "SCL" + Type + "DynEquipSet") != 0
           JMap.setInt(TargetData, "SCL" + Type + "DynEquipSet", 0)

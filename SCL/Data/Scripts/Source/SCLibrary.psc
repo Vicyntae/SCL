@@ -1603,7 +1603,7 @@ Int Function createActorProfile(Form akTarget = None, Int JM_Container = 0, Bool
       JMap.setFlt(TargetData, "STBase", RandomBase)
       JMap.setFlt(TargetData, "STStretch", 1.75)
       JMap.setInt(TargetData, "SCLStoredLimitUp", 2)
-      JMap.setFlt(TargetData, "STDigestionRate", 1)
+      JMap.setFlt(TargetData, "STDigestionRate", 3)
       JMap.setInt(TargetData, "STTier", 3)
       JMap.setInt(TargetData, "SCLGluttony", 15)
       JMap.setInt(TargetData, "SCLInsobriety", 5)
@@ -1613,7 +1613,7 @@ Int Function createActorProfile(Form akTarget = None, Int JM_Container = 0, Bool
       JMap.setInt(TargetData, "SCLStoredLimitUp", 1)
       JMap.setInt(TargetData, "STTier", 2)
       JMap.setFlt(TargetData, "STStretch", 1.6)
-      JMap.setFlt(TargetData, "STDigestionRate", 0.5)
+      JMap.setFlt(TargetData, "STDigestionRate", 1)
       JMap.setInt(TargetData, "SCLGluttony", 10)
       JMap.setInt(TargetData, "SCLInsobriety", 5)
     Else
@@ -1622,7 +1622,7 @@ Int Function createActorProfile(Form akTarget = None, Int JM_Container = 0, Bool
       JMap.setInt(TargetData, "SCLStoredLimitUp", 0)
       JMap.setInt(TargetData, "STTier", 1)
       JMap.setFlt(TargetData, "STStretch", 1.5)
-      JMap.setFlt(TargetData, "STDigestionRate", 0.2)
+      JMap.setFlt(TargetData, "STDigestionRate", 0.5)
       JMap.setInt(TargetData, "SCLGluttony", 5)
       JMap.setInt(TargetData, "SCLInsobriety", 5)
     EndIf
@@ -1631,7 +1631,7 @@ Int Function createActorProfile(Form akTarget = None, Int JM_Container = 0, Bool
     JMap.setInt(TargetData, "SCLStoredLimitUp", 0)
     JMap.setInt(TargetData, "STTier", 1)
     JMap.setFlt(TargetData, "STStretch", 1.5)
-    JMap.setFlt(TargetData, "STDigestionRate", 0.2)
+    JMap.setFlt(TargetData, "STDigestionRate", 0.5)
     JMap.setInt(TargetData, "SCLGluttony", 5)
     JMap.setInt(TargetData, "SCLInsobriety", 5)
     JMap.setInt(TargetData, "SCLBasicProfile", 1)
@@ -2496,8 +2496,8 @@ Bool Function canTakePerk(Actor akTarget, String asPerkID, Bool abOverride = Fal
   Return False
 EndFunction
 
-Function takePerk(Actor akTarget, String asPerkID)
-  getPerkForm(asPerkID).takePerk(akTarget)
+Function takePerk(Actor akTarget, String asPerkID, Bool abOverride = False)
+  getPerkForm(asPerkID).takePerk(akTarget, abOverride)
 EndFunction
 
 Function takeUpPerks(Actor akTarget, String asPerkID, Int aiPerkLevel)
@@ -2538,7 +2538,7 @@ EndFunction
 
 String Function getPerkRequirements(String asPerkID, Int aiPerkLevel = 0)
   SCLPerkBase PerkEntry = getPerkForm(asPerkID)
-  Return PerkEntry.getDescription(aiPerkLevel)
+  Return PerkEntry.getRequirements(aiPerkLevel)
 EndFunction
 
 ;Vomit Functions ***************************************************************
@@ -2717,29 +2717,31 @@ Function vomitAmount(Actor akTarget, Float afRemoveAmount, Bool abRemoveStored =
     JA_Remove = JArray.object()
     Int i = JIntMap.nextKey(SCLSet.JI_ItemTypes)
     While i
-      Int JM_FoodTypes = JIntMap.getObj(SCLSet.JI_ItemTypes, i)
-      If JMap.getInt(JM_FoodTypes, "STisVomitType") == 1
-        Int JF_ContentsMap = getContents(akTarget, i)
-        ItemKey = JFormMap.nextKey(JF_ContentsMap)
-        While ItemKey
-          If ItemKey as ObjectReference
-            Int Chance = Utility.RandomInt()
-            If Chance <= aiOtherRemoveChance
-              If ItemKey as Actor
-                extractActor(akTarget, ItemKey as Actor, i, VomitContainer)
-              ElseIf ItemKey as SCLBundle
-                ;VomitContainer.AddItem(ItemKey as SCLBundle, 1, False)
-                VomitContainer.AddItem((ItemKey as SCLBundle).ItemForm, (ItemKey as SCLBundle).NumItems, False)
-                (ItemKey as ObjectReference).Delete()
-              Else
-                VomitContainer.AddItem(ItemKey as ObjectReference, 1, False)
+      If i != 1 && i != 2
+        Int JM_FoodTypes = JIntMap.getObj(SCLSet.JI_ItemTypes, i)
+        If JMap.getInt(JM_FoodTypes, "STisVomitType") == 1
+          Int JF_ContentsMap = getContents(akTarget, i)
+          ItemKey = JFormMap.nextKey(JF_ContentsMap)
+          While ItemKey
+            If ItemKey as ObjectReference
+              Int Chance = Utility.RandomInt()
+              If Chance <= aiOtherRemoveChance
+                If ItemKey as Actor
+                  extractActor(akTarget, ItemKey as Actor, i, VomitContainer)
+                ElseIf ItemKey as SCLBundle
+                  ;VomitContainer.AddItem(ItemKey as SCLBundle, 1, False)
+                  VomitContainer.AddItem((ItemKey as SCLBundle).ItemForm, (ItemKey as SCLBundle).NumItems, False)
+                  (ItemKey as ObjectReference).Delete()
+                Else
+                  VomitContainer.AddItem(ItemKey as ObjectReference, 1, False)
+                EndIf
+                JArray.addForm(JA_Remove, ItemKey)
               EndIf
-              JArray.addForm(JA_Remove, ItemKey)
             EndIf
-          EndIf
-          ItemKey = JFormMap.nextKey(JF_ContentsMap, ItemKey)
-        EndWhile
-        JF_eraseKeys(JF_ContentsMap, JA_Remove)
+            ItemKey = JFormMap.nextKey(JF_ContentsMap, ItemKey)
+          EndWhile
+          JF_eraseKeys(JF_ContentsMap, JA_Remove)
+        EndIf
       EndIf
       i = JIntMap.nextKey(SCLSet.JI_ItemTypes, i)
     EndWhile

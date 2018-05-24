@@ -28,10 +28,10 @@ Bool Function canTake(Actor akTarget, Int aiPerkLevel, Bool abOverride, Int aiTa
   Return False
 EndFunction
 
-Bool Function takePerk(Actor akTarget, Int aiTargetData = 0)
+Bool Function takePerk(Actor akTarget, Bool abOverride = False, Int aiTargetData = 0)
   Int TargetData = SCLib.getData(akTarget, aiTargetData)
   Int i = getFirstPerkLevel(akTarget) + 1
-  If canTake(akTarget, i, SCLSet.DebugEnable)
+  If canTake(akTarget, i, abOverride)
     akTarget.AddSpell(AbilityArray[i], True)
     Return True
   Else
