@@ -2078,11 +2078,8 @@ Function updateFullness(Actor akTarget, Bool abNoVomit = False, Int aiTargetData
       String ContentsKey = JArray.getStr(JA_AggValues, i)
       Float Value = JMap.getFlt(TargetData, ContentsKey)
       Total += Value
-      Note("Aggregating " + ContentsKey + " into value " + AggStr +". Value = " + Value)
     EndWhile
-    ;Note(nameGet(akTarget) + ": Total for agg value " + AggStr + " = " + Total)
     JMap.setFlt(TargetData, AggStr, Total)
-    Note("Final Total for " + AggStr + "=" + Total)
     AggStr = JMap.nextKey(SCLSet.JM_AggregateValues, AggStr)
   EndWhile
 EndFunction
@@ -2099,7 +2096,6 @@ Function updateFullnessEX(Actor akTarget, Bool abNoVomit = False, Int aiTargetDa
     String ContentsKey = getContentsKey(ItemType)
     If ContentsKey
       Float Fullness = getFullness(JF_ItemList)
-      Note("Fullness for Contents" + ItemType + "=" + Fullness)
       If Fullness < 0
         Issue("getFullness for ItemType " + ItemType + " returned less than 0. Setting to 0", 1)
         Fullness = 0
@@ -2617,7 +2613,6 @@ Function vomitAll(Actor akTarget, Bool ReturnFood = False, Bool RemoveEverything
     EndWhile
     String k = JMap.nextKey(SCLSet.JM_AggregateValues)
     Int TargetData = getTargetData(akTarget)
-    Note("Fullness Before = " + JMap.getFlt(TargetData, "STFullness"))
     While k
       Int JA_AggValues = JMap.getObj(SCLSet.JM_AggregateValues, k)
       Int j = JArray.count(JA_AggValues)
@@ -2629,7 +2624,6 @@ Function vomitAll(Actor akTarget, Bool ReturnFood = False, Bool RemoveEverything
       k = JMap.nextKey(SCLSet.JM_AggregateValues, k)
     EndWhile
     updateFullnessEX(akTarget)
-    Note("Fullness After = " + JMap.getFlt(TargetData, "STFullness"))
   EndIf
   sendVomitEvent(akTarget, 1, False)
   Notice("vomitAll completed for " + nameGet(aktarget))
