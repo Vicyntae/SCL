@@ -1,6 +1,7 @@
 ScriptName SCLPerkWF_BasementStorage Extends SCLPerkBase
 
 Function Setup()
+  Name = "Basement Storage"
   Description = New String[2]
   Description[0] = "Allows actor to store items in colon."
   Description[1] = "Allows actor to store items in colon."

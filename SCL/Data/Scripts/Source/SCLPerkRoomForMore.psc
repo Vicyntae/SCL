@@ -1,6 +1,7 @@
 ScriptName SCLPerkRoomForMore Extends SCLPerkBase
 
 Function Setup()
+  Name = "Room for More"
   Description = New String[6]
   Description[0] = "Increases base capacity."
   Description[1] = "Increases base capacity by 2.5."

@@ -256,15 +256,21 @@ EndEvent
 Event OnOptionSelect(Int Option)
   String sPerkID = JIntMap.getStr(JI_PerkIndex, Option)
   If sPerkID
+    Int CurrentPerkValue = JMap.getInt(JM_PerkValues, sPerkID)
     If SCLib.canTakePerk(SelectedActor, sPerkID, SCLSet.DebugEnable)
-      Int CurrentPerkValue = JMap.getInt(JM_PerkValues, sPerkID)
       If ShowMessage(SCLib.getPerkDescription(sPerkID, CurrentPerkValue + 1) + "\n Take Perk " + SCLib.getPerkName(sPerkID, CurrentPerkValue + 1) + "?", True, "Yes", "No")
         SCLib.takePerk(SelectedActor, sPerkID, True)
         ShowMessage("Perk " + SCLib.getPerkName(sPerkID, SCLib.getCurrentPerkLevel(SelectedActor, sPerkID)) + " taken! Some perk effects will not show until the menu is exited", False, "OK")
+        JMap.setInt(JM_SelectedPerkLevel, sPerkID, CurrentPerkValue + 1)
         ForcePageReset()
       EndIf
     Else
-      ShowMessage(SCLib.getPerkRequirements(sPerkID, JMap.getInt(JM_PerkValues, sPerkID) + 1), False, "OK")
+      Int MaxValue = SCLib.getAbilityArray(sPerkID).Length - 1
+      If CurrentPerkValue >= MaxValue
+        ShowMessage(SCLib.getPerkName(sPerkID, CurrentPerkValue) + ": " + SCLib.getPerkDescription(sPerkID, CurrentPerkValue) + "\n Requirements: " + SCLib.getPerkRequirements(sPerkID, CurrentPerkValue), False, "OK")
+      Else
+        ShowMessage(SCLib.getPerkRequirements(sPerkID, CurrentPerkValue + 1), False, "OK")
+      EndIf
     EndIf
   EndIf
 EndEvent
@@ -272,41 +278,41 @@ EndEvent
 Event OnOptionMenuOpen(int a_option)
   String asPerkID = JIntMap.getStr(JI_PerkIndex, a_option)
   If asPerkID
-    Int CurrentPerkValue = SCLib.getCurrentPerkLevel(SelectedActor, asPerkID)
-    String[] EntryArray = Utility.CreateStringArray(CurrentPerkValue, "")
+    SCLPerkBase PerkBase = SCLib.getPerkForm(asPerkID)
+    Int CurrentPerkValue = PerkBase.getFirstPerkLevel(SelectedActor)
+    String[] EntryArray = Utility.CreateStringArray(CurrentPerkValue + 1, "")
     Int i = 0
-    While i < CurrentPerkValue
+    While i <= CurrentPerkValue
+      EntryArray[i] = PerkBase.getPerkName(i)
       i += 1
-      EntryArray[i - 1] = SCLib.getPerkName(asPerkID, i)
     EndWhile
-    SetMenuDialogStartIndex(JMap.getInt(JM_SelectedPerkLevel, asPerkID, 1) - 1)
-    SetMenuDialogDefaultIndex(CurrentPerkValue - 1)
+    SetMenuDialogStartIndex(JMap.getInt(JM_SelectedPerkLevel, asPerkID, 1))
+    SetMenuDialogDefaultIndex(0)
     SetMenuDialogOptions(EntryArray)
   EndIf
 EndEvent
 
 Event OnOptionMenuAccept(int a_option, int a_index)
   String asPerkID = JIntMap.getStr(JI_PerkIndex, a_option)
-  JMap.setInt(JM_SelectedPerkLevel, asPerkID, a_index + 1)
-  SetMenuOptionValue(a_option, "Taken")
+  JMap.setInt(JM_SelectedPerkLevel, asPerkID, a_index)
+  ;SetMenuOptionValue(a_option, SCLib.getPerkName(asPerkID, JMap.getInt(JM_SelectedPerkLevel, asPerkID)))
 EndEvent
 
 Event OnOptionHighlight(int a_option)
   String sPerkID = JIntMap.getStr(JI_PerkIndex, a_option)
   If sPerkID
     Int CurrentPerkValue = JMap.getInt(JM_PerkValues, sPerkID)
+    Int SelectedPerkValue = JMap.getInt(JM_SelectedPerkLevel, sPerkID)
     If a_option % 2 == 0
-      If CurrentPerkValue == 0
-        SetInfoText("Requirements: " + SCLib.getPerkRequirements(sPerkID, 1))
-      Else
-        SetInfoText(SCLib.getPerkDescription(sPerkID, JMap.getInt(JM_SelectedPerkLevel, sPerkID)) + "\n Requirements: " + SCLib.getPerkRequirements(sPerkID, JMap.getInt(JM_SelectedPerkLevel, sPerkID)))
+      If CurrentPerkValue > 0
+        SetInfoText(SCLib.getPerkName(sPerkID, SelectedPerkValue) + ": " + SCLib.getPerkDescription(sPerkID, SelectedPerkValue) + "\n Requirements: " + SCLib.getPerkRequirements(sPerkID, SelectedPerkValue))
       EndIf
     Else
       Int MaxPerkValue = SCLib.getAbilityArray(sPerkID).Length - 1
       If CurrentPerkValue >= MaxPerkValue
-        SetInfoText(SCLib.getPerkDescription(sPerkID, CurrentPerkValue))
+        SetInfoText(SCLib.getPerkName(sPerkID, SelectedPerkValue) + ": " + SCLib.getPerkDescription(sPerkID, CurrentPerkValue) + "\n Requirements: " + SCLib.getPerkRequirements(sPerkID, CurrentPerkValue))
       Else
-        SetInfoText("Requirements: " + SCLib.getPerkRequirements(sPerkID, JMap.getInt(JM_SelectedPerkLevel, sPerkID)))
+        SetInfoText("Requirements: " + SCLib.getPerkRequirements(sPerkID, CurrentPerkValue + 1))
       EndIf
     EndIF
   EndIf
@@ -1503,33 +1509,26 @@ String Function getPerkIDFromOption(Int aiOption)
 EndFunction/;
 
 Function addPerkOption(Actor akTarget, String asPerkID)
-  Int CurrentPerkValue = SCLib.getCurrentPerkLevel(akTarget, asPerkID)
-  Int MaxValue = SCLib.getAbilityArray(asPerkID).Length - 1
-  Int PerkIndex01
-  Int PerkIndex02
-  If !CurrentPerkValue
-    If SCLSet.DebugEnable
-      PerkIndex01 = AddTextOption(SCLib.getPerkName(asPerkID, CurrentPerkValue + 1), "Take Perk")
+  SCLPerkBase PerkBase = SCLib.getPerkForm(asPerkID)
+  If PerkBase.isKnown(akTarget)
+    Int PerkIndex01
+    Int PerkIndex02
+    Int MaxValue = PerkBase.AbilityArray.Length - 1
+    Int CurrentPerkValue = PerkBase.getFirstPerkLevel(akTarget)
+    If !CurrentPerkValue
+      PerkIndex01 = AddEmptyOption()
     Else
-      PerkIndex01 = AddTextOption("?????", "Take Perk")
+      PerkIndex01 = AddMenuOption(SCLib.getPerkName(asPerkID, 0), "")
     EndIf
-    PerkIndex02 = AddEmptyOption()
-  Else
     If CurrentPerkValue == MaxValue
-      PerkIndex01 = AddMenuOption(SCLib.getPerkName(asPerkID, CurrentPerkValue - 1), "Taken")
       PerkIndex02 = AddTextOption(SCLib.getPerkName(asPerkID, CurrentPerkValue), "Taken")
     Else
-      PerkIndex01 = AddMenuOption(SCLib.getPerkName(asPerkID, CurrentPerkValue), "Taken")
-      If SCLSet.DebugEnable
-        PerkIndex02 = AddTextOption(SCLib.getPerkName(asPerkID, CurrentPerkValue + 1), "Take Perk")
-      Else
-        PerkIndex02 = AddTextOption("?????", "Take Perk")
-      EndIf
+      PerkIndex02 = AddTextOption(SCLib.getPerkName(asPerkID, CurrentPerkValue + 1), "Take Perk")
     EndIf
+    JMap.setInt(JM_PerkValues, asPerkID, CurrentPerkValue)
+    JIntMap.setStr(JI_PerkIndex, PerkIndex01, asPerkID)
+    JIntMap.setStr(JI_PerkIndex, PerkIndex02, asPerkID)
   EndIf
-  JMap.setInt(JM_PerkValues, asPerkID, CurrentPerkValue)
-  JIntMap.setStr(JI_PerkIndex, PerkIndex01, asPerkID)
-  JIntMap.setStr(JI_PerkIndex, PerkIndex02, asPerkID)
 EndFunction
 
 ;Go back to this one

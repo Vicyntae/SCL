@@ -157,6 +157,7 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
       Notice(akBaseObject.GetName() + " was eaten!")
       SCLib.addItem(MyActor, akReference, akBaseObject, 1)
       SCLib.updateSingleContents(MyActor, 1)
+      ;Change this to a modular effects system.
       Float Illness = JMap.getFlt(JM_Entry, "IllnessAmount")
       If Illness
         JMap.setFlt(ActorData, "IllnessBuildUp", JMap.getFlt(ActorData, "IllnessBuildUp") + Illness)
@@ -213,6 +214,7 @@ Function fullActorUpdate(Float afTimePassed, Float afCurrentUpdateTime, Bool abD
   ;Lock()
   sendProcessEvent(afTimePassed)
   Processing = True
+  DigestFinished = False
   ;/Int ProcessEvent = ModEvent.Create("SCLProcessEvent")
   ModEvent.pushForm(ProcessEvent, MyActor)
   ModEvent.PushFloat(ProcessEvent, afTimePassed)
@@ -243,7 +245,7 @@ Function fullActorUpdate(Float afTimePassed, Float afCurrentUpdateTime, Bool abD
     EndWhile
   EndIf
   DigestFinished = False
-  updateFullness()
+  updateFullnessEX()
   Float Fullness = JMap.getFlt(ActorData, "STFullness")
   ;Note("Fullness after update = " + Fullness)
   Float Max = SCLib.getMax(MyActor)
@@ -253,7 +255,7 @@ Function fullActorUpdate(Float afTimePassed, Float afCurrentUpdateTime, Bool abD
     Fullness = 0
   EndIf
 
-  JMap.setFlt(ActorData, "STFullness", Fullness)
+  ;JMap.setFlt(ActorData, "STFullness", Fullness)
   If Fullness > JMap.getFlt(ActorData, "SCLHighestFullness")
     JMap.setFlt(ActorData, "SCLHighestFullness", Fullness)
   EndIf
@@ -284,19 +286,20 @@ Function fullActorUpdate(Float afTimePassed, Float afCurrentUpdateTime, Bool abD
       OverfullTier += Math.Floor(Fullness / 100) ;Right now, it every 100 units per tier, maybe adjust this to be more extreme
     EndIf
 
-    If OverfullTier > SCLSet.SCL_OverfullHealSpeedArray.length - 1  ;Just using this as a test marker, all spell arrays should be filled the same
-      OverfullTier = SCLSet.SCL_OverfullHealSpeedArray.length - 1 ;Ensures that the overfull tier does not go above spells set
+    If OverfullTier > SCLSet.SCL_OverfullSpellArray.length - 1  ;Just using this as a test marker, all spell arrays should be filled the same
+      OverfullTier = SCLSet.SCL_OverfullSpellArray.length - 1 ;Ensures that the overfull tier does not go above spells set
     EndIf
 
     Int CurrentOverfull = JMap.getInt(ActorData, "SCLAppliedOverfullTier")
     If OverfullTier != CurrentOverfull
-      SCLSet.SCL_OverfullHealSpeedArray[OverfullTier].cast(MyActor) ;If it's tier 0, it casts the dispel effect and nothing else
-      SCLSet.SCL_OverfullStaminaMagicArray[OverfullTier].cast(MyActor)
+      SCLSet.SCL_OverfullSpellArray[0].cast(MyActor)
+      Utility.Wait(0.2)
+      SCLSet.SCL_OverfullSpellArray[OverfullTier].cast(MyActor) ;If it's tier 0, it casts the dispel effect and nothing else
 
       JMap.setInt(ActorData, "SCLAppliedOverfullTier", OverfullTier)
     EndIf
   ElseIf JMap.getInt(ActorData, "SCLAppliedOverfullTier")  != 0
-    SCLSet.SCL_OverfullHealSpeedArray[0].cast(MyActor) ;If it's tier 0, it casts the dispel effect and nothing else
+    SCLSet.SCL_OverfullSpellArray[0].cast(MyActor) ;If it's tier 0, it casts the dispel effect and nothing else
     JMap.setInt(ActorData, "SCLAppliedOverfullTier", 0)
   EndIf
 
@@ -510,7 +513,6 @@ Function updateFullness()
     Float Delta = Fullness - Max
     SCLib.vomitAmount(MyActor, Delta, True, 30, True, 20)
     FullUpdate = True
-    Fullness = JMap.getFlt(ActorData, "STFullness")
     JMap.setInt(ActorData, "SCLAllowOverflowTracking", JMap.getInt(ActorData, "SCLAllowOverflowTracking") + 1)
     SCLib.addVomitDamage(MyActor)
     SCLib.quickUpdate(MyActor)
@@ -526,8 +528,39 @@ Function updateFullness()
   If FullUpdate
     SCLib.updateFullnessEX(MyActor, True, ActorData)
   EndIf
+  Fullness = JMap.getFlt(ActorData, "STFullness")
   If Fullness > JMap.getFlt(ActorData, "SCLHighestFullness")
     JMap.setFlt(ActorData, "SCLHighestFullness", Fullness)
+  EndIf
+EndFunction
+
+Function updateFullnessEX()
+  {Updates AggregateValues after getting and setting total Digest Values}
+  Int ItemType = JIntMap.nextKey(SCLSet.JI_ItemTypes)
+
+  Float Total
+  While ItemType
+    Int JF_ItemList = JMap.getObj(ActorData, "Contents" + ItemType)
+    String ContentsKey = SCLib.getContentsKey(ItemType)
+    If ContentsKey
+      Float Fullness = getFullness(JF_ItemList)
+      If Fullness < 0
+        Issue("getFullness for ItemType " + ItemType + " returned less than 0. Setting to 0", 1)
+        Fullness = 0
+      EndIf
+      JMap.setFlt(ActorData, ContentsKey, Fullness)
+    EndIf
+    ItemType = JIntMap.nextKey(SCLSet.JI_ItemTypes, ItemType)
+  EndWhile
+  updateFullness()
+EndFunction
+
+Float Function getFullness(Int JF_ContentsMap)
+  {Sums up the contents of a single contents map}
+  If !JValue.empty(JF_ContentsMap)
+    Return JValue.evalLuaFlt(JF_ContentsMap, "return jc.accumulateValues(jobject, function(a,b) return a + b end, '.DigestValue')", -1)
+  Else
+    Return 0
   EndIf
 EndFunction
 

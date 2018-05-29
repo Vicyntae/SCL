@@ -3,6 +3,7 @@ ScriptName SCLPerkBase Extends ReferenceAlias Hidden
 SCLibrary Property SCLib Auto
 SCLSettings Property SCLSet Auto
 ;String Property PerkID Auto
+String Property Name Auto
 String[] Property Description Auto
 String[] Property Requirements Auto
 Spell[] Property AbilityArray Auto
@@ -22,6 +23,14 @@ Event OnInit()
 EndEvent
 
 Function Setup()
+EndFunction
+
+String Function getPerkName(Int aiPerkLevel)
+  If aiPerkLevel
+    Return AbilityArray[aiPerkLevel].GetName()
+  Else
+    Return Name
+  EndIf
 EndFunction
 
 Bool Function canTake(Actor akTarget, Int aiPerkLevel, Bool abOverride, Int aiTargetData = 0)
@@ -65,6 +74,10 @@ Int Function getFirstPerkLevel(Actor akTarget, Int aiTargetData = 0)
     EndIf
   EndWhile
   Return 0
+EndFunction
+
+Bool Function isKnown(Actor akTarget)
+  Return True
 EndFunction
 
 Function Popup(String sMessage)

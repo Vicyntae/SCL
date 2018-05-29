@@ -137,7 +137,7 @@ Event OnEditBodyCall(Int aiID)
       If SizeValue < MinSize
         If JMap.getInt(TargetData, "SCL" + Type + "DynEquipSet") != 0
           JMap.setInt(TargetData, "SCL" + Type + "DynEquipSet", 0)
-          purgeEquipSets(InflateEntry)
+          purgeDynEquipSets(InflateEntry)
         EndIf
         JMap.setFlt(TargetData, "VisualCurrentBellySize", 0)
         Result = 0

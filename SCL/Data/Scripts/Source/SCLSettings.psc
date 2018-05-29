@@ -296,8 +296,7 @@ FormList Property SCL_EquipmentSetKeywords Auto
 
 String Property ContainerTrashKey = "SCLContainerCleanup" Auto
 
-Spell[] Property SCL_OverfullHealSpeedArray Auto
-Spell[] Property SCL_OverfullStaminaMagicArray Auto
+Spell[] Property SCL_OverfullSpellArray Auto
 
 Spell[] Property SCL_HeavySpeedArray Auto
 

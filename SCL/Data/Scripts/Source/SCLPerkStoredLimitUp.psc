@@ -1,6 +1,7 @@
 ScriptName SCLPerkStoredLimitUp Extends SCLPerkBase
 
 Function Setup()
+  Name = "Stored Limit Up"
   Description = New String[6]
   Description[0] = "Allows you to store items in your stomach."
   Description[1] = "Increases item storage by 2."

@@ -1974,14 +1974,14 @@ Function updateDamage(Actor akTarget, Int aiTargetData = 0)
 
   Float Overfull = getOverfullPercent(akTarget, TargetData)
   Int OverfullTier = getOverfullTier(Overfull, Fullness)
-  If OverfullTier > SCLSet.SCL_OverfullHealSpeedArray.length - 1  ;Just using this as a test marker, all spell arrays should be filled the same
-    OverfullTier = SCLSet.SCL_OverfullHealSpeedArray.length - 1 ;Ensures that the overfull tier does not go above spells set
+  If OverfullTier > SCLSet.SCL_OverfullSpellArray.length - 1  ;Just using this as a test marker, all spell arrays should be filled the same
+    OverfullTier = SCLSet.SCL_OverfullSpellArray.length - 1 ;Ensures that the overfull tier does not go above spells set
   EndIf
   Int CurrentOverfull = getCurrentOverfull(akTarget, TargetData)
   If OverfullTier != CurrentOverfull
-    SCLSet.SCL_OverfullHealSpeedArray[OverfullTier].cast(akTarget) ;If it's tier 0, it casts the dispel effect and nothing else
-    SCLSet.SCL_OverfullStaminaMagicArray[OverfullTier].cast(akTarget)
-
+    SCLSet.SCL_OverfullSpellArray[0].cast(akTarget) ;If it's tier 0, it casts the dispel effect and nothing else
+    Utility.Wait(0.2)
+    SCLSet.SCL_OverfullSpellArray[OverfullTier].cast(akTarget)
     JMap.setInt(TargetData, "SCLAppliedOverfullTier", OverfullTier)
   EndIf
 
@@ -2076,10 +2076,13 @@ Function updateFullness(Actor akTarget, Bool abNoVomit = False, Int aiTargetData
     While i
       i -= 1
       String ContentsKey = JArray.getStr(JA_AggValues, i)
-      Total += JMap.getFlt(TargetData, ContentsKey)
+      Float Value = JMap.getFlt(TargetData, ContentsKey)
+      Total += Value
+      Note("Aggregating " + ContentsKey + " into value " + AggStr +". Value = " + Value)
     EndWhile
     ;Note(nameGet(akTarget) + ": Total for agg value " + AggStr + " = " + Total)
     JMap.setFlt(TargetData, AggStr, Total)
+    Note("Final Total for " + AggStr + "=" + Total)
     AggStr = JMap.nextKey(SCLSet.JM_AggregateValues, AggStr)
   EndWhile
 EndFunction
@@ -2096,6 +2099,7 @@ Function updateFullnessEX(Actor akTarget, Bool abNoVomit = False, Int aiTargetDa
     String ContentsKey = getContentsKey(ItemType)
     If ContentsKey
       Float Fullness = getFullness(JF_ItemList)
+      Note("Fullness for Contents" + ItemType + "=" + Fullness)
       If Fullness < 0
         Issue("getFullness for ItemType " + ItemType + " returned less than 0. Setting to 0", 1)
         Fullness = 0
@@ -2516,7 +2520,7 @@ Function takeUpPerks(Actor akTarget, String asPerkID, Int aiPerkLevel)
 EndFunction
 
 String Function getPerkName(String asPerkID, Int aiPerkLevel = 1)
-  Return getAbilityArray(asPerkID)[aiPerkLevel].GetName()
+  Return getPerkForm(asPerkID).getPerkName(aiPerkLevel)
 EndFunction
 
 Bool Function canTakeAnyPerk(Actor akTarget)
@@ -2611,6 +2615,21 @@ Function vomitAll(Actor akTarget, Bool ReturnFood = False, Bool RemoveEverything
       EndIf
       i = JIntMap.nextKey(SCLSet.JI_ItemTypes, i)
     EndWhile
+    String k = JMap.nextKey(SCLSet.JM_AggregateValues)
+    Int TargetData = getTargetData(akTarget)
+    Note("Fullness Before = " + JMap.getFlt(TargetData, "STFullness"))
+    While k
+      Int JA_AggValues = JMap.getObj(SCLSet.JM_AggregateValues, k)
+      Int j = JArray.count(JA_AggValues)
+      While j
+        j -= 1
+        JMap.setFlt(TargetData, JArray.getFlt(JA_AggValues, j), 0)
+      EndWhile
+      JMap.setFlt(TargetData, k, 0)
+      k = JMap.nextKey(SCLSet.JM_AggregateValues, k)
+    EndWhile
+    updateFullnessEX(akTarget)
+    Note("Fullness After = " + JMap.getFlt(TargetData, "STFullness"))
   EndIf
   sendVomitEvent(akTarget, 1, False)
   Notice("vomitAll completed for " + nameGet(aktarget))
@@ -3135,7 +3154,7 @@ EndFunction
 Bool Function buildActorMainMenu(Actor akTarget, Int aiMode = 0)
   UIWheelMenu WM_ActorMenu = UIExtensions.GetMenu("UIWheelMenu", True) as UIWheelMenu
   String ActorName = nameGet(akTarget)
-  Int TargetData = getTargetData(akTarget, True)
+  ;Int TargetData = getTargetData(akTarget, True)
   Bool AllowCommandFunctions = False
   If akTarget == PlayerRef || akTarget.IsPlayerTeammate() || SCLSet.DebugEnable
     AllowCommandFunctions = True
@@ -3465,16 +3484,24 @@ Function showPerksList(Actor akTarget = None, Int aiMode = 0)
 
   UIExtensions.OpenMenu("UIListMenu", akTarget)
   Int Option = UIExtensions.GetMenuResultInt("UIListMenu")
-  While Option > 0 && Option < JArray.count(JA_Description)
-    Notice("Option " + Option + " selected!")
+  While Option > 0 && Option < JArray.count(JA_OptionList1)
+    ;Note("Option " + Option + " selected!")
     Bool RebuildMenu = False
     String PerkID = JArray.getStr(JA_OptionList1, Option)
-    If canTakePerk(akTarget, PerkID, SCLSet.DebugEnable)
-      takePerk(akTarget, PerkID)
+    Int PerkLevel = JArray.getInt(JA_OptionList2, Option)
+    ;Note("PerkID = " + PerkID + ", PerkLevel = " + PerkLevel)
+    Int CurrentPerkValue = getCurrentPerkLevel(akTarget, PerkID)
+    ;Note("CurrentPerkValue=" + CurrentPerkValue)
+    If PerkLevel <= CurrentPerkValue
+      Debug.Notification(getPerkDescription(PerkID, PerkLevel))
+      Debug.Notification(getPerkRequirements(PerkID, PerkLevel))
+    ElseIf canTakePerk(akTarget, PerkID, SCLSet.DebugEnable)
+      takePerk(akTarget, PerkID, True)
       Debug.Notification("Perk " + getPerkName(PerkID, JArray.getInt(JA_OptionList2, Option)) + " taken!")
       RebuildMenu = True
     Else
-      Debug.Notification(JArray.getStr(JA_Description, Option))
+      Debug.Notification(getPerkDescription(PerkID, PerkLevel))
+      Debug.Notification(getPerkRequirements(PerkID, PerkLevel))
     EndIf
     If RebuildMenu
       If buildPerksMenu(akTarget)
@@ -3502,17 +3529,43 @@ Bool Function buildPerksMenu(Actor akTarget)
   JA_Description = JValue.retain(JArray.object())
   JA_OptionList1 = JValue.retain(JArray.object())
   JA_OptionList2 = JValue.retain(JArray.object())
-  Int HasAvailablePerk = 0
   LM_ST_Perks.AddEntryItem("<< Return")
-  JArray.addStr(JA_Description, "")
+  ;JArray.addStr(JA_Description, "")
   JArray.addStr(JA_OptionList1, "")
+  JArray.addStr(JA_OptionList2, "")
 
   String sPerkID = JMap.nextKey(SCLSet.JM_PerkIDs)
   While sPerkID
-    HasAvailablePerk += addPerkEntry(akTarget, LM_ST_Perks, sPerkID)
+    SCLPerkBase PerkBase = getPerkForm(sPerkID)
+    If PerkBase.isKnown(akTarget)
+      Int CurrentPerkValue = PerkBase.getFirstPerkLevel(akTarget)
+      Int i = 0
+      While i <= CurrentPerkValue
+        String Entry
+        If i == 0
+          Entry = PerkBase.Name
+        Else
+          Entry = ">>" + PerkBase.AbilityArray[i].GetName()
+        EndIf
+        LM_ST_Perks.AddEntryItem(Entry)
+        ;JArray.addStr(JA_Description, getPerkDescription(sPerkID, i))
+        JArray.addStr(JA_OptionList1, sPerkID)
+        JArray.addInt(JA_OptionList2, i)
+        i += 1
+      EndWhile
+      Int MaxValue = PerkBase.AbilityArray.Length - 1
+      If CurrentPerkValue + 1 <= MaxValue
+        LM_ST_Perks.AddEntryItem(">>>>" + PerkBase.AbilityArray[i].GetName())
+        ;JArray.addStr(JA_Description, getPerkDescription(sPerkID, i))
+        JArray.addStr(JA_OptionList1, sPerkID)
+        JArray.addInt(JA_OptionList2, CurrentPerkValue + 1)
+      EndIf
+    EndIf
+
+    ;HasAvailablePerk += addPerkEntry(akTarget, LM_ST_Perks, sPerkID)
     sPerkID = JMap.nextKey(SCLSet.JM_PerkIDs, sPerkID)
   EndWhile
-  Return HasAvailablePerk as Bool
+  Return True
 EndFunction
 
 Int Function addPerkEntry(Actor akTarget, UIListMenu akMenu, String asPerkID)

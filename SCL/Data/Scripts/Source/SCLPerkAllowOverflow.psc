@@ -1,7 +1,9 @@
 ScriptName SCLPerkAllowOverflow Extends SCLPerkBase
 
+
 Function Setup()
   Description = New String[2]
+  Name = "Allow Overflow"
   Description[0] = "Allows actor to eat above the maximum without vomiting (other effects may apply)."
   Description[1] = "Allows actor to eat above the maximum without vomiting (other effects may apply)."
 

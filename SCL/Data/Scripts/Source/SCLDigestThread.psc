@@ -148,7 +148,8 @@ Event OnDigestCall(Int aiID)
         ItemKey = JFormMap.nextKey(ItemList, ItemKey)
       EndWhile
       ;Notice("Done processing items, setting final stats:")
-      JMap.setFlt(TargetData, "ContentsFullness1", Fullness)
+      ;Maybe just run updateFullnessEX after digestion.
+      ;JMap.setFlt(TargetData, "ContentsFullness1", Fullness)
       JMap.setFlt(TargetData, "STTotalDigestedFood", JMap.getFlt(TargetData, "STTotalDigestedFood") + TotalDigested)
       JMap.setFlt(TargetData, "STLastDigestAmount", TotalDigested)
       If SCLSet.WF_Active

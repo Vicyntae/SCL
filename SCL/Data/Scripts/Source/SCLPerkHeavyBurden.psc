@@ -2,6 +2,7 @@ ScriptName SCLPerkHeavyBurden Extends SCLPerkBase
 MagicEffect Property SCL_HeavyBurdenReqTrackerEffect Auto ;goes on a spell attached to reference alias, conditioned to recognize heavy effects
 
 Function Setup()
+  Name = "Heavy Burden"
   Description = New String[6]
   Description[0] = "Allows actor to move freely when their weight is high."
   Description[1] = "Allows actor to move freely when their weight exceeds " + (100 * (1 + 1)) + "."
