@@ -440,8 +440,24 @@ EndFunction
 
 Function checkWF(Float afTimePassed, Float afCurrentUpdateTime)
   If SCLSet.WF_Active
+    Float SolidAmount = SCLib.WF_getTotalSolidFullness(MyActor, ActorData)
+    If SolidAmount
+      Int BasementReq
+      Int PerkLevel = SCLib.getCurrentPerkLevel(MyActor, "WF_BasementStorage")
+      If PerkLevel == 1
+        BasementReq = 5
+      ElseIf PerkLevel == 2
+        BasementReq == 10
+      ElseIf PerkLevel == 3
+        BasementReq == 20
+      ElseIf PerkLevel == 4
+        BasementReq == 30
+      EndIf
+      If SolidAmount >= BasementReq
+        JMap.setInt(ActorData, "SCLWF_BasementStorageReq", 1)
+      EndIf
+    EndIf
     If SCLSet.WF_SolidActive
-      Float SolidAmount = SCLib.WF_getTotalSolidFullness(MyActor, ActorData)
       Float SolidTimePast = ((afCurrentUpdateTime - (JMap.getFlt(ActorData, "WF_SolidTimePast")))*24) ;In hours
       Float SolidBase = SCLib.WF_getAdjSolidBase(MyActor, ActorData)
       If !MyActor.HasSpell(SCLSet.WF_SolidDebuffSpell)
@@ -449,10 +465,12 @@ Function checkWF(Float afTimePassed, Float afCurrentUpdateTime)
           MyActor.AddSpell(SCLSet.WF_SolidDebuffSpell, False)
         EndIf
       Else
-        If SolidAmount < SolidBase && SolidTimePast > 8
+        If SolidAmount < SolidBase && SolidTimePast < 8
           MyActor.RemoveSpell(SCLSet.WF_SolidDebuffSpell)
         EndIf
       EndIf
+
+
       ;/Float IllnessFlt = JMap.getFlt(ActorData, "IllnessBuildUp")
       Float Boundary = JMap.getFlt(ActorData, "IllnessThreshold", 1)
       If IllnessFlt > Boundary

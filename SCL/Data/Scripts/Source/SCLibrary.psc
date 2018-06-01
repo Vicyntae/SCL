@@ -1107,6 +1107,8 @@ Float Function giveExpandBonus(Actor akTarget, Int aiMultiply = 1, Int aiTargetD
   Bonus *= aiMultiply
   Notice("Adding expand bonus of " + Bonus + " to " + nameGet(akTarget))
   JMap.setFlt(TargetData, "STBase", JMap.getFlt(TargetData, "STBase") + Bonus)
+  JMap.setFlt(TargetData, "SCLExpandNum", JMap.getFlt(TargetData, "SCLExpandNum") + 1)
+
   Return Bonus
 EndFunction
 
@@ -1362,7 +1364,7 @@ Float Function getOverfullPercent(Actor akTarget, Int aiTargetData = 0)
   Float Fullness = JMap.getFlt(TargetData, "STFullness")
   Float Base = getAdjBase(akTarget, TargetData)
   If Fullness > Base
-    Float Percent = Fullness - Base / getMax(akTarget, TargetData) - Base
+    Float Percent = Fullness - Base / (Base * 1.5) - Base
     Return Percent
   Else
     Return 0
@@ -1371,7 +1373,17 @@ EndFunction
 
 Int Function getOverfullTier(Float afValue, Float afFullness)
   Int Tier
-  If afValue > 1
+  If afValue > 2
+    Tier = 12
+  ElseIf afValue > 1.8
+    Tier = 11
+  ElseIf afValue > 1.6
+    Tier = 10
+  ElseIf afValue > 1.4
+    Tier = 8
+  ElseIf afValue > 1.2
+    Tier = 7
+  ElseIf afValue > 1
     Tier = 6
   ElseIf afValue > 0.8
     Tier = 5
@@ -1394,12 +1406,7 @@ Int Function getOverfullTier(Float afValue, Float afFullness)
 EndFunction
 
 Int Function getCurrentOverfull(Actor akTarget, Int aiTargetData = 0)
-  Int TargetData
-  If aiTargetData
-    TargetData = aiTargetData
-  Else
-    TargetData = getTargetData(akTarget)
-  EndIf
+  Int TargetData = getData(akTarget, aiTargetData)
   Return JMap.getInt(TargetData, "SCLAppliedOverfullTier")
 EndFunction
 
