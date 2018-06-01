@@ -149,19 +149,50 @@ Event OnQuickUpdate()
   EndIf
 EndEvent
 
+Int JA_AddQueue
+Int AddQueueNum = 0
 Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
   If akBaseObject as Potion || akBaseObject as Ingredient
     Int JM_Entry = SCLib.getItemDataEntry(akBaseObject)
     If JMap.getInt(JM_Entry, "STIsNotFood") == 0
-      ;Lock()
       Notice(akBaseObject.GetName() + " was eaten!")
-      SCLib.addItem(MyActor, akReference, akBaseObject, 1)
+      Bool FirstItem
+      If !JA_AddQueue
+        JA_AddQueue = JValue.retain(JArray.object())
+        FirstItem = True
+      Else
+        AddQueueNum += 1
+      EndIf
+      If akReference
+        JArray.addForm(JA_AddQueue, akReference)
+      Else
+        JArray.addForm(JA_AddQueue, akBaseObject)
+      EndIf
+      Utility.Wait(0.5)
+      If FirstItem
+        While AddQueueNum > 0
+          Utility.Wait(1)
+        EndWhile
+      Else
+        AddQueueNum -= 1
+        Return
+      EndIf
+      ;Lock()
+      Int i = 0
+      Int NumItems = JArray.count(JA_AddQueue)
+      While i < NumItems
+        Form akItem = JArray.getForm(JA_AddQueue, i)
+        SCLib.AddItem(MyActor, akItem as ObjectReference, akItem, 1)
+        i += 1
+      EndWhile
+      JA_AddQueue = JValue.release(JA_AddQueue)
+      ;SCLib.addItem(MyActor, akReference, akBaseObject, 1)
       SCLib.updateSingleContents(MyActor, 1)
       ;Change this to a modular effects system.
-      Float Illness = JMap.getFlt(JM_Entry, "IllnessAmount")
+      ;/Float Illness = JMap.getFlt(JM_Entry, "IllnessAmount")
       If Illness
         JMap.setFlt(ActorData, "IllnessBuildUp", JMap.getFlt(ActorData, "IllnessBuildUp") + Illness)
-      EndIf
+      EndIf/;
       SCLib.quickUpdate(MyActor)
       ;Unlock()
     EndIf
@@ -440,24 +471,8 @@ EndFunction
 
 Function checkWF(Float afTimePassed, Float afCurrentUpdateTime)
   If SCLSet.WF_Active
-    Float SolidAmount = SCLib.WF_getTotalSolidFullness(MyActor, ActorData)
-    If SolidAmount
-      Int BasementReq
-      Int PerkLevel = SCLib.getCurrentPerkLevel(MyActor, "WF_BasementStorage")
-      If PerkLevel == 1
-        BasementReq = 5
-      ElseIf PerkLevel == 2
-        BasementReq == 10
-      ElseIf PerkLevel == 3
-        BasementReq == 20
-      ElseIf PerkLevel == 4
-        BasementReq == 30
-      EndIf
-      If SolidAmount >= BasementReq
-        JMap.setInt(ActorData, "SCLWF_BasementStorageReq", 1)
-      EndIf
-    EndIf
     If SCLSet.WF_SolidActive
+      Float SolidAmount = SCLib.WF_getTotalSolidFullness(MyActor, ActorData)
       Float SolidTimePast = ((afCurrentUpdateTime - (JMap.getFlt(ActorData, "WF_SolidTimePast")))*24) ;In hours
       Float SolidBase = SCLib.WF_getAdjSolidBase(MyActor, ActorData)
       If !MyActor.HasSpell(SCLSet.WF_SolidDebuffSpell)
@@ -465,12 +480,10 @@ Function checkWF(Float afTimePassed, Float afCurrentUpdateTime)
           MyActor.AddSpell(SCLSet.WF_SolidDebuffSpell, False)
         EndIf
       Else
-        If SolidAmount < SolidBase && SolidTimePast < 8
+        If SolidAmount < SolidBase && SolidTimePast > 8
           MyActor.RemoveSpell(SCLSet.WF_SolidDebuffSpell)
         EndIf
       EndIf
-
-
       ;/Float IllnessFlt = JMap.getFlt(ActorData, "IllnessBuildUp")
       Float Boundary = JMap.getFlt(ActorData, "IllnessThreshold", 1)
       If IllnessFlt > Boundary
