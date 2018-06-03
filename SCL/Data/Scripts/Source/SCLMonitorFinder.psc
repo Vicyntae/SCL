@@ -2,6 +2,9 @@ ScriptName SCLMonitorFinder Extends Quest
 SCLibrary Property SCLib Auto
 SCLSettings Property SCLSet Auto
 Actor Property PlayerRef Auto
+Formlist Property SCL_RejectList Auto
+Faction Property PotentialFollowerFaction Auto
+Faction Property CurrentFollowerFaction Auto
 Quest Property SCL_MonitorManagerQuest Auto
 String DebugName = "[SCLMonitorFinder] "
 Int DMID = 3
@@ -14,6 +17,10 @@ Bool Function Start()
     Notice("Monitor Manager not running!")
     Return bReturn
   EndIf
+  ReferenceAlias PlayerAlias = SCL_MonitorManagerQuest.GetNthAlias(0) as ReferenceAlias
+  If PlayerAlias.GetActorReference() != PlayerRef
+    PlayerAlias.ForceRefTo(PlayerRef)
+  EndIf
   If !SCLSet.LoadedActors
     SCLSet.LoadedActors = getActors()
   EndIf
@@ -21,6 +28,7 @@ Bool Function Start()
   Int JA_Teammates = JArray.object()
   ;Notice("Removing no longer loaded actors")
   Int i
+  Int MaxTrack = SCLSet.MaxActorTracking
   Int LoadedNum = SCLSet.LoadedActors.length
   While i < LoadedNum
     Actor LoadedActor = SCLSet.LoadedActors[i] as Actor
@@ -28,6 +36,9 @@ Bool Function Start()
       Int j = NewActors.find(LoadedActor)
       If j < 0
         ;Notice(SCLib.nameGet(LoadedActor) + " is not in New Actors list! Removing...")
+        SCLSet.LoadedActors[i] = None
+        removeFromLoadedActors(LoadedActor, i)
+      ElseIf i > MaxTrack ;Check if actor positions are filled
         SCLSet.LoadedActors[i] = None
         removeFromLoadedActors(LoadedActor, i)
       EndIf
@@ -41,14 +52,31 @@ Bool Function Start()
   While i < LoadedNum
     Actor NewActor = NewActors[i] as Actor
     If NewActor && NewActor != PlayerRef
-      Int j = SCLSet.LoadedActors.find(NewActor)
-      If j < 0
-        ;Notice(SCLib.nameGet(NewActor) + " is not in Monitor Manager! Adding...")
-        Int k = addToLoadedActors(NewActor)
-        If k != -1
-          SCLSet.LoadedActors[k] = NewActor
-        Else
-          Notice("No slots open!")
+      Bool NoList
+      If (NewActor.IsInFaction(CurrentFollowerFaction) || NewActor.IsInFaction(PotentialFollowerFaction))
+        If !SCLSet.EnableFollowerTracking
+          SCL_RejectList.AddForm(NewActor.GetLeveledActorBase())
+          NoList = True
+        EndIf
+      ElseIf NewActor.GetLeveledActorBase().IsUnique()
+        If !SCLSet.EnableUniqueTracking
+          SCL_RejectList.AddForm(NewActor.GetLeveledActorBase())
+          NoList = True
+        EndIf
+      ElseIf !SCLSet.EnableNPCTracking
+        SCL_RejectList.AddForm(NewActor.GetLeveledActorBase())
+        NoList = True
+      EndIf
+      If !NoList
+        Int j = SCLSet.LoadedActors.find(NewActor)
+        If j < 0
+          ;Notice(SCLib.nameGet(NewActor) + " is not in Monitor Manager! Adding...")
+          Int k = addToLoadedActors(NewActor)
+          If k != -1
+            SCLSet.LoadedActors[k] = NewActor
+          Else
+            Notice("No slots open!")
+          EndIf
         EndIf
       EndIf
     EndIf
@@ -122,7 +150,11 @@ EndFunction
 Int Function addToLoadedActors(Actor akTarget)
   Int i
   Int NumAlias = SCL_MonitorManagerQuest.GetNumAliases()
-  While i < NumAlias
+  Int MaxTrack = SCLSet.MaxActorTracking
+  If MaxTrack > NumAlias - 1
+    MaxTrack = NumAlias - 1
+  EndIf
+  While i <= MaxTrack
     ;Notice("Add: Checking Alias " + i)
     ReferenceAlias LoadedAlias = SCL_MonitorManagerQuest.GetNthAlias(i) as ReferenceAlias
     If !LoadedAlias.GetActorReference()

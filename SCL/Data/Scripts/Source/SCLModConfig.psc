@@ -185,6 +185,12 @@ Event OnPageReset(string a_page)
     EndIf
   ElseIf a_page == "$Settings"
     SetCursorFillMode(LEFT_TO_RIGHT)
+    AddHeaderOption("$Tracking Options")
+    AddHeaderOption("")
+    AddToggleOptionST("EnableFollower_TOG", "$Enable Follower Tracking", SCLSet.EnableFollowerTracking)
+    AddToggleOptionST("EnableUnique_TOG", "$Enable Unique Actor Tracking", SCLSet.EnableUniqueTracking)
+    AddToggleOptionST("EnableNPC_TOG", "$Enable NPC Tracking", SCLSet.EnableNPCTracking)
+    AddSliderOptionST("MaxNumTracking_S", "$Max Num Actors Tracked", SCLSet.MaxActorTracking, "{0} Actors")
     AddHeaderOption("$Digestion Settings")
     AddHeaderOption("")
     AddSliderOptionST("GlobalDigest_S", "$Global Digestion Rate", SCLSet.GlobalDigestMulti, "x{1}")
@@ -778,6 +784,83 @@ State WF_BasementStorage_TB
 EndState
 
 ;Settings **********************************************************************
+State EnableFollower_TOG
+  Event OnSelectST()
+    SCLSet.EnableFollowerTracking = !SCLSet.EnableFollowerTracking
+    SetToggleOptionValueST(SCLSet.EnableFollowerTracking)
+    SCLSet.SCL_RejectList.Revert()
+  EndEvent
+
+  Event OnDefaultST()
+    SCLSet.EnableFollowerTracking = True
+    SetToggleOptionValueST(True)
+    SCLSet.SCL_RejectList.Revert()
+  EndEvent
+
+  Event OnHighlightST()
+    SetInfoText("Enable tracking of player followers.")
+  EndEvent
+EndState
+
+State EnableUnique_TOG
+  Event OnSelectST()
+    SCLSet.EnableUniqueTracking = !SCLSet.EnableUniqueTracking
+    SetToggleOptionValueST(SCLSet.EnableUniqueTracking)
+    SCLSet.SCL_RejectList.Revert()
+  EndEvent
+
+  Event OnDefaultST()
+    SCLSet.EnableUniqueTracking = True
+    SetToggleOptionValueST(True)
+    SCLSet.SCL_RejectList.Revert()
+  EndEvent
+
+  Event OnHighlightST()
+    SetInfoText("Enable tracking of unique NPCs.")
+  EndEvent
+EndState
+
+State EnableNPC_TOG
+  Event OnSelectST()
+    SCLSet.EnableNPCTracking = !SCLSet.EnableNPCTracking
+    SetToggleOptionValueST(SCLSet.EnableNPCTracking)
+    SCLSet.SCL_RejectList.Revert()
+  EndEvent
+
+  Event OnDefaultST()
+    SCLSet.EnableNPCTracking = True
+    SetToggleOptionValueST(True)
+    SCLSet.SCL_RejectList.Revert()
+  EndEvent
+
+  Event OnHighlightST()
+    SetInfoText("Enable tracking of general NPCs.")
+  EndEvent
+EndState
+
+State MaxNumTracking_S
+  Event OnSliderOpenST()
+    SetSliderDialogStartValue(SCLSet.MaxActorTracking)
+    SetSliderDialogDefaultValue(SCLSet.LoadedActors.length - 1)
+    SetSliderDialogRange(0, SCLSet.LoadedActors.length - 1)
+    SetSliderDialogInterval(1)
+  EndEvent
+
+  Event OnSliderAcceptST(float a_value)
+    SCLSet.MaxActorTracking = a_value as Int
+    SetSliderOptionValueST(SCLSet.MaxActorTracking, "{0} Actors")
+  EndEvent
+
+  Event OnDefaultST()
+    SCLSet.MaxActorTracking = 20
+    SetSliderOptionValueST(20, "{0} Actors")
+  EndEvent
+
+  Event OnHighlightST()
+    SetInfoText("Set max number of tracked NPCs")
+  EndEvent
+EndState
+
 State GlobalDigest_S
 	Event OnSliderOpenST()
 		SetSliderDialogStartValue(SCLSet.GlobalDigestMulti)

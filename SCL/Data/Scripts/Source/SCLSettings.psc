@@ -4,7 +4,13 @@ ScriptName SCLSettings Extends Quest
 Quest Property SCLStartUpQuest Auto
 
 ;Settings **********************************************************************
-
+Bool Property EnableFollowerTracking Auto
+Bool Property EnableUniqueTracking Auto
+Bool Property EnableNPCTracking Auto
+Int Property MaxActorTracking Auto
+Formlist Property SCL_RejectList Auto
+Faction Property PotentialFollowerFaction Auto
+Faction Property CurrentFollowerFaction Auto
 ;Interface Settings ------------------------------------------------------------
 GlobalVariable Property SCL_SET_PlayerMessagePOV Auto ;Default 0
 Int Property PlayerMessagePOV
@@ -304,9 +310,6 @@ Spell[] Property SCL_StoredDamageArray Auto
 MiscObject Property SCL_ItemBundle Auto
 
 ObjectReference Property SCL_TransferChest Auto
-
-Faction Property PotentialFollowerFaction Auto
-
 ;Perks
 
 Formlist Property TrackingSpellList Auto
