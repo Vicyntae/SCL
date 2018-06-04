@@ -15,9 +15,9 @@ Function Setup()
   Requirements[0] = "No Requirements."
   Requirements[1] = "Reach Level 5."
   Requirements[2] = "Reach Level 10 and have at least 5 units of stuff in your colon at some point."
-  Requirements[2] = "Reach Level 25 and have at least 10 units of stuff in your colon at some point."
-  Requirements[2] = "Reach Level 40 and have at least 20 units of stuff in your colon at some point."
-  Requirements[2] = "Reach Level 60 and have at least 30 units of stuff in your colon at some point."
+  Requirements[3] = "Reach Level 25 and have at least 10 units of stuff in your colon at some point."
+  Requirements[4] = "Reach Level 40 and have at least 20 units of stuff in your colon at some point."
+  Requirements[5] = "Reach Level 60 and have at least 30 units of stuff in your colon at some point."
 
 EndFunction
 

@@ -75,14 +75,15 @@ Int Function getActorData(Actor akTarget) Global
   Data now stored under ActorBase for unique actors
   Function will generate new actor profile if no data found && abGenProfile == True
   Player data still stored under actor}
-  Form Target
-  If akTarget == Game.GetPlayer()
+  Form Target = akTarget.GetLeveledActorBase()
+
+  ;/If akTarget == Game.GetPlayer()
     Target = Game.GetPlayer()
   ElseIf akTarget.GetLeveledActorBase().IsUnique()
     Target = akTarget.GetActorBase()
   Else
     Target = akTarget
-  EndIf
+  EndIf/;
   Int Data = JFormDB.findEntry("SCLActorData", Target)
   Return Data
 EndFunction
@@ -1043,15 +1044,15 @@ Float Function clampFlt(Float afValue, Float afMin, Float afMax)
 EndFunction
 
 Int Function getTargetData(Actor akTarget, Bool abGenProfile = False)
-  {Data now stored under ActorBase for unique actors
-  Function will generate new actor profile if no data found && abGenProfile == True
-  Player data still stored under actor}
-  Form Target
-  If akTarget.GetLeveledActorBase().IsUnique()
+  {Data now stored under ActorBase for all actors
+  Function will generate new actor profile if no data found && abGenProfile == True}
+  Form Target = akTarget.GetLeveledActorBase()
+
+  ;/If akTarget.GetLeveledActorBase().IsUnique()
     Target = akTarget.GetActorBase()
   Else
     Target = akTarget
-  EndIf
+  EndIf/;
   If Target
     Int Data = JFormDB.findEntry("SCLActorData", Target)
     If !Data && abGenProfile
