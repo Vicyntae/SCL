@@ -1,13 +1,15 @@
 ## Version 0.4
 * Another complete rewrite of SCL: Past versions are not compatible for upgrade.
-* Monitors now use reference aliases to track actors
-* Perks system uses reference aliases as well to hold perk objects
-* All actordata is stored via actorbase instead of actor
+* Monitors now use reference aliases to track actors.
+* Perks system uses reference aliases as well to hold perk objects.
+* All actordata is stored via actorbase instead of actor.
 * Added Aggregate values, which collect groups of values into a final value.
 * Implemented asynchronous frameworks for several important and frequent functions.
 * Added Auto-Eat Functionality: Actors will now automatically eat after certain lengths of time, and seek food out in the world.
 * Implimented basic waste functionality.
 * Mod now starts when the player eats something.
+* Added Dynamic Equipment inflation option, based on armors and bodymorphs.
+
 ## Version 0.32
 * Rewrote monitor script, fixing menu crash in addons
 * Fixed Update Script update patterns, and added fall-backs in case of irregularities with base capacities
