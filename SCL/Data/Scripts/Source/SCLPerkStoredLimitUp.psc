@@ -19,6 +19,10 @@ Function Setup()
   Requirements[5] = "Have a stomach capacity greater than 150."
 EndFunction
 
+Function reloadMaintenence()
+  Setup()
+EndFunction
+
 Bool Function canTake(Actor akTarget, Int aiPerkLevel, Bool abOverride, Int aiTargetData = 0)
   Int TargetData = SCLib.getData(akTarget, aiTargetData)
   Int Req

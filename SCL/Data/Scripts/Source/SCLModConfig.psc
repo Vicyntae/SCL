@@ -1711,6 +1711,35 @@ Function reloadMaintenence()
     SCL_Quest.GetStage()
     i += 1
   EndWhile
+
+  ;Perk Reloads
+  Int JA_Quests = JValue.retain(JArray.object())
+  Int JM_Perk = SCLSet.JM_PerkIDs
+  String PerkID = JMap.nextKey(JM_Perk)
+  While PerkID
+    Quest PerkQuest = JMap.getForm(JM_Perk, PerkID) as Quest
+    If PerkQuest
+      If JArray.findForm(JA_Quests, PerkQuest) == -1
+        JArray.addForm(JA_Quests, PerkQuest)
+      EndIf
+    EndIf
+    PerkID = JMap.nextKey(JM_Perk, PerkID)
+  EndWhile
+
+  i = JArray.count(JA_Quests)
+  While i
+    i -= 1
+    Quest R = JArray.getForm(JA_Quests, i) as Quest
+    Int j = R.GetNumAliases()
+    While j
+      j -= 1
+      SCLPerkBase P = R.GetNthAlias(j) as SCLPerkBase
+      If P
+        P.reloadMaintenence()
+      EndIf
+    EndWhile
+  EndWhile
+  JValue.release(JA_Quests)
 EndFunction
 
 Function checkBaseDependencies()

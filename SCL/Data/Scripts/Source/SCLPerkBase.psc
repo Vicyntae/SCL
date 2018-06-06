@@ -22,6 +22,9 @@ Event OnInit()
   SCLibrary.addPerkID(GetName(), GetOwningQuest())
 EndEvent
 
+Function reloadMaintenence()
+EndFunction
+
 Function Setup()
 EndFunction
 
