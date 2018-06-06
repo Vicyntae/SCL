@@ -84,7 +84,6 @@ Function Setup()
     MyActor = Target
   EndIf
   Notice("NPC Monitor Starting!")
-  SCLibrary.removeFromActorTrashList(MyActor)
   RegisterForModEvent("SCLQuickUpdate" + ActorData, "OnQuickUpdate")
   RegisterForModEvent("SCLFullUpdate" + ActorData, "OnFullUpdate")
   RegisterForModEvent("SCLDigestFinishEvent", "OnDigestFinish")
@@ -96,9 +95,6 @@ Function ForceRefTo(ObjectReference akNewRef)
   ;Notice("ForceRefTo called, performing setup again.")
   If MyActor
     SCLib.quickUpdate(MyActor)
-    If !MyActor.GetLeveledActorBase().IsUnique()
-      SCLibrary.addToActorTrashList(MyActor, 15)
-    Endif
   EndIf
   UnregisterForAllModEvents()
   ;UnregisterAllAnimEvents()
@@ -111,9 +107,6 @@ EndFunction
 Function Clear()
   If MyActor
     SCLib.quickUpdate(MyActor)
-    If !MyActor.GetLeveledActorBase().IsUnique()
-      SCLibrary.addToActorTrashList(MyActor, 15)
-    EndIf
   EndIf
   UnregisterForAllModEvents()
   ;UnregisterAllAnimEvents()

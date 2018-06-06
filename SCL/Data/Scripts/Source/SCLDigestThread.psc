@@ -299,7 +299,7 @@ EndFunction
 Function sendDigestItemFinishEvent(Actor akEater, Form akFood, Float afDigestValue)
   If akFood as Actor
     (akFood as Actor).Kill(akEater)
-    SCLibrary.addToActorTrashList(akFood as Actor, 3)
+    SCLibrary.eraseActorData(akFood as Actor)
   EndIf
   Int FinishEvent = ModEvent.Create("SCLDigestItemFinishEvent")
   ModEvent.PushForm(FinishEvent, akEater)
@@ -318,7 +318,7 @@ EndFunction
 Function sendBreakDownItemFinishEvent(Actor akEater, Form akFood, Float afDigestValue)
   If akFood as Actor
     (akFood as Actor).Kill(akEater)
-    SCLibrary.addToActorTrashList(akFood as Actor, 3)
+    SCLibrary.eraseActorData(akFood as Actor)
   EndIf
   Int FinishEvent = ModEvent.Create("SCLBreakDownItemFinishEvent")
   ModEvent.PushForm(FinishEvent, akEater)
@@ -334,10 +334,9 @@ Function JF_eraseKeys(Int JF_Source, Int JA_Remove, Actor akEater)
     Form Erase = JArray.getForm(JA_Remove, i)
     ;/If Erase as Actor
       (Erase as Actor).Kill(akEater)
-      SCLibrary.addToActorTrashList(Erase as Actor, 3)
     EndIf/;
     JFormMap.removeKey(JF_Source, Erase)
-    SCLibrary.addToObjectTrashList(Erase as ObjectReference, 3)
+    (Erase as ObjectReference).DeleteWhenAble()
   EndWhile
 EndFunction
 

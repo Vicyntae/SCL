@@ -88,6 +88,16 @@ Int Function getActorData(Actor akTarget) Global
   Return Data
 EndFunction
 
+Function eraseActorData(Actor akTarget) Global
+  Form Target = akTarget.GetLeveledActorBase()
+  If Target
+    Int JF_ActorData = JDB.solveObj(".SCLActorData")
+    If JF_ActorData
+      JFormMap.removeKey(JF_ActorData, Target)
+    EndIf
+  EndIf
+EndFunction
+
 ;-------------------------------------------------------------------------------
 ;Get Scripts
 ;-------------------------------------------------------------------------------
@@ -126,87 +136,6 @@ EndFunction
 SCLSettings Function getSCLSettings() Global
   Return Game.GetFormFromFile(0x0200B50C, "SCL.esp") as SCLSettings
 EndFunction
-;-------------------------------------------------------------------------------
-;Trash
-;-------------------------------------------------------------------------------
-
-Function addToObjectTrashList(ObjectReference akReference, Float afTime) Global
-  {Items added using this function will be deleted after afTime in-game hours
-  OR immediately if the limit is reached (default 15)
-  Using this function will make sure that the script is updating}
-  SCLTrashHandler SCLTrash = SCLibrary.getSCLTrashHandler()
-  JFormMap.setFlt(SCLTrash.JF_ObjectTrash, akReference, afTime)
-EndFunction
-
-Function removeFromObjectTrashList(ObjectReference akReference) Global
-  Int JF_ObjectTrash = JDB.solveObj(".SCLTrashList.ObjectTrash")
-  If JFormMap.hasKey(JF_ObjectTrash, akReference)
-    JFormMap.removeKey(JF_ObjectTrash, akReference)
-  EndIf
-EndFunction
-
-Float Function remainingObjectTrashTime(ObjectReference akReference) Global
-  {Returns -1 if the object isn't there}
-  Int JF_ObjectTrash = JDB.solveObj(".SCLTrashList.ObjectTrash")
-  If JFormMap.hasKey(JF_ObjectTrash, akReference)
-    Return JFormMap.getFlt(JF_ObjectTrash, akReference)
-  Else
-    Return -1
-  EndIf
-EndFunction
-
-Bool Function isInObjectTrashList(ObjectReference akReference) Global
-  Int JF_ObjectTrash = JDB.solveObj(".SCLTrashList.ObjectTrash")
-  Return JFormMap.hasKey(JF_ObjectTrash, akReference)
-EndFunction
-
-Function addToActorTrashList(Actor akTarget, Float afTime) Global
-  {Actors added using this function will have their ActorData deleted from SCLActorData after afTime in-game hours
-  or immediately if the limit is reached (default 50)
-  Using this function will make sure that the script is updating}
-  SCLTrashHandler SCLTrash = SCLibrary.getSCLTrashHandler()
-  JFormMap.setFlt(SCLTrash.JF_ActorTrash, akTarget, afTime)
-EndFunction
-
-Function removeFromActorTrashList(Actor akTarget) Global
-  Int JF_ActorTrash = JDB.solveObj(".SCLTrashList.ActorTrash")
-  If JFormMap.hasKey(JF_ActorTrash, akTarget)
-    JFormMap.removeKey(JF_ActorTrash, akTarget)
-  EndIf
-EndFunction
-
-Float Function remainingActorTrashTime(Actor akTarget) Global
-  {Returns -1 if the object isn't there}
-  Int JF_ActorTrash = JDB.solveObj(".SCLTrashList.ActorTrash")
-  If JFormMap.hasKey(JF_ActorTrash, akTarget)
-    Return JFormMap.getFlt(JF_ActorTrash, akTarget)
-  Else
-    Return -1
-  EndIf
-EndFunction
-
-Bool Function isInActorTrashList(Actor akTarget) Global
-  Int JF_ActorTrash = JDB.solveObj(".SCLTrashList.ActorTrash")
-  Return JFormMap.hasKey(JF_ActorTrash, akTarget)
-EndFunction
-
-;/;Persistence
-Function addToPersist(ObjectReference akRef, Float afTime = -1.0) Global
-  SCLPersistence SCLPersist = SCLibrary.getSCLPersistence()
-  JFormMap.setFlt(SCLPersist.JF_Persist, akRef, afTime)
-EndFunction
-
-Function removeFromPersist(ObjectReference akRef) Global
-  Int JF_Persist = JDB.solveObj(".SCLTrashList.PersistList")
-  If JFormMap.hasKey(JF_Persist, akRef)
-    JFormMap.removeKey(JF_Persist, akRef)
-  EndIf
-EndFunction
-
-Bool Function isPersistent(ObjectReference akRef) Global
-  Int JF_Persist = JDB.solveObj(".SCLTrashList.PersistList")
-  Return JFormMap.hasKey(JF_Persist, akRef)
-EndFunction/;
 
 ;-------------------------------------------------------------------------------
 ;Search
@@ -1807,9 +1736,9 @@ Bool Function removeItem(Actor akTarget, ObjectReference akReference = None, For
   ElseIf akReference
     If JFormMap.removeKey(Contents, akReference)
       If akReference as SCLBundle || abDelete
-        SCLibrary.addToObjectTrashList(akReference, 1)
+        akReference.DeleteWhenAble()
         If akReference as Actor
-          SCLibrary.addToActorTrashList(akReference as Actor, 1)
+          SCLibrary.eraseActorData(akReference as Actor)
         EndIf
       EndIf
       Return True
@@ -1830,7 +1759,7 @@ Bool Function removeItem(Actor akTarget, ObjectReference akReference = None, For
         Removed += Stored
         Remaining -= Stored
         JFormMap.removeKey(Contents, Bundle)
-        SCLibrary.addToObjectTrashList(Bundle, 1)
+        Bundle.DeleteWhenAble()
       EndIf
     EndIf
     If Remaining
@@ -1840,9 +1769,9 @@ Bool Function removeItem(Actor akTarget, ObjectReference akReference = None, For
         If Ref
           JFormMap.removeKey(Contents, Ref)
           If abDelete
-            SCLibrary.addToObjectTrashList(Ref, 1)
+            Ref.DeleteWhenAble()
             If akReference as Actor
-              SCLibrary.addToActorTrashList(Ref as Actor, 1)
+              SCLibrary.eraseActorData(Ref as Actor)
             EndIf
           EndIf
           Removed += 1
@@ -2918,7 +2847,6 @@ ObjectReference Function placeVomit(ObjectReference akPosition, Bool abLeveled =
   EndIf
   Vomit.MoveTo(akPosition, 64 * Math.Sin(akPosition.GetAngleZ()), 64 * Math.Cos(akPosition.GetAngleZ()), 0, False)
   Vomit.SetAngle(0, 0, 0)
-  addToObjectTrashList(Vomit, 5)
   Return Vomit
 EndFunction
 
@@ -3223,7 +3151,6 @@ Function openTransferMenu(Actor akTarget, String asDestination = "Stomach")
   SCLTransferObject ST_TransferRef = SCLSet.SCL_TransferChest as SCLTransferObject
   ST_TransferRef.Destination = asDestination  ;Sets properties on the transfer object script before its opened
   ST_TransferRef.TransferTarget = akTarget
-  ;addToObjectTrashList(ST_TransferRef, 5)
   quickUpdate(akTarget)
   ST_TransferRef.Activate(PlayerRef)
 EndFunction
@@ -3372,7 +3299,7 @@ Function showContentsList(Actor akTarget, Int aiMode = 0)
                 akTarget.EquipItem(CurrentForm, False, False)
                 i += 1
               EndWhile
-              SCLibrary.addToObjectTrashList(Item, 2)
+              Item.DeleteWhenAble()
             Else
               addItem(akTarget, akBaseObject = CurrentForm, aiItemType = 1, aiItemCount = NumItems)
             EndIf
@@ -4173,7 +4100,6 @@ SCLWFSolidWaste Function WF_placeSolidWaste(ObjectReference akPosition, Int aiTy
   EndIf
   Refuse.MoveTo(akPosition, 64 * Math.Sin(akPosition.GetAngleZ()), 64 * Math.Cos(akPosition.GetAngleZ()), 0, False)
   Refuse.SetAngle(0, 0, 0)
-  SCLibrary.addToObjectTrashList(Refuse, 5)
   Return Refuse
 EndFunction
 
