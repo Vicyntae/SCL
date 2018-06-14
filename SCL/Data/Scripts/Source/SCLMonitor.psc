@@ -154,7 +154,7 @@ Int AddQueueNum = 0
 Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
   If akBaseObject as Potion || akBaseObject as Ingredient
     Int JM_Entry = SCLib.getItemDataEntry(akBaseObject)
-    If JMap.getInt(JM_Entry, "STIsNotFood") == 0
+    If JMap.getInt(JM_Entry, "STIsNotFood") == 0 || (akBaseObject as Potion).IsPoison()
       Notice(akBaseObject.GetName() + " was eaten!")
       Bool FirstItem
       If !JA_AddQueue
@@ -180,11 +180,20 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
       ;Lock()
       Int i = 0
       Int NumItems = JArray.count(JA_AddQueue)
-      While i < NumItems
-        Form akItem = JArray.getForm(JA_AddQueue, i)
-        SCLib.AddItem(MyActor, akItem as ObjectReference, akItem, 1)
-        i += 1
-      EndWhile
+      Bool Dest = SCLSet.PlayerAutoDestination
+      If MyActor == PlayerRef && Dest
+        While i < NumItems
+          Form akItem = JArray.getForm(JA_AddQueue, i)
+          SCLib.AddItem(MyActor, akItem as ObjectReference, akItem, 3)
+          i += 1
+        EndWhile
+      Else
+        While i < NumItems
+          Form akItem = JArray.getForm(JA_AddQueue, i)
+          SCLib.AddItem(MyActor, akItem as ObjectReference, akItem, 1)
+          i += 1
+        EndWhile
+      EndIf
       JA_AddQueue = JValue.release(JA_AddQueue)
       ;SCLib.addItem(MyActor, akReference, akBaseObject, 1)
       SCLib.updateSingleContents(MyActor, 1)
@@ -358,6 +367,9 @@ Function fullActorUpdate(Float afTimePassed, Float afCurrentUpdateTime, Bool abD
     If HeavyTier > SCLSet.SCL_HeavySpeedArray.length - 1
       HeavyTier = SCLSet.SCL_HeavySpeedArray.length - 1
     EndIf
+    If HeavyTier >= 6
+      JMap.setInt(ActorData, "SCL_HeavyBurdenTracker", 1)
+    EndIf
 
     Int CurrentHeavy = JMap.getInt(ActorData, "SCLAppliedHeavyTier")
     If HeavyTier != CurrentHeavy
@@ -470,43 +482,30 @@ Function checkAutoEat(Float afFullness, Float afCurrentUpdateTime)
 EndFunction
 
 Function checkWF(Float afTimePassed, Float afCurrentUpdateTime)
-  If SCLSet.WF_Active
-    If SCLSet.WF_SolidActive
-      Float SolidAmount = SCLib.WF_getTotalSolidFullness(MyActor, ActorData)
-      Float SolidTimePast = ((afCurrentUpdateTime - (JMap.getFlt(ActorData, "WF_SolidTimePast")))*24) ;In hours
-      Float SolidBase = SCLib.WF_getAdjSolidBase(MyActor, ActorData)
-      If !MyActor.HasSpell(SCLSet.WF_SolidDebuffSpell)
-        If SolidAmount > SolidBase || SolidTimePast > 8
-          MyActor.AddSpell(SCLSet.WF_SolidDebuffSpell, False)
-        EndIf
-      Else
-        If SolidAmount < SolidBase && SolidTimePast > 8
-          MyActor.RemoveSpell(SCLSet.WF_SolidDebuffSpell)
-        EndIf
+  If SCLSet.WF_NeedsActive
+    Float SolidAmount = SCLib.WF_getTotalSolidFullness(MyActor, ActorData)
+    Float SolidTimePast = ((afCurrentUpdateTime - (JMap.getFlt(ActorData, "WF_SolidTimePast")))*24) ;In hours
+    Float SolidBase = SCLib.WF_getAdjSolidBase(MyActor, ActorData)
+    If !MyActor.HasSpell(SCLSet.WF_SolidDebuffSpell)
+      If SolidAmount > SolidBase || SolidTimePast > 8
+        MyActor.AddSpell(SCLSet.WF_SolidDebuffSpell, False)
       EndIf
-      ;/Float IllnessFlt = JMap.getFlt(ActorData, "IllnessBuildUp")
-      Float Boundary = JMap.getFlt(ActorData, "IllnessThreshold", 1)
-      If IllnessFlt > Boundary
-        JMap.setFlt(ActorData, "IllnessBuildUp", 0)
-        Int IllnessLevel = JMap.getInt(ActorData, "IllnessLevel") + 1
-        SCLib.WF_addSolidIllnessEffect(MyActor, IllnessLevel, ActorData)
-      Else
-        JMap.setFlt(ActorData, "IllnessBuildUp", JMap.getFlt(ActorData, "IllnessBuildUp") - (SCLSet.IllnessBuildUpDecrease * afTimePassed))
-      EndIf/;
-      JMap.setFlt(ActorData, "WF_SolidTotalFullness", SolidAmount)
+    Else
+      If SolidAmount < SolidBase && SolidTimePast > 8
+        MyActor.RemoveSpell(SCLSet.WF_SolidDebuffSpell)
+      EndIf
     EndIf
-    If SCLSet.WF_LiquidActive
-      Float LiquidAmount = JMap.getFlt(ActorData, "WF_CurrentLiquidAmount")
-      Float LiquidTimePast = ((afCurrentUpdateTime - (JMap.getFlt(ActorData, "WF_LiquidTimePast")))*24) ;In hours
-      Float LiquidBase = SCLib.WF_getAdjLiquidBase(MyActor, ActorData)
-      If !MyActor.HasSpell(SCLSet.WF_LiquidDebuffSpell)
-        If LiquidAmount > LiquidBase || LiquidTimePast > 8
-          MyActor.AddSpell(SCLSet.WF_LiquidDebuffSpell, False)
-        EndIf
-      Else
-        If LiquidAmount < LiquidBase && LiquidTimePast > 8
-          MyActor.RemoveSpell(SCLSet.WF_LiquidDebuffSpell)
-        EndIf
+    JMap.setFlt(ActorData, "WF_SolidTotalFullness", SolidAmount)
+    Float LiquidAmount = JMap.getFlt(ActorData, "WF_CurrentLiquidAmount")
+    Float LiquidTimePast = ((afCurrentUpdateTime - (JMap.getFlt(ActorData, "WF_LiquidTimePast")))*24) ;In hours
+    Float LiquidBase = SCLib.WF_getAdjLiquidBase(MyActor, ActorData)
+    If !MyActor.HasSpell(SCLSet.WF_LiquidDebuffSpell)
+      If LiquidAmount > LiquidBase || LiquidTimePast > 8
+        MyActor.AddSpell(SCLSet.WF_LiquidDebuffSpell, False)
+      EndIf
+    Else
+      If LiquidAmount < LiquidBase && LiquidTimePast > 8
+        MyActor.RemoveSpell(SCLSet.WF_LiquidDebuffSpell)
       EndIf
     EndIf
     ;/If SCLSet.WF_GasActive

@@ -40,15 +40,23 @@ EndFunction
 Event OnItemDigestFinish(Form akEater, Form akFood, Float afDigestValue)
   If akEater as Actor
     Actor Target = akEater as Actor
-    If akFood as Weapon || akFood as Armor
+    Form BaseForm
+    If akFood as Actor
+      BaseForm = (akFood as Actor).GetLeveledActorBase()
+    ElseIf akFood as ObjectReference
+      BaseForm = (akFood as ObjectReference).GetBaseObject()
+    Else
+      BaseForm = akFood
+    EndIf
+    If BaseForm as Weapon || BaseForm as Armor
       Int PerkLevel = getFirstPerkLevel(Target)
       Enchantment Ench
       If akFood as ObjectReference
         Ench = (akFood as ObjectReference).GetEnchantment()
-      ElseIf akFood as Weapon
-        Ench = (akFood as Weapon).GetEnchantment()
-      ElseIf akFood as Armor
-        Ench = (akFood as Armor).GetEnchantment()
+      ElseIf BaseForm as Weapon
+        Ench = (BaseForm as Weapon).GetEnchantment()
+      ElseIf BaseForm as Armor
+        Ench = (BaseForm as Armor).GetEnchantment()
       EndIf
       If Ench && PerkLevel >= 3
         Int EffectIndex = Ench.GetCostliestEffectIndex()
@@ -77,19 +85,58 @@ Event OnItemDigestFinish(Form akEater, Form akFood, Float afDigestValue)
         If AV > 0
           MagicEffect ME = Ench.GetNthEffectMagicEffect(EffectIndex)
           String Skill = ME.GetAssociatedSkill()
-          Game.AdvanceSkill(Skill, AV)
+          If Target == PlayerRef
+            Game.AdvanceSkill(Skill, AV)
+          Else
+            Target.ModActorValue(Skill, AV)
+          EndIf
         EndIf
       EndIf
 
-      If akFood as Armor && PerkLevel >= 1
-        Float AR = (akFood as Armor).GetArmorRating() / 500
-        If AR
-          Target.ModActorValue("ArmorPerks", AR)
+      If BaseForm as Armor && PerkLevel >= 1
+        Int WeightClass = (BaseForm as Armor).GetWeightClass()
+        String Skill
+        If WeightClass == 0
+          Skill = "LightArmor"
+        ElseIf WeightClass == 1
+          Skill = "HeavyArmor"
         EndIf
-      ElseIf akFood as Weapon && PerkLevel >= 2
-        Float BD = (akFood as Weapon).GetBaseDamage() / 500
+        Float AR = (BaseForm as Armor).GetArmorRating() / 500
+        If AR
+          If Target == PlayerRef
+            Game.AdvanceSkill(Skill, AR)
+          Else
+            Target.ModActorValue(Skill, AR)
+          EndIf
+        EndIf
+      ElseIf BaseForm as Weapon && PerkLevel >= 2
+        Int WeaponType = (BaseForm as Weapon).GetWeaponType()
+        String Skill
+        If WeaponType == 0
+          Skill = "UnarmedDamage"
+        ElseIf WeaponType == 1 || WeaponType == 3 || WeaponType == 4
+          Skill = "OneHanded"
+        ElseIf WeaponType == 2
+          Skill = "Sneak"
+        ElseIf WeaponType == 5 || WeaponType == 6
+          Skill = "TwoHanded"
+        ElseIf WeaponType == 7 || WeaponType == 9
+          Skill = "Marksman"
+        ElseIf WeaponType == 8
+          Skill = "Enchanting"
+        EndIf
+        Float BD
+        If WeaponType == 8
+          BD = BaseForm.GetGoldValue() / 2000
+        Else
+          BD = (BaseForm as Weapon).GetBaseDamage() / 500
+        EndIf
         If BD
-          Target.ModActorValue("MeleeDamage", BD)
+          If Target != PlayerRef || Skill == "UnarmedDamage"
+            Target.ModActorValue("MeleeDamage", BD)
+          Else
+            Game.AdvanceSkill(Skill, BD)
+          EndIf
         EndIf
       EndIf
     EndIf

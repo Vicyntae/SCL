@@ -2005,6 +2005,9 @@ Function updateDamage(Actor akTarget, Int aiTargetData = 0)
 
     JMap.setInt(TargetData, "SCLAppliedHeavyTier", HeavyTier)
   EndIf
+  If HeavyTier >= 6
+    JMap.setInt(TargetData, "SCL_HeavyBurdenTracker", 1)
+  EndIf
 
   Int Storage = countItemTypes(akTarget, 2, True)
   Int StorageMax = getTotalPerkLevel(akTarget, "SCLStoredLimitUp", TargetData)
@@ -3204,7 +3207,7 @@ Function handleActorMainMenu(Actor akTarget, Int aiOption, Int aiMode)
     EndIf
   ElseIf aiOption == 7
     Int Option = 1
-    If SCLSet.WF_Active
+    If getCurrentPerkLevel(akTarget, "WF_BasementStorage") >= 1
       Option = SCLSet.SCL_MES_WF_StorageChoice.Show()
     EndIf
     If Option == 1
@@ -3290,17 +3293,15 @@ Bool Function buildActorStatsMenu(Actor akTarget)
   LM_ST_Stats.AddEntryItem("Digestion Rate = " + roundFlt(JMap.getFlt(TargetData, "STDigestionRate"), 2))
   JArray.addStr(JA_Description, "Units of food digested per in-game hour.")
 
-  If SCLSet.WF_Active
-    LM_ST_Stats.AddEntryItem("Num Items Stowed Away = " + countItemTypes(akTarget, 4, True))
-    JArray.addStr(JA_Description, "Number of Items stored in colon")
+  LM_ST_Stats.AddEntryItem("Current Illness Level = " + JMap.getInt(TargetData, "IllnessLevel"))
+  JArray.addStr(JA_Description, "How sick actor is. Increases by eating inedible food. May cause vomiting.")
 
+  LM_ST_Stats.AddEntryItem("Num Items Stowed Away = " + countItemTypes(akTarget, 4, True))
+  JArray.addStr(JA_Description, "Number of Items stored in colon")
+
+  If SCLSet.WF_NeedsActive
     LM_ST_Stats.AddEntryItem("Current Colon Fullness = " + JMap.getFlt(TargetData, "WF_SolidTotalFullness"))
     JArray.addStr(JA_Description, "Total weight of items in " + TargetName + "'s colon.")
-
-    If SCLSet.WF_SolidActive
-      LM_ST_Stats.AddEntryItem("Current Illness Level = " + JMap.getInt(TargetData, "IllnessLevel"))
-      JArray.addStr(JA_Description, "How sick actor is. Increases by eating inedible food. Makes them need to go.")
-    EndIf
   EndIf
 
   Int LibList = SCLSet.JA_LibraryList
@@ -3350,7 +3351,7 @@ Function showContentsList(Actor akTarget, Int aiMode = 0)
         UIExtensions.OpenMenu("UIListMenu", akTarget)
         Option = UIExtensions.GetMenuResultInt("UIListMenu")
       ElseIf Choice == 1 ;Vomit item
-        Notice("Removeing " + nameGet(JArray.getForm(JA_OptionList1, Option) as ObjectReference) + ", index " + Option + ", from " + nameGet(akTarget))
+        Notice("Removing " + nameGet(JArray.getForm(JA_OptionList1, Option) as ObjectReference) + ", index " + Option + ", from " + nameGet(akTarget))
         Int ItemType = JArray.getInt(JA_OptionList2, Option)
         If ItemType == 1 || ItemType == 2
           vomitSpecificItem(akTarget, ItemType, JArray.getForm(JA_OptionList1, Option) as ObjectReference)
@@ -3372,27 +3373,83 @@ Function showContentsList(Actor akTarget, Int aiMode = 0)
                 akTarget.EquipItem(CurrentForm, False, False)
                 i += 1
               EndWhile
+              JFormMap.removeKey(JF_Stored, Item)
+              Int JF_Stored = getContents(akTarget, 2)
+              quickUpdate(akTarget, True)
+              buildContentsList(akTarget)
               SCLibrary.addToObjectTrashList(Item, 2)
             Else
-              addItem(akTarget, akBaseObject = CurrentForm, aiItemType = 1, aiItemCount = NumItems)
+              If getCurrentPerkLevel(akTarget, "SCLExtractionExpert") >= 1
+                addItem(akTarget, akBaseObject = CurrentForm, aiItemType = 1, aiItemCount = NumItems)
+                Int JF_Stored = getContents(akTarget, 2)
+                JFormMap.removeKey(JF_Stored, Item)
+                quickUpdate(akTarget, True)
+                buildContentsList(akTarget)
+              Else
+                Debug.Notification("Actor unable to digest item.")
+              EndIf
             EndIf
           Else
             Form Base = Item.GetBaseObject()
-            If ((Base as Potion || Base as Ingredient) && !isNotFood(Base)) || (Item as Actor)
+            If (Base as Potion || Base as Ingredient) && !isNotFood(Base)
+              akTarget.EquipItem(Item)
+              Int JF_Stored = getContents(akTarget, 2)
+              JFormMap.removeKey(JF_Stored, Item)
+              quickUpdate(akTarget, True)
+              buildContentsList(akTarget)
+            ElseIf getCurrentPerkLevel(akTarget, "SCLExtractionExpert") >= 1
               addItem(akTarget, Item, aiItemType = 1)
+              Int JF_Stored = getContents(akTarget, 2)
+              JFormMap.removeKey(JF_Stored, Item)
+              quickUpdate(akTarget, True)
+              buildContentsList(akTarget)
             Else
-              Debug.Notification("Item must be edible")
+              Debug.Notification("Actor unable to digest item.")
             EndIf
           EndIf
-          Int JF_Stored = getContents(akTarget, 2)
-          JFormMap.removeKey(JF_Stored, Item)
-          quickUpdate(akTarget, True)
-          buildContentsList(akTarget)
           UIExtensions.OpenMenu("UIListMenu", akTarget)
           Option = UIExtensions.GetMenuResultInt("UIListMenu")
+        ElseIf ItemType == 4
+          If getCurrentPerkLevel(akTarget, "WF_BottomsUp") >= 1
+            ObjectReference Item = JArray.getForm(JA_OptionList1, Option) as ObjectReference
+            If Item as SCLBundle
+              Form CurrentForm = (Item as SCLBundle).ItemForm
+              Int i
+              Int NumItems = (Item as SCLBundle).NumItems
+              If (CurrentForm as Potion || CurrentForm as Ingredient) && !isNotFood(CurrentForm) && (akTarget == playerRef) && SCLSet.PlayerAutoDestination
+                While i < NumItems
+                  akTarget.EquipItem(CurrentForm, False, False)
+                  i += 1
+                EndWhile
+              Else
+                addItem(akTarget, akBaseObject = CurrentForm, aiItemType = 3, aiItemCount = NumItems)
+              EndIf
+              Int JF_Stored = getContents(akTarget, 4)
+              JFormMap.removeKey(JF_Stored, Item)
+              quickUpdate(akTarget, True)
+              buildContentsList(akTarget)
+            Else
+              Form Base = Item.GetBaseObject()
+              If (Base as Potion || Base as Ingredient) && !isNotFood(Base) && (akTarget == playerRef) && SCLSet.PlayerAutoDestination
+                akTarget.EquipItem(Item)
+              Else
+                addItem(akTarget, Item, aiItemType = 3)
+              EndIf
+              Int JF_Stored = getContents(akTarget, 4)
+              JFormMap.removeKey(JF_Stored, Item)
+              quickUpdate(akTarget, True)
+              buildContentsList(akTarget)
+            EndIf
+            UIExtensions.OpenMenu("UIListMenu", akTarget)
+            Option = UIExtensions.GetMenuResultInt("UIListMenu")
+          EndIf
         Else
-          Debug.Notification("Item must be stored.")
+          Debug.Notification("Actor unable to break item down.")
         EndIf
+      Else
+        Debug.Notification("Item must be stored.")
+        UIExtensions.OpenMenu("UIListMenu", akTarget)
+        Option = UIExtensions.GetMenuResultInt("UIListMenu")
       ;ElseIf Choice == 3
       EndIf
     Else
@@ -3487,6 +3544,47 @@ Function showPerksList(Actor akTarget = None, Int aiMode = 0)
   UIExtensions.OpenMenu("UIListMenu", akTarget)
   Int Option = UIExtensions.GetMenuResultInt("UIListMenu")
   While Option > 0 && Option < JArray.count(JA_OptionList1)
+    Int PerkLevel = JArray.getInt(JA_OptionList1, Option, -1)
+    String PerkID = JArray.getStr(JA_OptionList2, Option, "")
+    SCLPerkBase PerkForm = getPerkForm(PerkID)
+    Bool RebuildMenu = False
+    Int CurrentPerkValue = PerkForm.getFirstPerkLevel(akTarget)
+    If PerkLevel <= CurrentPerkValue
+      Debug.MessageBox(PerkForm.getPerkName(PerkLevel) + ": " + PerkForm.getDescription(PerkLevel) + "\n Requirements: " + PerkForm.getRequirements(PerkLevel))
+      Utility.Wait(0.2)
+      ;Debug.Notification(getPerkDescription(PerkID, PerkLevel))
+      ;Debug.Notification(getPerkRequirements(PerkID, PerkLevel))
+    ElseIf canTakePerk(akTarget, PerkID, SCLSet.DebugEnable)
+      Debug.MessageBox(PerkForm.getPerkName(CurrentPerkValue + 1) + ": " + PerkForm.getDescription(CurrentPerkValue + 1) + "\n Requirements: " + PerkForm.getRequirements(CurrentPerkValue + 1))
+      Utility.Wait(0.1)
+      If SCLSet.SCL_MES_TakePerk.Show()
+        takePerk(akTarget, PerkID, True)
+        Debug.MessageBox("Perk " + PerkForm.getPerkName(CurrentPerkValue + 1) + " taken!")
+        Utility.Wait(0.2)
+      EndIf
+      ;Debug.Notification("Perk " + getPerkName(PerkID, PerkLevel) + " taken!")
+      RebuildMenu = True
+    Else
+      Debug.MessageBox(PerkForm.getPerkName(CurrentPerkValue + 1) + ": " + PerkForm.getDescription(CurrentPerkValue + 1) + "\n Requirements: " + PerkForm.getRequirements(CurrentPerkValue + 1))
+      Utility.Wait(0.2)
+      ;Debug.Notification(getPerkDescription(PerkID, PerkLevel))
+      ;Debug.Notification(getPerkRequirements(PerkID, PerkLevel))
+    EndIf
+    If RebuildMenu
+      If buildPerksMenu(akTarget)
+        UIExtensions.OpenMenu("UIListMenu", akTarget)
+        Option = UIExtensions.GetMenuResultInt("UIListMenu")
+      Else
+        Option = 0
+      EndIf
+    Else
+      UIExtensions.OpenMenu("UIListMenu", akTarget)
+      Option = UIExtensions.GetMenuResultInt("UIListMenu")
+    EndIf
+  EndWhile
+  sendActorMainMenuOpenEvent(akTarget, 0)
+EndFunction
+;/
     ;Note("Option " + Option + " selected!")
     Bool RebuildMenu = False
     String PerkID = JArray.getStr(JA_OptionList1, Option)
@@ -3518,7 +3616,7 @@ Function showPerksList(Actor akTarget = None, Int aiMode = 0)
     Endif
   EndWhile
   sendActorMainMenuOpenEvent(akTarget, 0)
-EndFunction
+EndFunction/;
 
 Bool Function buildPerksMenu(Actor akTarget)
   UIListMenu LM_ST_Perks = UIExtensions.GetMenu("UIListMenu", True) as UIListMenu
@@ -3533,9 +3631,42 @@ Bool Function buildPerksMenu(Actor akTarget)
   JA_OptionList2 = JValue.retain(JArray.object())
   LM_ST_Perks.AddEntryItem("<< Return")
   ;JArray.addStr(JA_Description, "")
-  JArray.addStr(JA_OptionList1, "")
+  JArray.addInt(JA_OptionList1, -1)
   JArray.addStr(JA_OptionList2, "")
 
+  Int i
+  Int NumPerks = JMap.count(SCLSet.JM_PerkIDs)
+  Int currentEntry = -1
+  While i < NumPerks
+    String sPerkID = JMap.getNthKey(SCLSet.JM_PerkIDs, i)
+    SCLPerkBase PerkBase = getPerkForm(sPerkID)
+    If PerkBase.isKnown(akTarget)
+      currentEntry = LM_ST_Perks.AddEntryItem(PerkBase.Name)
+      JArray.addInt(JA_OptionList1, 0); Index - Level
+      JArray.addStr(JA_OptionList2, sPerkID) ;Index - PerkID
+
+      LM_ST_Perks.SetPropertyIndexBool("hasChildren", currentEntry, True)
+      Int CurrentPerkValue = PerkBase.getFirstPerkLevel(akTarget)
+      Int j = 0
+      While j < CurrentPerkValue
+        j += 1
+        Int Entry = LM_ST_Perks.addEntryItem(PerkBase.getPerkName(j), currentEntry, i)
+        JArray.addInt(JA_OptionList1, j)
+        JArray.addStr(JA_OptionList2, sPerkID)
+      EndWhile
+      Int MaxValue = PerkBase.AbilityArray.Length - 1
+      If CurrentPerkValue < MaxValue
+        Int NextEntry = LM_ST_Perks.addEntryItem("*" + PerkBase.getPerkName(j + 1), currentEntry, i)
+        JArray.addInt(JA_OptionList1, j + 1)
+        JArray.addStr(JA_OptionList2, sPerkID)
+      EndIf
+    EndIf
+    i += 1
+  EndWhile
+  Return True
+EndFunction
+
+;/
   String sPerkID = JMap.nextKey(SCLSet.JM_PerkIDs)
   While sPerkID
     SCLPerkBase PerkBase = getPerkForm(sPerkID)
@@ -3568,7 +3699,7 @@ Bool Function buildPerksMenu(Actor akTarget)
     sPerkID = JMap.nextKey(SCLSet.JM_PerkIDs, sPerkID)
   EndWhile
   Return True
-EndFunction
+EndFunction/;
 
 Int Function addPerkEntry(Actor akTarget, UIListMenu akMenu, String asPerkID)
   Int CurrentPerkValue = getCurrentPerkLevel(akTarget, asPerkID)
@@ -3977,9 +4108,9 @@ Float Function WF_getSolidMaxInsert(Actor akTarget, Int aiTargetData = 0)
     Return 0
   EndIf
   Int SecondPerkLevel = getTotalPerkLevel(akTarget, "WF_BasementStorage")
-  Float MaxInsert = Math.pow(SecondPerkLevel, 2) + 0.3
+  Float MaxInsert = Math.pow(SecondPerkLevel, 2) + 0.5
   If MaxInsert < 0
-    MaxInsert = 0.3
+    MaxInsert = 0.5
   EndIf
   Return MaxInsert
 EndFunction

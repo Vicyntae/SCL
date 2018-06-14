@@ -83,6 +83,50 @@ Bool Function isKnown(Actor akTarget)
   Return True
 EndFunction
 
+;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+;Debug Functions
+;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Bool Function PlayerThought(Actor akTarget, String sMessage1 = "", String sMessage2 = "", String sMessage3 = "", Int iOverride = 0)
+  {Use this to display player information. Returns whether the passed actor is
+  the player.
+  Make sure sMessage1 is 1st person, sMessage2 is 2nd person, sMessage3 is 3rd person
+  Make sure at least one is filled: it will default to it regardless of setting
+  Use iOverride to force a particular message}
+
+  If akTarget == PlayerRef
+    Int Setting = SCLSet.PlayerMessagePOV
+    If Setting == -1
+      Return True
+    EndIf
+    If (sMessage1 && Setting == 1) || iOverride == 1
+      Debug.Notification(sMessage1)
+    ElseIf (sMessage2 && Setting == 2) || iOverride == 2
+      Debug.Notification(sMessage3)
+    ElseIf (sMessage3 && Setting == 3) || iOverride == 3
+      Debug.Notification(sMessage3)
+    ElseIf sMessage3
+      Debug.Notification(sMessage3)
+    ElseIf sMessage1
+      Debug.Notification(sMessage1)
+    ElseIf sMessage2
+      Debug.Notification(sMessage2)
+    Else
+      Issue("Empty player thought. Skipping...", 1)
+    EndIf
+    Return True
+  Else
+    Return False
+  EndIf
+EndFunction
+
+Bool Function PlayerThoughtDB(Actor akTarget, String sKey, Int iOverride = 0, Int JA_Actors = 0, Int aiActorIndex = -1)
+  {Use this to display player information. Returns whether the passed actor is
+  the player.
+  Pulls message from database; make sure sKey is valid.
+  Will add POV int to end of key, so omit it in the parameter}
+  Return SCLib.ShowPlayerThoughtDB(akTarget, sKey, iOverride, JA_Actors, aiActorIndex)
+EndFunction
+
 Function Popup(String sMessage)
   SCLib.ShowPopup(sMessage, DebugName)
 EndFunction

@@ -108,7 +108,7 @@ Event OnDigestCall(Int aiID)
                 EndIf
               EndWhile
               DigestedAmount -= RemoveAmount  ;If there's anything left of the remove amount, subtract it from the digested amount
-              If SCLSet.WF_Active
+              If SCLSet.WF_NeedsActive
                 Float LiquidRatio = JMap.getFlt(JM_DataEntry, "LiquidRatio")
                 LiquidDigest += DigestedAmount * LiquidRatio
                 SolidDigest += DigestedAmount * (1 - LiquidRatio)
@@ -138,7 +138,7 @@ Event OnDigestCall(Int aiID)
                 JArray.addForm(JA_Remove, ItemKey)
                 sendDigestItemFinishEvent(MyActor, ItemKey, JMap.getFlt(JM_ItemEntry, "IndvDVal"))
               EndIf
-              If SCLSet.WF_Active
+              If SCLSet.WF_NeedsActive
                 Float LiquidRatio = JMap.getFlt(JM_DataEntry, "LiquidRatio")
                 LiquidDigest += DigestedAmount * LiquidRatio
                 SolidDigest += DigestedAmount * (1 - LiquidRatio)
@@ -157,7 +157,7 @@ Event OnDigestCall(Int aiID)
       ;JMap.setFlt(TargetData, "ContentsFullness1", Fullness)
       JMap.setFlt(TargetData, "STTotalDigestedFood", JMap.getFlt(TargetData, "STTotalDigestedFood") + TotalDigested)
       JMap.setFlt(TargetData, "STLastDigestAmount", TotalDigested)
-      If SCLSet.WF_Active
+      If SCLSet.WF_NeedsActive
         If SCLSet.WF_SolidActive
           JMap.setFlt(TargetData, "WF_CurrentSolidAmount", JMap.getFlt(TargetData, "WF_CurrentSolidAmount") + SolidDigest)
         EndIf
@@ -177,111 +177,117 @@ Event OnDigestCall(Int aiID)
       sendDigestFinishEvent(MyActor, 0)
     EndIf
 
-    If SCLSet.WF_Active
-      Int SolidWasteList = SCLib.getContents(MyActor, 3, TargetData)
-      If !JValue.empty(SolidWasteList)
-        Int JA_Remove = JValue.retain(JArray.object())
-        Int NumOfItems = JFormMap.count(SolidWasteList)
-        Float IndvRemoveAmount = (2 * TimePassed) / NumOfItems
-        ;Notice("# Items = " + NumOfItems + ", Remove Amount/Item = " + IndvRemoveAmount)
-        Form ItemKey = JFormMap.nextKey(SolidWasteList)
-        Float Fullness
-        Float TotalBrokenDown
-        While ItemKey
-
-          If ItemKey as ObjectReference
-            Int JM_ItemEntry = JFormMap.getObj(SolidWasteList, ItemKey)
-            Float D = JMap.getFlt(JM_ItemEntry, "DigestValue")
-            If D > 0
-              If ItemKey as SCLBundle
-                Float RemoveAmount = IndvRemoveAmount
-                ;Note("SCLBundle found! Remove Amount = " + RemoveAmount)
-                Float BrokenDownAmount = RemoveAmount
-                Bool Done ;If we finish off the item
-                Float Indv = JMap.getFlt(JM_ItemEntry, "IndvDVal")
-                Float Active = JMap.getFlt(JM_ItemEntry, "ActiveDVal")
-                Int ItemNum = (ItemKey as SCLBundle).NumItems
-                While RemoveAmount > 0 && !Done
-                  If Active > RemoveAmount
-                    Active -= RemoveAmount
-                    ;Note("Ran out of RemoveAmount! Resetting DigestValue")
-                    RemoveAmount = 0  ;didn't manage to finish the stack before we ran out
-                    JMap.setFlt(JM_ItemEntry, "ActiveDVal", Active)
-                    (ItemKey as SCLBundle).NumItems = ItemNum
-                    Float DValue = Active + (Indv * (ItemNum - 1))
-                    JMap.setFlt(JM_ItemEntry, "DigestValue", DValue)
-
-                    ;Float DValue = SCLib.updateDValue(JM_ItemEntry)
-
-
-                    Fullness += DValue
-                  Else
-                    RemoveAmount -= Active
-                    ;Debug.notification("Remove Amount = " + RemoveAmount)
-                    Active = 0
-                    If ItemNum > 1  ;If there's more than 1 item left
-                      ;Debug.notification("Item Number = " + ItemNum + ", resetting Active value")
-                      ItemNum -= 1 ;Remove 1
-                      Active = Indv ;Reset the active amount
-                      ;Debug.notification("Active = " + Active)
-                      ;Notice("More items found! Resetting active amount")
-                    Else
-                      ;Debug.notification("Items finished.")
-                      Done = True ;That was the last item
-                      JArray.addForm(JA_Remove, ItemKey)
-                      ;Don't have to reset dvalues, we're going to delete this
-                      ;Notice("No more items left!")
-                    EndIf
-                    sendBreakDownItemFinishEvent(MyActor, (ItemKey as SCLBundle).ItemForm, Indv)
-                  EndIf
-                EndWhile
-                BrokenDownAmount -= RemoveAmount  ;If there's anything left of the remove amount, subtract it from the digested amount
-                TotalBrokenDown += BrokenDownAmount
-              Else
-                ;Note("Regular reference found!")
-                Float Active = JMap.getFlt(JM_ItemEntry, "ActiveDVal")
-                Float DigestedAmount = Active ;If it finishes the item, then it adds the active amount
-                Float RemoveAmount = IndvRemoveAmount
-                If Active > RemoveAmount ;Failed to remove everything from item
-                  Active -= RemoveAmount
-                  RemoveAmount = 0
-                  Fullness += Active
-                  JMap.setFlt(JM_ItemEntry, "ActiveDVal", Active)
-                  JMap.setFlt(JM_ItemEntry, "DigestValue", Active)
-                  ;Notice("Active amount = " + Active + ", resetting digest value")
-                  DigestedAmount -= RemoveAmount  ;If there's anything left of the remove amount, subtract it from the digested amount
-                  If ItemKey as Actor
-                    (ItemKey as Actor).DamageActorValue("Health", RemoveAmount)
-                  EndIf
-                Else
-                  RemoveAmount -= Active ;Removed everything from the item
-                  Active = 0
-                  ;Notice("Active amount = " + Active + ", removing item")
-                  JArray.addForm(JA_Remove, ItemKey)
-                  sendBreakDownItemFinishEvent(MyActor, ItemKey, JMap.getFlt(JM_ItemEntry, "IndvDVal"))
-                EndIf
-                TotalBrokenDown += DigestedAmount
-              EndIf
-            Else
-              JArray.addForm(JA_Remove, ItemKey)
-            EndIf
-          EndIf
-          Utility.WaitMenuMode(0.5)
-          ItemKey = JFormMap.nextKey(SolidWasteList, ItemKey)
-        EndWhile
-        JF_eraseKeys(SolidWasteList, JA_Remove, MyActor)
-        JA_Remove = JValue.release(JA_Remove)
-        JMap.setFlt(TargetData, "ContentsFullness3", Fullness)
-        JMap.setFlt(TargetData, "WF_CurrentSolidAmount", JMap.getFlt(TargetData, "WF_CurrentSolidAmount") + TotalBrokenDown)
-        JMap.setFlt(TargetData, "STLastBrokenDownAmount", TotalBrokenDown)
-        sendBreakDownFinishEvent(MyActor, 0)
-      Else
-        JMap.setFlt(TargetData, "ContentsFullness3", 0)
-        JMap.setFlt(TargetData, "STLastBrokenDownAmount", 0)
-        sendBreakDownFinishEvent(MyActor, 0)
+    Int SolidWasteList = SCLib.getContents(MyActor, 3, TargetData)
+    If !JValue.empty(SolidWasteList)
+      Int JA_Remove = JValue.retain(JArray.object())
+      Int NumOfItems = JFormMap.count(SolidWasteList)
+      Float BreakdownRate = JMap.getFlt(TargetData, "WF_SolidBreakDownRate")
+      Int PerkLevel = SCLib.getCurrentPerkLevel(MyActor, "WF_BottomsUp")
+      If PerkLevel >= 5 && NumOfItems >= 10
+        BreakdownRate += 3
+      ElseIf PerkLevel >= 3 && NumOfItems >= 15
+        BreakdownRate += 1
       EndIf
-      SCLib.updateSingleContents(MyActor, 4)
+      Float IndvRemoveAmount = (BreakdownRate * TimePassed) / NumOfItems
+      ;Notice("# Items = " + NumOfItems + ", Remove Amount/Item = " + IndvRemoveAmount)
+      Form ItemKey = JFormMap.nextKey(SolidWasteList)
+      Float Fullness
+      Float TotalBrokenDown
+      While ItemKey
+
+        If ItemKey as ObjectReference
+          Int JM_ItemEntry = JFormMap.getObj(SolidWasteList, ItemKey)
+          Float D = JMap.getFlt(JM_ItemEntry, "DigestValue")
+          If D > 0
+            If ItemKey as SCLBundle
+              Float RemoveAmount = IndvRemoveAmount
+              ;Note("SCLBundle found! Remove Amount = " + RemoveAmount)
+              Float BrokenDownAmount = RemoveAmount
+              Bool Done ;If we finish off the item
+              Float Indv = JMap.getFlt(JM_ItemEntry, "IndvDVal")
+              Float Active = JMap.getFlt(JM_ItemEntry, "ActiveDVal")
+              Int ItemNum = (ItemKey as SCLBundle).NumItems
+              While RemoveAmount > 0 && !Done
+                If Active > RemoveAmount
+                  Active -= RemoveAmount
+                  ;Note("Ran out of RemoveAmount! Resetting DigestValue")
+                  RemoveAmount = 0  ;didn't manage to finish the stack before we ran out
+                  JMap.setFlt(JM_ItemEntry, "ActiveDVal", Active)
+                  (ItemKey as SCLBundle).NumItems = ItemNum
+                  Float DValue = Active + (Indv * (ItemNum - 1))
+                  JMap.setFlt(JM_ItemEntry, "DigestValue", DValue)
+
+                  ;Float DValue = SCLib.updateDValue(JM_ItemEntry)
+
+
+                  Fullness += DValue
+                Else
+                  RemoveAmount -= Active
+                  ;Debug.notification("Remove Amount = " + RemoveAmount)
+                  Active = 0
+                  If ItemNum > 1  ;If there's more than 1 item left
+                    ;Debug.notification("Item Number = " + ItemNum + ", resetting Active value")
+                    ItemNum -= 1 ;Remove 1
+                    Active = Indv ;Reset the active amount
+                    ;Debug.notification("Active = " + Active)
+                    ;Notice("More items found! Resetting active amount")
+                  Else
+                    ;Debug.notification("Items finished.")
+                    Done = True ;That was the last item
+                    JArray.addForm(JA_Remove, ItemKey)
+                    ;Don't have to reset dvalues, we're going to delete this
+                    ;Notice("No more items left!")
+                  EndIf
+                  sendBreakDownItemFinishEvent(MyActor, (ItemKey as SCLBundle).ItemForm, Indv)
+                EndIf
+              EndWhile
+              BrokenDownAmount -= RemoveAmount  ;If there's anything left of the remove amount, subtract it from the digested amount
+              TotalBrokenDown += BrokenDownAmount
+            Else
+              ;Note("Regular reference found!")
+              Float Active = JMap.getFlt(JM_ItemEntry, "ActiveDVal")
+              Float DigestedAmount = Active ;If it finishes the item, then it adds the active amount
+              Float RemoveAmount = IndvRemoveAmount
+              If Active > RemoveAmount ;Failed to remove everything from item
+                Active -= RemoveAmount
+                RemoveAmount = 0
+                Fullness += Active
+                JMap.setFlt(JM_ItemEntry, "ActiveDVal", Active)
+                JMap.setFlt(JM_ItemEntry, "DigestValue", Active)
+                ;Notice("Active amount = " + Active + ", resetting digest value")
+                DigestedAmount -= RemoveAmount  ;If there's anything left of the remove amount, subtract it from the digested amount
+                If ItemKey as Actor
+                  (ItemKey as Actor).DamageActorValue("Health", RemoveAmount)
+                EndIf
+              Else
+                RemoveAmount -= Active ;Removed everything from the item
+                Active = 0
+                ;Notice("Active amount = " + Active + ", removing item")
+                JArray.addForm(JA_Remove, ItemKey)
+                sendBreakDownItemFinishEvent(MyActor, ItemKey, JMap.getFlt(JM_ItemEntry, "IndvDVal"))
+              EndIf
+              TotalBrokenDown += DigestedAmount
+            EndIf
+          Else
+            JArray.addForm(JA_Remove, ItemKey)
+          EndIf
+        EndIf
+        Utility.WaitMenuMode(0.5)
+        ItemKey = JFormMap.nextKey(SolidWasteList, ItemKey)
+      EndWhile
+      JF_eraseKeys(SolidWasteList, JA_Remove, MyActor)
+      JA_Remove = JValue.release(JA_Remove)
+      JMap.setFlt(TargetData, "WF_TotalBrokenDown", JMap.getFlt(TargetData, "WF_TotalBrokenDown") + TotalBrokenDown)
+      JMap.setFlt(TargetData, "ContentsFullness3", Fullness)
+      JMap.setFlt(TargetData, "WF_CurrentSolidAmount", JMap.getFlt(TargetData, "WF_CurrentSolidAmount") + TotalBrokenDown)
+      JMap.setFlt(TargetData, "STLastBrokenDownAmount", TotalBrokenDown)
+      sendBreakDownFinishEvent(MyActor, 0)
+    Else
+      JMap.setFlt(TargetData, "ContentsFullness3", 0)
+      JMap.setFlt(TargetData, "STLastBrokenDownAmount", 0)
+      sendBreakDownFinishEvent(MyActor, 0)
     EndIf
+    SCLib.updateSingleContents(MyActor, 4)
     ;Notice("Fullness = " + Fullness + ", TotalDigested=" + TotalDigested)
     ;Note("Final ContentsFullness1 = " + JMap.getFlt(TargetData, "ContentsFullness1"))
     clear_thread_vars()
@@ -298,7 +304,6 @@ EndFunction
 
 Function sendDigestItemFinishEvent(Actor akEater, Form akFood, Float afDigestValue)
   If akFood as Actor
-    (akFood as Actor).Kill(akEater)
     SCLibrary.addToActorTrashList(akFood as Actor, 3)
   EndIf
   Int FinishEvent = ModEvent.Create("SCLDigestItemFinishEvent")
@@ -317,7 +322,6 @@ EndFunction
 
 Function sendBreakDownItemFinishEvent(Actor akEater, Form akFood, Float afDigestValue)
   If akFood as Actor
-    (akFood as Actor).Kill(akEater)
     SCLibrary.addToActorTrashList(akFood as Actor, 3)
   EndIf
   Int FinishEvent = ModEvent.Create("SCLBreakDownItemFinishEvent")

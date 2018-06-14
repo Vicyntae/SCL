@@ -138,19 +138,18 @@ Event OnPageReset(string a_page)
       AddTextOptionST("DisplayNumStored_T", "$Num Items Stored", SCLib.countItemTypes(SelectedActor, 2, True))
       AddTextOptionST("DisplayFullness_T", "$Fullness", JMap.getFlt(SelectedData, "STFullness"))  ;12
       AddTextOptionST("DisplayMax_T", "$Max Capacity", SCLib.getMax(SelectedActor)) ;14
-      If SCLSet.WF_Active
-        If SCLSet.DebugEnable
-          AddSliderOptionST("WF_EditMaxStorage_S", "$Set Max Num Items To Stow", SCLib.WF_getSolidMaxNumItems(SelectedActor, SelectedData))
-        Else
-          AddTextOptionST("WF_DisplayMaxStorage_T", "$Max Num Items Can Stow", SCLib.WF_getSolidMaxNumItems(SelectedActor, SelectedData))
-        EndIf
-        AddTextOptionST("WF_DisplayMaxInsert_T", "$Max Insertable Size", SCLib.WF_getSolidMaxInsert(SelectedActor, SelectedData))
-        AddTextOptionST("DisplayNumStowedItems_T", "$Num Items Stowed Away", SCLib.countItemTypes(SelectedActor, 4, True))
-        If SCLSet.WF_SolidActive
-          AddTextOptionST("DisplaySolidFullness_T", "$Solid Fulless", SCLib.roundFlt(SCLib.WF_getTotalSolidFullness(SelectedActor, SelectedData), 1))
-          AddTextOptionST("DisplaySolidIllness", "$Solid Illness Level", JMap.getInt(SelectedData, "WF_SolidIllnessLevel"))
-        EndIf
+      AddTextOptionST("DisplaySolidIllness", "$Illness Level", JMap.getInt(SelectedData, "WF_SolidIllnessLevel"))
+      If SCLSet.DebugEnable
+        AddSliderOptionST("WF_EditMaxStorage_S", "$Set Max Num Items To Stow", SCLib.WF_getSolidMaxNumItems(SelectedActor, SelectedData))
+      Else
+        AddTextOptionST("WF_DisplayMaxStorage_T", "$Max Num Items Can Stow", SCLib.WF_getSolidMaxNumItems(SelectedActor, SelectedData))
       EndIf
+      AddTextOptionST("WF_DisplayMaxInsert_T", "$Max Insertable Size", SCLib.WF_getSolidMaxInsert(SelectedActor, SelectedData))
+      If SelectedActor == PlayerRef && SCLib.getCurrentPerkLevel(SelectedActor, "WF_BottomsUp") >= 1
+        AddToggleOptionST("SetAutoDestination_TOG", "$Auto-Send To Colon", SCLSet.PlayerAutoDestination)
+      EndIf
+      AddTextOptionST("DisplayNumStowedItems_T", "$Num Items Stowed Away", SCLib.countItemTypes(SelectedActor, 4, True))
+      AddTextOptionST("DisplaySolidFullness_T", "$Solid Fulless", SCLib.roundFlt(SCLib.WF_getTotalSolidFullness(SelectedActor, SelectedData), 1))
   		AddMenuOptionST("DisplayStomachContents_M", "$Show Stomach Contents", "") ;18
     Else
       AddTextOptionST("ChooseActorMessage_T", "$Choose an actor.", "")
@@ -178,8 +177,21 @@ Event OnPageReset(string a_page)
     AddMenuOptionST("SelectedActor_M", "$Actor", SelectedActorName);0
     If SelectedActor
       AddTextOptionST("DisplayTotalDigest_T", "$Total Digested Food", JMap.getFlt(SelectedData, "STTotalDigestedFood")) ;2
-      AddTextOptionST("DisplayTotalTimesVomited", "$Total Times Vomited", JMap.getInt(SelectedData, "SCLAllowOverflowTracking")) ;4
-      AddTextOptionST("DisplayHighestFullness", "$Highest Fullness Reached", JMap.getFlt(SelectedData, "SCLHighestFullness")) ; 6
+      AddTextOptionST("DisplayTotalTimesVomited_T", "$Total Times Vomited", JMap.getInt(SelectedData, "SCLAllowOverflowTracking")) ;4
+      AddTextOptionST("DisplayHighestFullness_T", "$Highest Fullness Reached", JMap.getFlt(SelectedData, "SCLHighestFullness")) ; 6
+      AddTextOptionST("DisplayTotalBrokenDown_T", "$Total Broken Down Food", JMap.getFlt(SelectedData, "WF_TotalBrokenDown")) ;2
+      Int Bottoms = SCLib.getCurrentPerkLevel(SelectedActor, "WF_BottomsUp")
+      If Bottoms >= 1
+        AddTextOptionST("DisplayTotalTempBoostsGained_T", "$Total Temporary Boosts Gained", JMap.getInt(SelectedData, "WF_TotalTempBoostsGained"))
+      EndIf
+      If Bottoms >= 4
+        AddTextOptionST("DisplayTotalPermBoostsGained_T", "$Total Permanent Boosts Gained", JMap.getInt(SelectedData, "WF_TotalPermBoostsGained"))
+      EndIf
+      Int Refine = SCLib.getCurrentPerkLevel(SelectedActor, "WF_RearRefinery")
+      If Refine > 1
+        AddTextOptionST("DisplayTotalItemsRefined_T", "$Total Items Refined", JMap.getInt(SelectedData, "WF_TotalRefinedItems"))
+      EndIf
+
     Else
       AddTextOptionST("ChooseActorMessage_T", "$Choose an actor.", "")
     EndIf
@@ -227,15 +239,8 @@ Event OnPageReset(string a_page)
     AddEmptyOption()
     AddEmptyOption()
     AddHeaderOption("$Waste Function Settings")
-    AddToggleOptionST("WF_Enable_TOG", "$Enable Waste Functions", SCLSet.WF_Active)
-    If SCLSet.WF_Active
-      AddKeyMapOptionST("WF_ActionKeyPick_KM", "$Choose Waste Function Action Key", SCLSet.WF_ActionKey)
-      AddToggleOptionST("WF_SolidEnable_TOG", "$Enable Solid Waste Functions", SCLSet.WF_SolidActive)
-      AddToggleOptionST("WF_LiquidEnable_TOG", "$Enable Liquid Waste Functions", SCLSet.WF_LiquidActive)
-
-      ;AddToggleOptionST("WF_GasEnable_TOG", "$Enable Gas Waste Functions", SCLSet.WF_GasActive)
-      ;AddEmptyOption()
-    EndIf
+    AddKeyMapOptionST("WF_ActionKeyPick_KM", "$Choose Waste Function Action Key", SCLSet.WF_ActionKey)
+    AddToggleOptionST("WF_Enable_TOG", "$Enable Waste Needs Functions", SCLSet.WF_NeedsActive)
     AddHeaderOption("$Other Settings")
     AddHeaderOption("")
     AddSliderOptionST("PlayerMessagePOV_S", "$Message POV", SCLSet.PlayerMessagePOV, SCLib.addIntSuffix(SCLSet.PlayerMessagePOV))
@@ -271,12 +276,7 @@ Event OnOptionSelect(Int Option)
         ForcePageReset()
       EndIf
     Else
-      Int MaxValue = SCLib.getAbilityArray(sPerkID).Length - 1
-      If CurrentPerkValue >= MaxValue
-        ShowMessage(SCLib.getPerkName(sPerkID, CurrentPerkValue) + ": " + SCLib.getPerkDescription(sPerkID, CurrentPerkValue) + "\n Requirements: " + SCLib.getPerkRequirements(sPerkID, CurrentPerkValue), False, "OK")
-      Else
-        ShowMessage(SCLib.getPerkRequirements(sPerkID, CurrentPerkValue + 1), False, "OK")
-      EndIf
+      ShowMessage(SCLib.getPerkName(sPerkID, CurrentPerkValue) + ": " + SCLib.getPerkDescription(sPerkID, CurrentPerkValue) + "\n Requirements: " + SCLib.getPerkRequirements(sPerkID, CurrentPerkValue), False, "OK")
     EndIf
   EndIf
 EndEvent
@@ -314,12 +314,7 @@ Event OnOptionHighlight(int a_option)
         SetInfoText(SCLib.getPerkName(sPerkID, SelectedPerkValue) + ": " + SCLib.getPerkDescription(sPerkID, SelectedPerkValue) + "\n Requirements: " + SCLib.getPerkRequirements(sPerkID, SelectedPerkValue))
       EndIf
     Else
-      Int MaxPerkValue = SCLib.getAbilityArray(sPerkID).Length - 1
-      If CurrentPerkValue >= MaxPerkValue
-        SetInfoText(SCLib.getPerkName(sPerkID, SelectedPerkValue) + ": " + SCLib.getPerkDescription(sPerkID, CurrentPerkValue) + "\n Requirements: " + SCLib.getPerkRequirements(sPerkID, CurrentPerkValue))
-      Else
-        SetInfoText("Requirements: " + SCLib.getPerkRequirements(sPerkID, CurrentPerkValue + 1))
-      EndIf
+      SetInfoText(SCLib.getPerkName(sPerkID, CurrentPerkValue + 1) + ": " + SCLib.getPerkDescription(sPerkID, CurrentPerkValue + 1) + "\n Requirements: " + SCLib.getPerkRequirements(sPerkID, CurrentPerkValue + 1))
     EndIF
   EndIf
 EndEvent
@@ -560,6 +555,22 @@ State DisplayMax_T
   EndEvent
 EndState
 
+State SetAutoDestination_TOG
+  Event OnSelectST()
+    SCLSet.PlayerAutoDestination = !SCLSet.PlayerAutoDestination
+    SetToggleOptionValueST(SCLSet.PlayerAutoDestination)
+  EndEvent
+
+  Event OnDefaultST()
+    SCLSet.PlayerAutoDestination = False
+    SetToggleOptionValueST(False)
+  EndEvent
+
+  Event OnHighlightST()
+    SetInfoText("Auto-Send all consumed items to the colon instead of the stomach.")
+  EndEvent
+EndState
+
 State WF_EditMaxStorage_S
 	Event OnSliderOpenST()
 		SetSliderDialogStartValue(SCLib.WF_getSolidMaxNumItems(SelectedActor))
@@ -598,6 +609,42 @@ EndState
 State DisplayTotalDigest_T
   Event OnHighlightST()
     SetInfoText("Total amount of food that the actor has digested.")
+  EndEvent
+EndState
+
+State DisplayTotalBrokenDown_T
+  Event OnHighlightST()
+    SetInfoText("Total amount of food that the actor has broken down via their colon.")
+  EndEvent
+EndState
+
+State DisplayHighestFullness_T
+  Event OnHighlightST()
+    SetInfoText("Highest fullness achieved.")
+  EndEvent
+EndState
+
+State DisplayTotalTimesVomited_T
+  Event OnHighlightST()
+    SetInfoText("Total number of times this actor has vomited due to overeating.")
+  EndEvent
+EndState
+
+State DisplayTotalTempBoostsGained_T
+  Event OnHighlightST()
+    SetInfoText("Total number of times this actor has gained temporary boosts from breaking items down.")
+  EndEvent
+EndState
+
+State DisplayTotalPermBoostsGained_T
+  Event OnHighlightST()
+    SetInfoText("Total number of times this actor has gained permanent boosts from breaking items down.")
+  EndEvent
+EndState
+
+State DisplayTotalItemsRefined_T
+  Event OnHighlightST()
+    SetInfoText("Total number of times this actor has managed to refine items by breaking them down.")
   EndEvent
 EndState
 
@@ -991,6 +1038,28 @@ State AutoEatEnable_TOG
     SetInfoText("Have actors automatically eat items from inventory periodically.")
   EndEvent
 EndState
+State WF_SolidIllnessBuildUpDecrease_S
+  Event OnSliderOpenST()
+    SetSliderDialogStartValue(SCLSet.IllnessBuildUpDecrease)
+    SetSliderDialogDefaultValue(2.0)
+    SetSliderDialogRange(0.1, 10)
+    SetSliderDialogInterval(0.1)
+  EndEvent
+
+  Event OnSliderAcceptST(float a_value)
+    SCLSet.IllnessBuildUpDecrease = a_value
+    SetSliderOptionValueST(a_value, "{1}/hr")
+  EndEvent
+
+  Event OnDefaultST()
+    SCLSet.IllnessBuildUpDecrease = 2
+    SetSliderOptionValueST(2, "{1}/hr")
+  EndEvent
+
+  Event OnHighlightST()
+    SetInfoText("How fast illness receeds.")
+  EndEvent
+EndState
 
 State BellyInflateMethod_M
 	Event OnMenuOpenST()
@@ -1340,49 +1409,17 @@ EndState
 ;Waste Functions Options *******************************************************
 State WF_Enable_TOG
 	Event OnSelectST()
-		SCLSet.WF_Active = !SCLSet.WF_Active
+		SCLSet.WF_NeedsActive = !SCLSet.WF_NeedsActive
     ForcePageReset()
 	EndEvent
 
 	Event OnDefaultST()
-    SCLSet.WF_Active = False
+    SCLSet.WF_NeedsActive = False
     ForcePageReset()
 	EndEvent
 
 	Event OnHighlightST()
-		SetInfoText("Allow waste functions.")
-	EndEvent
-EndState
-
-State WF_SolidEnable_TOG
-	Event OnSelectST()
-		SCLSet.WF_SolidActive = !SCLSet.WF_SolidActive
-    ForcePageReset()
-	EndEvent
-
-	Event OnDefaultST()
-    SCLSet.WF_SolidActive = False
-    ForcePageReset()
-	EndEvent
-
-	Event OnHighlightST()
-		SetInfoText("Allows solid waste functions.")
-	EndEvent
-EndState
-
-State WF_LiquidEnable_TOG
-	Event OnSelectST()
-		SCLSet.WF_LiquidActive = !SCLSet.WF_LiquidActive
-    ForcePageReset()
-	EndEvent
-
-	Event OnDefaultST()
-    SCLSet.WF_LiquidActive = False
-    ForcePageReset()
-	EndEvent
-
-	Event OnHighlightST()
-		SetInfoText("Allow liquid waste functions.")
+		SetInfoText("Allow waste needs functions.")
 	EndEvent
 EndState
 

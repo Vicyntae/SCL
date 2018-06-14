@@ -20,7 +20,7 @@ Float AppliedValue
 Event OnEffectStart(Actor akTarget, Actor akCaster)
   MyActor = akTarget
   Float Magnitude = GetMagnitude()
-  If SCLSet.WF_Active && SCLSet.WF_SolidActive
+  If SCLSet.WF_NeedsActive
     JMap.setFlt(ActorData, "WF_SolidCapMulti", JMap.getFlt(ActorData, "WF_SolidCapMulti") + Magnitude)
     AppliedValue = Magnitude
   EndIf

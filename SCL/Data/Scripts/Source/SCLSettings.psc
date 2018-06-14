@@ -44,6 +44,19 @@ Int Property ActionKey
   EndFunction
 EndProperty
 
+GlobalVariable Property SCL_SET_PlayerAutoDestination Auto
+Bool Property PlayerAutoDestination
+  Bool Function Get()
+    Return SCL_SET_PlayerAutoDestination.GetValueInt() as Bool
+  EndFunction
+  Function Set(Bool a_value)
+    If a_value
+      SCL_SET_PlayerAutoDestination.SetValueInt(1)
+    Else
+      SCL_SET_PlayerAutoDestination.SetValueInt(0)
+    EndIf
+  EndFunction
+EndProperty
 ;Debug Modes -------------------------------------------------------------------
 GlobalVariable Property SCL_SET_DebugEnable Auto  ;Default 0 (False)
 Bool Property DebugEnable
@@ -325,7 +338,7 @@ Form[] Property LoadedActors Auto
 Form[] Property TeammatesList Auto
 
 Message Property SCL_ContentsMenuMessage Auto
-
+Message Property SCL_MES_TakePerk Auto
 SCLAddItemThreadManager Property ItemThreadManager Auto
 SCLEditBodyThreadManager Property EditBodyThreadManager Auto
 SCLDigestThreadManager Property DigestThreadManager Auto
@@ -416,7 +429,7 @@ EndProperty
 
 ;WF Properties *****************************************************************
 GlobalVariable Property SCL_SET_WF_Active Auto
-Bool Property WF_Active
+Bool Property WF_NeedsActive
   Bool Function Get()
     Return SCL_SET_WF_Active.GetValueInt() as Bool
   EndFunction
