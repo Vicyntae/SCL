@@ -3300,15 +3300,11 @@ Function showContentsList(Actor akTarget, Int aiMode = 0)
                 akTarget.EquipItem(CurrentForm, False, False)
                 i += 1
               EndWhile
-<<<<<<< HEAD
               JFormMap.removeKey(JF_Stored, Item)
               Int JF_Stored = getContents(akTarget, 2)
               quickUpdate(akTarget, True)
               buildContentsList(akTarget)
-              SCLibrary.addToObjectTrashList(Item, 2)
-=======
               Item.DeleteWhenAble()
->>>>>>> TrashOverhaul
             Else
               If getCurrentPerkLevel(akTarget, "SCLExtractionExpert") >= 1
                 addItem(akTarget, akBaseObject = CurrentForm, aiItemType = 1, aiItemCount = NumItems)

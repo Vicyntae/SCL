@@ -74,22 +74,17 @@ Event OnKeyDown(int keyCode)
     Else
       Form CurrentBase = CurrentRef.GetBaseObject()
       If CurrentBase as Potion || CurrentBase as Ingredient || CurrentBase as Ammo || CurrentBase as Armor || CurrentBase as Book || CurrentBase as LeveledItem || CurrentBase as MiscObject || CurrentBase as SoulGem || CurrentBase as Scroll || CurrentBase as Weapon
-        Note("Reference is insertable item!")
         ;Later: make it so that potions/ingredients not in containers are eaten?
         Int Option = 1
         Bool Dest = SCLSet.PlayerAutoDestination
         If SCLib.getCurrentPerkLevel(MyActor, "WF_BasementStorage") >= 1
-          Note("Player can insert into colon!")
           If Dest
-            Note("Autodestination on! Option 2 selected!")
             Option = 2
           Else
-            Note("Autodestination off! Showing message!")
             Option = SCLSet.SCL_MES_WF_StorageChoice.Show()
           EndIf
         EndIf
         If Option == 1
-          Note("Proceeding with option 1")
           Float CurrentWeight = JMap.getFlt(ActorData, "STFullness")
           Float DigestValue = SCLib.genDigestValue(CurrentBase)
           Float MaxWeight = SCLib.getMax(MyActor, ActorData)
@@ -102,7 +97,6 @@ Event OnKeyDown(int keyCode)
             PlayerThought(MyActor, "I can't swallow that! I'm too full!", "You can't swallow that! You're too full!", MyActorName + " can't swallow that! They're too full!")
           EndIf
         ElseIf Option == 2
-          Note("Proceeding with option 2")
           Float MaxWeight = SCLib.WF_getSolidMaxInsert(MyActor, ActorData)
           Int NumItems = SCLib.countItemTypes(MyActor, 4, True) + SCLib.countItemTypes(MyActor, 3, True)
           Int MaxNumItems = SCLib.WF_getSolidMaxNumItems(MyActor, ActorData)

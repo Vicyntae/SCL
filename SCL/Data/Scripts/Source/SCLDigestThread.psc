@@ -304,12 +304,8 @@ EndFunction
 
 Function sendDigestItemFinishEvent(Actor akEater, Form akFood, Float afDigestValue)
   If akFood as Actor
-<<<<<<< HEAD
-    SCLibrary.addToActorTrashList(akFood as Actor, 3)
-=======
     (akFood as Actor).Kill(akEater)
     SCLibrary.eraseActorData(akFood as Actor)
->>>>>>> TrashOverhaul
   EndIf
   Int FinishEvent = ModEvent.Create("SCLDigestItemFinishEvent")
   ModEvent.PushForm(FinishEvent, akEater)
@@ -327,12 +323,8 @@ EndFunction
 
 Function sendBreakDownItemFinishEvent(Actor akEater, Form akFood, Float afDigestValue)
   If akFood as Actor
-<<<<<<< HEAD
-    SCLibrary.addToActorTrashList(akFood as Actor, 3)
-=======
     (akFood as Actor).Kill(akEater)
     SCLibrary.eraseActorData(akFood as Actor)
->>>>>>> TrashOverhaul
   EndIf
   Int FinishEvent = ModEvent.Create("SCLBreakDownItemFinishEvent")
   ModEvent.PushForm(FinishEvent, akEater)
