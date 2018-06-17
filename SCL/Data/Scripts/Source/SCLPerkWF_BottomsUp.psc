@@ -12,7 +12,7 @@ Function Setup()
   Description[1] = "Allows actor to break down items in the colon. Broken down items give temporary benefits."
   Description[2] = "Increases breakdown speed by 1 unit/hour."
   Description[3] = "Increases breakdown speed by 1 unit/hour, and an additional unit when there are 15 or more items breaking down."
-  Description[4] = "Increases breakdown speed by 1 unit/hour. Small chance to get a permanent benefit."
+  Description[4] = "Increases breakdown speed by 1 unit/hour. Small chance to get a permanent benefit. Potions increase Magicka Regeneration, Armor increases Health Regeneration, Weapons increase Stamina Regeneration, Soulgems increase Magic Resist."
   Description[5] = "Increases breakdown speed by 1 unit/hour, and an additional 2 units when there are 10 or more items breaking down. Doubles permanent benefits gained."
 
   Requirements = New String[6]
@@ -111,7 +111,7 @@ Event OnItemBreakdownFinish(Form akEater, Form akFood, Float afDigestValue)
         If Buff as Spell
           (Buff as Spell).Cast(Target)
         EndIf
-        PlayerThoughtDB(Target, "SCLWFBDTempSuccess")
+        Debug.Notification("Gained buff " + Buff.GetName() + " from breaking down " + BaseForm.GetName())
         JMap.setInt(TargetData, "WF_TotalTempBoostsGained", JMap.getInt(TargetData, "WF_TotalTempBoostsGained") + 1)
         If PerkLevel >= 4
           Float Success = Utility.RandomFloat()
@@ -121,7 +121,9 @@ Event OnItemBreakdownFinish(Form akEater, Form akFood, Float afDigestValue)
             Else
               Target.ModActorValue("MagickaRate", 0.1)
             EndIf
-            PlayerThoughtDB(Target, "SCLWFBDPermSuccess")
+            If Target == PlayerRef
+              Debug.Notification("Magicka Regeneration increased from breaking down " + BaseForm.GetName())
+            EndIf
             JMap.setInt(TargetData, "WF_TotalPermBoostsGained", JMap.getInt(TargetData, "WF_TotalPermBoostsGained") + 1)
           EndIf
         EndIf
@@ -131,7 +133,7 @@ Event OnItemBreakdownFinish(Form akEater, Form akFood, Float afDigestValue)
         If Buff as Spell
           (Buff as Spell).Cast(Target)
         EndIf
-        PlayerThoughtDB(Target, "SCLWFBDTempSuccess")
+        Debug.Notification("Gained buff " + Buff.GetName() + " from breaking down " + BaseForm.GetName())
         JMap.setInt(TargetData, "WF_TotalTempBoostsGained", JMap.getInt(TargetData, "WF_TotalTempBoostsGained") + 1)
         If PerkLevel >= 4
           Float Success = Utility.RandomFloat()
@@ -141,7 +143,9 @@ Event OnItemBreakdownFinish(Form akEater, Form akFood, Float afDigestValue)
             Else
               Target.ModActorValue("HealRate", 0.1)
             EndIf
-            PlayerThoughtDB(Target, "SCLWFBDPermSuccess")
+            If Target == PlayerRef
+              Debug.Notification("Health Regeneration increased from breaking down " + BaseForm.GetName())
+            EndIf
             JMap.setInt(TargetData, "WF_TotalPermBoostsGained", JMap.getInt(TargetData, "WF_TotalPermBoostsGained") + 1)
           EndIf
         EndIf
@@ -151,7 +155,7 @@ Event OnItemBreakdownFinish(Form akEater, Form akFood, Float afDigestValue)
         If Buff as Spell
           (Buff as Spell).Cast(Target)
         EndIf
-        PlayerThoughtDB(Target, "SCLWFBDTempSuccess")
+        Debug.Notification("Gained buff " + Buff.GetName() + " from breaking down " + BaseForm.GetName())
         JMap.setInt(TargetData, "WF_TotalTempBoostsGained", JMap.getInt(TargetData, "WF_TotalTempBoostsGained") + 1)
         If PerkLevel >= 4
           Float Success = Utility.RandomFloat()
@@ -161,7 +165,9 @@ Event OnItemBreakdownFinish(Form akEater, Form akFood, Float afDigestValue)
             Else
               Target.ModActorValue("StaminaRate", 0.1)
             EndIf
-            PlayerThoughtDB(Target, "SCLWFBDPermSuccess")
+            If Target == PlayerRef
+              Debug.Notification("Stamina Regeneration increased from breaking down " + BaseForm.GetName())
+            EndIf
             JMap.setInt(TargetData, "WF_TotalPermBoostsGained", JMap.getInt(TargetData, "WF_TotalPermBoostsGained") + 1)
           EndIf
         EndIf
@@ -171,8 +177,8 @@ Event OnItemBreakdownFinish(Form akEater, Form akFood, Float afDigestValue)
         If Buff as Spell
           (Buff as Spell).Cast(Target)
         EndIf
-        PlayerThoughtDB(Target, "SCLWFBDTempSuccess")
-        JMap.setInt(TargetData, "WF_TotalTempBoostsGained", JMap.getInt(TargetData, "WF_TotalTempBoostsGained") + 1)
+        Debug.Notification("Gained buff " + Buff.GetName() + " from breaking down " + BaseForm.GetName())
+        JMap.setInt(TargetData, "WF_TotalSoulgemTempBoostsGained", JMap.getInt(TargetData, "WF_TotalTempBoostsGained") + 1)
         If PerkLevel >= 4
           Float Success = Utility.RandomFloat()
           If Success <= 0.01
@@ -181,7 +187,9 @@ Event OnItemBreakdownFinish(Form akEater, Form akFood, Float afDigestValue)
             Else
               Target.ModActorValue("MagicResist", 0.1)
             EndIf
-            PlayerThoughtDB(Target, "SCLWFBDPermSuccess")
+            If Target == PlayerRef
+              Debug.Notification("Magic Resist increased from breaking down " + BaseForm.GetName())
+            EndIf
             JMap.setInt(TargetData, "WF_TotalPermBoostsGained", JMap.getInt(TargetData, "WF_TotalPermBoostsGained") + 1)
           EndIf
         EndIf

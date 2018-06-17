@@ -118,11 +118,11 @@ Function Setup()
   Name = "Rear Refinery"
   Description = New String[6]
   Description[0] = "Allows creation of special items when breaking down items in the colon."
-  Description[1] = "Allows for a small chance of creating special items when breaking down food in the colon"
-  Description[2] = "Allows for a small chance of creating special items when breaking down potions in the colon"
-  Description[3] = "Allows for a small chance of creating special items when breaking down armor in the colon"
-  Description[4] = "Allows for a small chance of creating special items when breaking down weaponry in the colon"
-  Description[5] = "Allows for a small chance of creating special items when breaking down soulgems in the colon"
+  Description[1] = "Allows for a small chance of creating special items when breaking down food in the colon. Chance affected by cost of item."
+  Description[2] = "Allows for a small chance of creating special items when breaking down potions in the colon."
+  Description[3] = "Allows for a small chance of creating special items when breaking down armor in the colon."
+  Description[4] = "Allows for a small chance of creating special items when breaking down weaponry in the colon."
+  Description[5] = "Allows for a small chance of creating special items when breaking down soulgems in the colon."
 
   Requirements = New String[6]
   Requirements[0] = "No Requirements."

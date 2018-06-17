@@ -3795,6 +3795,37 @@ Function processConsoleInput(Actor akTarget, String[] cmdList)
     Return
   EndIf
 EndFunction
+
+Function showQuickActorStatus(Actor akTarget)
+  If akTarget == PlayerRef
+    Int PlayerData = getTargetData(akTarget)
+    Float Fullness = JMap.getFlt(PlayerData, "STFullness")
+    Float Base = getAdjBase(akTarget)
+    Debug.Notification("My Fullness: " + Fullness + "/" + Base + ".")
+  ElseIf akTarget.IsInFaction(SCLSet.CurrentFollowerFaction) || SCLSet.DebugEnable
+    Int TargetData = getTargetData(akTarget)
+    Float Fullness = JMap.getFlt(TargetData, "STFullness")
+    Float Base = getAdjBase(akTarget)
+    String name = nameGet(akTarget)
+    Debug.Notification(name + "'s Fullness: " + Fullness + "/" + Base + ".")
+  EndIf
+EndFunction
+
+Function showFullActorStatus(Actor akTarget)
+  If akTarget == PlayerRef
+    Int PlayerData = getTargetData(akTarget)
+    Float Fullness = JMap.getFlt(PlayerData, "STFullness")
+    Float Base = getAdjBase(akTarget)
+    Debug.Notification("My Fullness: " + Fullness + "/" + Base + ".")
+  ElseIf akTarget.IsInFaction(SCLSet.CurrentFollowerFaction) || SCLSet.DebugEnable
+    Int TargetData = getTargetData(akTarget)
+    Float Fullness = JMap.getFlt(TargetData, "STFullness")
+    Float Base = getAdjBase(akTarget)
+    String name = nameGet(akTarget)
+    Debug.Notification(name + "'s Fullness: " + Fullness + "/" + Base + ".")
+  EndIf
+EndFunction
+
 ;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ;Debug Functions
 ;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

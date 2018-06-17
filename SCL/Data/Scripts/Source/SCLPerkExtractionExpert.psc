@@ -4,8 +4,8 @@ Function Setup()
   Name = "Extraction Expert"
   Description = New String[4]
   Description[0] = "Allows you to digest non-digestible items and obtain benefits."
-  Description[1] = "Allows you to digest armor and gain a small boost to damage resist."
-  Description[2] = "Allows you to digest weapons and gain a small boost to melee damage."
+  Description[1] = "Allows you to digest armor and gain a small boost to armor skills."
+  Description[2] = "Allows you to digest weapons and gain a small boost to weapon skills."
   Description[3] = "Allows you to digest enchanted weapons and armor and gain a small boost to magic skills."
 
   Requirements = New String[4]
@@ -86,6 +86,7 @@ Event OnItemDigestFinish(Form akEater, Form akFood, Float afDigestValue)
           MagicEffect ME = Ench.GetNthEffectMagicEffect(EffectIndex)
           String Skill = ME.GetAssociatedSkill()
           If Target == PlayerRef
+            Debug.Notification(Skill + " increased from digesting enchanted equipment!")
             Game.AdvanceSkill(Skill, AV)
           Else
             Target.ModActorValue(Skill, AV)
@@ -96,14 +97,34 @@ Event OnItemDigestFinish(Form akEater, Form akFood, Float afDigestValue)
       If BaseForm as Armor && PerkLevel >= 1
         Int WeightClass = (BaseForm as Armor).GetWeightClass()
         String Skill
-        If WeightClass == 0
+        If (BaseForm as Armor).IsShield()
+          Skill = "Block"
+        ElseIf WeightClass == 0
           Skill = "LightArmor"
         ElseIf WeightClass == 1
           Skill = "HeavyArmor"
+        ElseIf WeightClass == 2
+          If (BaseForm as Armor).IsJewelry()
+            Skill == "Smithing"
+          Else
+            Skill == "Alteration"
+          EndIf
         EndIf
-        Float AR = (BaseForm as Armor).GetArmorRating() / 500
+        Float AR
+        If WeightClass == 2
+          AR = BaseForm.GetGoldValue() / 500
+        Else
+          AR = (BaseForm as Armor).GetArmorRating() / 200
+        EndIf
         If AR
           If Target == PlayerRef
+            String AltSkill = Skill
+            If Skill == "LightArmor"
+              AltSkill = "Light Armor"
+            ElseIf Skill == "HeavyArmor"
+              AltSkill = "Heavy Armor"
+            EndIf
+            Debug.Notification(AltSkill + " increased from digesting armor!")
             Game.AdvanceSkill(Skill, AR)
           Else
             Target.ModActorValue(Skill, AR)
@@ -127,11 +148,22 @@ Event OnItemDigestFinish(Form akEater, Form akFood, Float afDigestValue)
         EndIf
         Float BD
         If WeaponType == 8
-          BD = BaseForm.GetGoldValue() / 2000
+          BD = BaseForm.GetGoldValue() / 500
         Else
-          BD = (BaseForm as Weapon).GetBaseDamage() / 500
+          BD = (BaseForm as Weapon).GetBaseDamage() / 200
         EndIf
         If BD
+          String AltSkill = Skill
+          If Skill == "UnarmedDamage"
+            AltSkill = "Unarmed Damage"
+          ElseIf Skill == "OneHanded"
+            AltSkill = "One Handed"
+          ElseIf Skill == "TwoHanded"
+            AltSkill = "Two Handed"
+          EndIf
+          If Target == PlayerRef
+            Debug.Notification(AltSkill + " increased from digesting weaponry!")
+          EndIf
           If Target != PlayerRef || Skill == "UnarmedDamage"
             Target.ModActorValue("MeleeDamage", BD)
           Else

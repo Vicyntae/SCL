@@ -17,10 +17,10 @@ Event OnUpdate()
   If eatQueued == 0
     eatQueued = 1
     RegisterForSingleUpdate(480)
-    Note("Battle time over 3 minutes. Prepping autoeat for potions and a snack.")
+    ;Note("Battle time over 3 minutes. Prepping autoeat for potions and a snack.")
   ElseIf eatQueued == 1
     eatQueued == 2
-    Note("Battle time over 10 minutes. Prepping autoeat for potions and a light meal.")
+    ;Note("Battle time over 10 minutes. Prepping autoeat for potions and a light meal.")
   EndIf
 EndEvent
 

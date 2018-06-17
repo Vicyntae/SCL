@@ -245,6 +245,7 @@ Event OnPageReset(string a_page)
     AddHeaderOption("")
     AddSliderOptionST("PlayerMessagePOV_S", "$Message POV", SCLSet.PlayerMessagePOV, SCLib.addIntSuffix(SCLSet.PlayerMessagePOV))
     AddKeyMapOptionST("ActionKeyPick_KM", "$Choose Action Key", SCLSet.ActionKey)
+    AddKeyMapOptionST("StatusKeyPick_KM", "$Choose Status Key", SCLSet.StatusKey)
     AddToggleOptionST("GodMode1_TOG", "$Enable God Mode", SCLSet.GodMode1)
     AddToggleOptionST("DebugEnable_TOG", "$Debug Mode", SCLSet.DebugEnable)
     If SCLSet.DebugEnable
@@ -269,14 +270,14 @@ Event OnOptionSelect(Int Option)
   If sPerkID
     Int CurrentPerkValue = JMap.getInt(JM_PerkValues, sPerkID)
     If SCLib.canTakePerk(SelectedActor, sPerkID, SCLSet.DebugEnable)
-      If ShowMessage(SCLib.getPerkDescription(sPerkID, CurrentPerkValue + 1) + "\n Take Perk " + SCLib.getPerkName(sPerkID, CurrentPerkValue + 1) + "?", True, "Yes", "No")
+      If ShowMessage(SCLib.getPerkDescription(sPerkID, CurrentPerkValue + 1) + "\n Requirements: " + SCLib.getPerkRequirements(sPerkID, CurrentPerkValue + 1) + "\n Take Perk " + SCLib.getPerkName(sPerkID, CurrentPerkValue + 1) + "?", True, "Yes", "No")
         SCLib.takePerk(SelectedActor, sPerkID, True)
         ShowMessage("Perk " + SCLib.getPerkName(sPerkID, SCLib.getCurrentPerkLevel(SelectedActor, sPerkID)) + " taken! Some perk effects will not show until the menu is exited", False, "OK")
         JMap.setInt(JM_SelectedPerkLevel, sPerkID, CurrentPerkValue + 1)
         ForcePageReset()
       EndIf
     Else
-      ShowMessage(SCLib.getPerkName(sPerkID, CurrentPerkValue) + ": " + SCLib.getPerkDescription(sPerkID, CurrentPerkValue) + "\n Requirements: " + SCLib.getPerkRequirements(sPerkID, CurrentPerkValue), False, "OK")
+      ShowMessage(SCLib.getPerkName(sPerkID, CurrentPerkValue + 1) + ": " + SCLib.getPerkDescription(sPerkID, CurrentPerkValue + 1) + "\n Requirements: " + SCLib.getPerkRequirements(sPerkID, CurrentPerkValue + 1), False, "OK")
     EndIf
   EndIf
 EndEvent
@@ -1387,6 +1388,34 @@ State ActionKeyPick_KM
 
   Event OnHighlightST()
     SetInfoText("Set key for interacting with things")
+  EndEvent
+EndState
+
+State StatusKeyPick_KM
+	Event OnKeyMapChangeST(int a_keyCode, string a_conflictControl, string a_conflictName)
+		Bool Continue = True
+		If a_conflictControl != ""
+			String msg
+			If a_conflictName != ""
+				msg = a_conflictControl + ": This key is already registered to " + a_conflictName + ". Are sure you want to continue?"
+			Else
+				msg = a_conflictControl + ": This key is already registered. Are you sure you want to continue?"
+			EndIf
+			Continue = ShowMessage(msg, true, "Yes", "No")
+		EndIf
+		If Continue
+			SCLSet.StatusKey = a_keyCode
+			SetKeyMapOptionValueST(a_keyCode)
+		EndIf
+	EndEvent
+
+  Event OnDefaultST()
+    SCLSet.StatusKey = 0
+    SetKeyMapOptionValueST(0)
+  EndEvent
+
+  Event OnHighlightST()
+    SetInfoText("Displays status information when pressed.")
   EndEvent
 EndState
 

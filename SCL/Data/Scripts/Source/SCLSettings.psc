@@ -44,6 +44,26 @@ Int Property ActionKey
   EndFunction
 EndProperty
 
+GlobalVariable Property SCL_SET_StatusKey Auto ;Default 0
+Int _StatusKey = 24
+Int Property StatusKey
+  Int Function Get()
+    Int iKey = SCL_SET_StatusKey.GetValueInt()
+    If _StatusKey != iKey  ;In case someone changes the global when we aren't looking
+      Int KeyModChange = ModEvent.Create("SCLActionKeyChange")
+      ModEvent.Send(KeyModChange)
+      _StatusKey = iKey
+    EndIf
+    Return iKey
+  EndFunction
+  Function Set(Int a_val)
+    SCL_SET_StatusKey.SetValueInt(a_val)
+    _StatusKey = a_val
+    Int KeyModChange = ModEvent.Create("SCLActionKeyChange")
+    ModEvent.Send(KeyModChange)
+  EndFunction
+EndProperty
+
 GlobalVariable Property SCL_SET_PlayerAutoDestination Auto
 Bool Property PlayerAutoDestination
   Bool Function Get()
