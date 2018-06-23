@@ -28,6 +28,17 @@ Int Property JA_OptionList2 Auto
 Int Property JA_OptionList3 Auto
 Bool GenerateLock
 
+ReferenceAlias Function getSCX_BaseAlias(Int JM_BaseList, String asBaseID) Global
+  {General function to retrieve objects using the SCX method
+  Returns a reference alias that should be cast to the correct type}
+  Quest OwnedQuest = JMap.getForm(JM_BaseList, asBaseID) as Quest
+  If OwnedQuest
+    Return OwnedQuest.GetAliasByName(asBaseID) as ReferenceAlias
+  Else
+    Return None
+  EndIf
+EndFunction
+
 Function addLibraryScript(Lib_SC akLibrary) Global
   {Keeps track of all library scripts added by other mods, and allows certain functions to input into SCL Functions}
   Int JA_LibraryList = JDB.solveObj(".SCLExtraData.LibraryList")
@@ -2483,6 +2494,28 @@ EndFunction
 
 ;Vomit Functions ***************************************************************
 Function vomitAll(Actor akTarget, Bool ReturnFood = False, Bool RemoveEverything = False)
+  If !SCLSet.JM_BaseArchetypes
+    Return
+  EndIf
+  Int ATypeList = SCLSet.JM_BaseArchetypes
+  SCX_BaseItemArchetypes AType = getSCX_BaseAlias(SCLSet.JM_BaseArchetypes, "Stomach") as SCX_BaseItemArchetypes
+  Note("Vomit all called. Archetype file found = " + AType as Bool)
+  AType.removeAllActorItems(akTarget, ReturnFood)
+EndFunction
+
+Function vomitAmount(Actor akTarget, Float afRemoveAmount, Bool abRemoveStored = False, Int aiStoredRemoveChance = 0, Bool abRemoveOtherItems = False, Int aiOtherRemoveChance = 0)
+  SCX_BaseItemArchetypes AType = getSCX_BaseAlias(SCLSet.JM_BaseArchetypes, "Stomach") as SCX_BaseItemArchetypes
+  AType.removeAmountActorItems(akTarget, afRemoveAmount, abRemoveStored, aiStoredRemoveChance, abRemoveOtherItems, aiOtherRemoveChance)
+EndFunction
+
+Function vomitSpecificItem(Actor akTarget, Int aiItemType, ObjectReference akReference = None, Form akBaseObject = None, Int aiItemCount = 1, Bool abDestroyDigestItems = True)
+  SCX_BaseItemArchetypes AType = getSCX_BaseAlias(SCLSet.JM_BaseArchetypes, "Stomach") as SCX_BaseItemArchetypes
+  AType.removeSpecificActorItems(akTarget, aiItemType, akReference, akBaseObject, aiItemCount, abDestroyDigestItems)
+EndFunction
+
+
+
+;/Function vomitAll(Actor akTarget, Bool ReturnFood = False, Bool RemoveEverything = False)
   Notice("vomitAll beginning for " + nameGet(akTarget))
   ObjectReference VomitContainer = vomitPerform(akTarget, False)
 
@@ -2567,9 +2600,9 @@ Function vomitAll(Actor akTarget, Bool ReturnFood = False, Bool RemoveEverything
   EndIf
   sendVomitEvent(akTarget, 1, False)
   Notice("vomitAll completed for " + nameGet(aktarget))
-EndFunction
+EndFunction/;
 
-Function vomitAmount(Actor akTarget, Float afRemoveAmount, Bool abRemoveStored = False, Int aiStoredRemoveChance = 0, Bool abRemoveOtherItems = False, Int aiOtherRemoveChance = 0)
+;/Function vomitAmount(Actor akTarget, Float afRemoveAmount, Bool abRemoveStored = False, Int aiStoredRemoveChance = 0, Bool abRemoveOtherItems = False, Int aiOtherRemoveChance = 0)
   {Might not remove exactly the right amount
   Stored items removed will not count towards this}
   Notice("vomitAmount beginning for " + nameGet(akTarget))
@@ -2701,9 +2734,9 @@ Function vomitAmount(Actor akTarget, Float afRemoveAmount, Bool abRemoveStored =
   EndIf
   sendVomitEvent(akTarget, 2, False)
   Notice("vomitAmount completed for " + nameGet(aktarget))
-EndFunction
+EndFunction/;
 
-Function vomitSpecificItem(Actor akTarget, Int aiItemType, ObjectReference akReference = None, Form akBaseObject = None, Int aiItemCount = 1, Bool abDestroyDigestItems = True)
+;/Function vomitSpecificItem(Actor akTarget, Int aiItemType, ObjectReference akReference = None, Form akBaseObject = None, Int aiItemCount = 1, Bool abDestroyDigestItems = True)
   Notice("vomitSpecificItem beginning for " + nameGet(akTarget))
   If !akReference && !akBaseObject
     Return
@@ -2754,9 +2787,9 @@ Function vomitSpecificItem(Actor akTarget, Int aiItemType, ObjectReference akRef
   Else
     Issue("Invalid item type inputted into vomitSpecificItem: Not on vomit item list")
   EndIf
-EndFunction
+EndFunction/;
 
-ObjectReference Function vomitPerform(Actor akTarget, Bool bLeveledRemains)
+;/ObjectReference Function vomitPerform(Actor akTarget, Bool bLeveledRemains)
   {Just plays the vomit animation, optionally puts down a vomit pile with leveled items}
   If akTarget == PlayerRef
     Game.ForceThirdPerson()
@@ -2775,7 +2808,7 @@ ObjectReference Function vomitPerform(Actor akTarget, Bool bLeveledRemains)
     Game.EnablePlayerControls()
   EndIf
   Return placeVomit(akTarget, bLeveledRemains)
-EndFunction
+EndFunction/;
 
 Function sendVomitEvent(Actor akTarget, Int aiVomitType, Bool bLeveledRemains, Form akSpecificItem = None)
   Int E = ModEvent.Create("SCLVomitEvent")
@@ -3283,7 +3316,7 @@ Function showContentsList(Actor akTarget, Int aiMode = 0)
         If ItemType == 1 || ItemType == 2
           vomitSpecificItem(akTarget, ItemType, JArray.getForm(JA_OptionList1, Option) as ObjectReference)
         ElseIf ItemType == 3 || ItemType == 4
-          WF_SolidRemoveSpecific(akTarget, ItemType, JArray.getForm(JA_OptionList1, Option) as ObjectReference)
+          WF_SolidRemoveSpecificItem(akTarget, ItemType, JArray.getForm(JA_OptionList1, Option) as ObjectReference)
         EndIf
         quickUpdate(akTarget, True)
         Return
@@ -4061,10 +4094,6 @@ EndFunction
 
 Float Function WF_getSolidMaxInsert(Actor akTarget, Int aiTargetData = 0)
   Int TargetData = getData(akTarget, aiTargetData)
-  Int FirstPerkLevel = getCurrentPerkLevel(akTarget, "WF_BasementStorage")
-  If FirstPerkLevel <= 0
-    Return 0
-  EndIf
   Int SecondPerkLevel = getTotalPerkLevel(akTarget, "WF_BasementStorage")
   Float MaxInsert = Math.pow(SecondPerkLevel, 2) + 0.5
   If MaxInsert < 0
@@ -4075,10 +4104,6 @@ EndFunction
 
 Int Function WF_getSolidMaxNumItems(Actor akTarget, Int aiTargetData = 0)
   Int TargetData = getData(akTarget, aiTargetData)
-  Int FirstPerkLevel = getCurrentPerkLevel(akTarget, "WF_BasementStorage")
-  If FirstPerkLevel <= 0
-    Return 0
-  EndIf
   Return getTotalPerkLevel(akTarget, "WF_BasementStorage", TargetData)
 EndFunction
 
@@ -4091,7 +4116,27 @@ Function WF_LiquidRemove(Actor akTarget, Int aiTargetData = 0)
   JMap.setFlt(TargetData, "WF_CurrentLiquidAmount", 0)
 EndFunction
 
-SCLWFSolidWaste Function WF_SolidRemovePerform(Actor akTarget, Bool bLeveledRemains)
+Function WF_SolidRemoveAll(Actor akTarget, Bool ReturnFood = False, Bool RemoveEverything = False)
+  If !SCLSet.JM_BaseArchetypes
+    Return
+  EndIf
+  Int ATypeList = SCLSet.JM_BaseArchetypes
+  SCX_BaseItemArchetypes AType = getSCX_BaseAlias(ATypeList, "Colon") as SCX_BaseItemArchetypes
+  Note("Vomit all called. Archetype file found = " + AType as Bool)
+  AType.removeAllActorItems(akTarget, ReturnFood)
+EndFunction
+
+Function WF_SolidRemoveAmount(Actor akTarget, Float afRemoveAmount, Bool abRemoveStored = False, Int aiStoredRemoveChance = 0, Bool abRemoveOtherItems = False, Int aiOtherRemoveChance = 0)
+  SCX_BaseItemArchetypes AType = getSCX_BaseAlias(SCLSet.JM_BaseArchetypes, "Stomach") as SCX_BaseItemArchetypes
+  AType.removeAmountActorItems(akTarget, afRemoveAmount, abRemoveStored, aiStoredRemoveChance, abRemoveOtherItems, aiOtherRemoveChance)
+EndFunction
+
+Function WF_SolidRemoveSpecificItem(Actor akTarget, Int aiItemType, ObjectReference akReference = None, Form akBaseObject = None, Int aiItemCount = 1, Bool abDestroyDigestItems = True)
+  SCX_BaseItemArchetypes AType = getSCX_BaseAlias(SCLSet.JM_BaseArchetypes, "Stomach") as SCX_BaseItemArchetypes
+  AType.removeSpecificActorItems(akTarget, aiItemType, akReference, akBaseObject, aiItemCount, abDestroyDigestItems)
+EndFunction
+
+;/SCLWFSolidWaste Function WF_SolidRemovePerform(Actor akTarget, Bool bLeveledRemains)
   If !akTarget.IsSneaking()
     Int i
     While !akTarget.IsSneaking() && i < 10
@@ -4110,9 +4155,9 @@ SCLWFSolidWaste Function WF_SolidRemovePerform(Actor akTarget, Bool bLeveledRema
     Game.EnablePlayerControls()
   EndIf
   Return Waste
-EndFunction
+EndFunction/;
 
-Function WF_SolidRemove(Actor akTarget, Int aiTargetData = 0)
+;/Function WF_SolidRemove(Actor akTarget, Int aiTargetData = 0)
   Int TargetData = getData(akTarget, aiTargetData)
   SCLWFSolidWaste Refuse = WF_SolidRemovePerform(akTarget, False)
   WF_removeSolidContents(akTarget, Refuse, TargetData)
@@ -4127,9 +4172,9 @@ Function WF_SolidRemove(Actor akTarget, Int aiTargetData = 0)
     Illness = 0
   EndIf
   WF_addSolidIllnessEffect(akTarget, Illness)
-EndFunction
+EndFunction/;
 
-Function WF_SolidRemoveNum(Actor akTarget, Int aiNumToRemove, Bool abRemoveBreakingDown = False, Int aiTargetData = 0)
+;/Function WF_SolidRemoveNum(Actor akTarget, Int aiNumToRemove, Bool abRemoveBreakingDown = False, Int aiTargetData = 0)
   Int TargetData = getData(akTarget, aiTargetData)
   Int JF_ContentsMap = getContents(akTarget, 4, TargetData)
   SCLWFSolidWaste Refuse = WF_SolidRemovePerform(akTarget, False)
@@ -4193,9 +4238,9 @@ Function WF_SolidRemoveNum(Actor akTarget, Int aiNumToRemove, Bool abRemoveBreak
       ItemKey = JFormMap.nextKey(JF_ContentsMap, ItemKey) as ObjectReference
     EndWhile
   EndIf
-EndFunction
+EndFunction/;
 
-Function WF_SolidRemoveSpecific(Actor akTarget, Int aiItemType, ObjectReference akReference = None, Form akBaseObject = None, Int aiItemCount = 1, Bool abDestroyDigestItems = True)
+;/Function WF_SolidRemoveSpecific(Actor akTarget, Int aiItemType, ObjectReference akReference = None, Form akBaseObject = None, Int aiItemCount = 1, Bool abDestroyDigestItems = True)
   If !akReference && !akBaseObject
     Return
   EndIf
@@ -4243,7 +4288,7 @@ Function WF_SolidRemoveSpecific(Actor akTarget, Int aiItemType, ObjectReference 
       WF_sendSolidRemoveEvent(akTarget, 3, False, Bundle)
     EndIf
   EndIf
-EndFunction
+EndFunction/;
 
 Function WF_sendSolidRemoveEvent(Actor akTarget, Int aiSolidRemoveType, Bool bLeveledRemains, Form akSpecificItem = None)
   Int E = ModEvent.Create("SCLWFRemoveSolidEvent")
@@ -4254,7 +4299,7 @@ Function WF_sendSolidRemoveEvent(Actor akTarget, Int aiSolidRemoveType, Bool bLe
   ModEvent.Send(E)
 EndFunction
 
-SCLWFSolidWaste Function WF_placeSolidWaste(ObjectReference akPosition, Int aiType = 0)
+;/SCLWFSolidWaste Function WF_placeSolidWaste(ObjectReference akPosition, Int aiType = 0)
   SCLWFSolidWaste Refuse
   If aiType == 0
     Refuse = akPosition.PlaceAtMe(SCLSet.SCL_WF_RefuseBase) as SCLWFSolidWaste
@@ -4263,7 +4308,7 @@ SCLWFSolidWaste Function WF_placeSolidWaste(ObjectReference akPosition, Int aiTy
   Refuse.MoveTo(akPosition, 64 * Math.Sin(akPosition.GetAngleZ()), 64 * Math.Cos(akPosition.GetAngleZ()), 0, False)
   Refuse.SetAngle(0, 0, 0)
   Return Refuse
-EndFunction
+EndFunction/;
 
 Function WF_addSolidIllnessEffect(Actor akTarget, Int afIllnessLevel, Int aiTargetData = 0)
   Int TargetData = getData(akTarget, aiTargetData)
@@ -4281,7 +4326,7 @@ Function WF_addSolidIllnessEffect(Actor akTarget, Int afIllnessLevel, Int aiTarg
   EndIf
 EndFunction
 
-Function WF_RemoveSolidContents(Actor akTarget, ObjectReference akTargetContainer, Int aiTargetData = 0)
+;/Function WF_RemoveSolidContents(Actor akTarget, ObjectReference akTargetContainer, Int aiTargetData = 0)
   Int TargetData = getData(akTarget, aiTargetData)
   Int JF_Contents = getContents(akTarget, 3, TargetData)
   If !JValue.empty(JF_Contents)
@@ -4318,7 +4363,8 @@ Function WF_RemoveSolidContents(Actor akTarget, ObjectReference akTargetContaine
     EndWhile
   EndIf
   JFormMap.clear(JF_Contents)
-EndFunction
+EndFunction/;
+
 ;/String Function getPerkDescription(String asPerkID, Int aiPerkLevel = 0)
   {Returns basic perk description, since you can't pull descriptions from perks themselves}
   If asPerkID == "SCLRoomForMore"

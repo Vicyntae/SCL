@@ -318,6 +318,13 @@ Bool Property NiOverrideInstalled Auto
 Bool Property HideNiOverrideWarning Auto
 
 Bool Property FNIS_Initialized Auto
+
+;Dummy Items -------------------------------------------------------------------
+;Marked as "Not Food"
+Potion Property SCL_DummyNotFoodSmall Auto
+Potion Property SCL_DummyNotFoodMedium Auto
+Potion Property SCL_DummyNotFoodLarge Auto
+
 ;Others ************************************************************************
 Container Property SCL_TransferBase Auto
 
@@ -429,6 +436,16 @@ Int Property JM_PerkIDs Auto
 Int Property JM_DynMorphList Auto
 Int Property JM_BellyInflateData Auto
 Int Property JM_AggregateValues Auto
+Int Property JM_BaseArchetypes
+  Int Function Get()
+    Int J = JDB.solveObj(".SCLExtraData.ItemArchetypes")
+    If !J
+      J = JMap.object()
+      JDB.solveObjSetter(".SCLExtraData.ItemArchetypes", J, True)
+    EndIf
+    Return J
+  EndFunction
+EndProperty
 
 ;AutoEat Properties ************************************************************
 GlobalVariable Property SCL_SET_AutoEat_Active Auto

@@ -34,7 +34,7 @@ Event OnInit()
   setDatabase()
 EndEvent
 
-Int ScriptVersion = 1
+Int ScriptVersion = 2
 Int Function GetStage()
   Int StoredVersion = JDB.solveInt(".SCLExtraData.VersionRecords.SCLItemDatabase")
   If SCLResetted
@@ -322,6 +322,13 @@ Function setupItemDatabase()
   JMap.setInt(PoisonEntry, "IsInContainer", 1)
 
   ;Generic Entries -------------------------------------------------------------
+  Int JM_DummyProfile = JMap.object()
+  JMap.setInt(JM_DummyProfile, "IsNotFood", 1)
+  JMap.setFlt(JM_DummyProfile, "WeightOverride", 0.001)
+  JFormDB.setEntry("SCLItemDatabase", SCLSet.SCL_DummyNotFoodLarge, JM_DummyProfile)
+  JFormDB.setEntry("SCLItemDatabase", SCLSet.SCL_DummyNotFoodMedium, JM_DummyProfile)
+  JFormDB.setEntry("SCLItemDatabase", SCLSet.SCL_DummyNotFoodSmall, JM_DummyProfile)
+
   Int JM_AlcoholProfile = JMap.object()
   ;"WeightOverride"
   JMap.setFlt(JM_AlcoholProfile, "WeightModifier", 0.8)

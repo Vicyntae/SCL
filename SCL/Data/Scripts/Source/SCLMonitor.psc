@@ -544,7 +544,7 @@ Function updateFullness()
   Int MaxItems = SCLib.WF_getSolidMaxNumItems(MyActor, ActorData)
   Int Items = SCLib.countItemTypes(MyActor, 4, ActorData) + SCLib.countItemTypes(MyActor, 3, ActorData)
   If Items > MaxItems
-    SCLib.WF_SolidRemoveNum(MyActor, Items - MaxItems, True, ActorData)
+    SCLib.WF_SolidRemoveAmount(MyActor, Items - MaxItems, True, ActorData)
     FullUpdate = True
     SCLib.addSolidRemoveDamage(MyActor)
   EndIf
