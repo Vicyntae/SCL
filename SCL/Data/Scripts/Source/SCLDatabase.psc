@@ -97,19 +97,19 @@ Function setupActorMainMenus()
   If !SCLSet.JI_WM_Actor
     SCLSet.JI_WM_Actor = JIntMap.object()
     JDB.solveObjSetter(".SCLExtraData.ActorMainMenus", SCLSet.JI_WM_Actor, True)
-    SCLibrary.addActorMainMenu(0, "SCL Main Menu", True)
   EndIf
+  SCLibrary.addActorMainMenu(0, "SCL Main Menu", True)
 EndFunction
 
 Function setupItemTypes()
   If !SCLSet.JI_ItemTypes
     SCLSet.JI_ItemTypes = JIntMap.object()
     JDB.solveObjSetter(".SCLExtraData.ItemTypeMap", SCLSet.JI_ItemTypes, True)
-    SCLibrary.addItemType(1, "Digesting", "Food digesting in actor's stomach.", "ContentsFullness1", True)
-    SCLibrary.addItemType(2, "Stored", "Items held within the actor's stomach.", "ContentsFullness2", True)
-    SCLibrary.addItemType(3, "Breaking Down", "Items breaking down within the actor's colon.", "ContentsFullness3", False)
-    SCLibrary.addItemType(4, "Stowed Away", "Items held within the actor's colon.", "ContentsFullness4", False)
   EndIf
+  SCLibrary.addItemType(1, "Digesting", "Food digesting in actor's stomach.", "ContentsFullness1", True)
+  SCLibrary.addItemType(2, "Stored", "Items held within the actor's stomach.", "ContentsFullness2", True)
+  SCLibrary.addItemType(3, "Breaking Down", "Items breaking down within the actor's colon.", "ContentsFullness3", False)
+  SCLibrary.addItemType(4, "Stowed Away", "Items held within the actor's colon.", "ContentsFullness4", False)
 EndFunction
 
 Function setupPerksList()

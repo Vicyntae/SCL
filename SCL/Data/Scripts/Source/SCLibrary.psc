@@ -2499,7 +2499,7 @@ Function vomitAll(Actor akTarget, Bool ReturnFood = False, Bool RemoveEverything
   EndIf
   Int ATypeList = SCLSet.JM_BaseArchetypes
   SCX_BaseItemArchetypes AType = getSCX_BaseAlias(SCLSet.JM_BaseArchetypes, "Stomach") as SCX_BaseItemArchetypes
-  Note("Vomit all called. Archetype file found = " + AType as Bool)
+  ;Note("Vomit all called. Archetype file found = " + AType as Bool)
   AType.removeAllActorItems(akTarget, ReturnFood)
 EndFunction
 
@@ -4122,7 +4122,7 @@ Function WF_SolidRemoveAll(Actor akTarget, Bool ReturnFood = False, Bool RemoveE
   EndIf
   Int ATypeList = SCLSet.JM_BaseArchetypes
   SCX_BaseItemArchetypes AType = getSCX_BaseAlias(ATypeList, "Colon") as SCX_BaseItemArchetypes
-  Note("Vomit all called. Archetype file found = " + AType as Bool)
+  ;Note("Vomit all called. Archetype file found = " + AType as Bool)
   AType.removeAllActorItems(akTarget, ReturnFood)
 EndFunction
 

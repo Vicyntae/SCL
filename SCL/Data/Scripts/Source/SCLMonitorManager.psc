@@ -60,6 +60,7 @@ EndEvent
 
 Bool Function Start()
   Bool bReturn = Parent.Start()
+  Utility.Wait(3)
   Notice("Starting up monitor manager")
   ;RegisterForSleep()
   RegisterForMenu("Sleep/Wait Menu")
